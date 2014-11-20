@@ -1,0 +1,26 @@
+# Metadata that will be used to create the paper's various preambles
+# Any empty line, and any line beginning with # is ignored.
+
+# The first non-ignored line of the file must contain the document's title.
+# It can contain any LaTeX code that is permitted in the \title{} command
+
+Applications of the Flux Capacitor
+
+# What remains of the file is the list of authors and affiliations.
+# Author lines end with (x), where x is the number associated with the
+# author's affiliation
+
+Emmett Brown (1)
+Marty McFly (1)
+Biff Tannen (2)
+
+# Affiliation lines begin with a single digit (indictating the affiliation)
+# Any following line is appended to the affiliation
+
+1
+Temporal Industries
+Hill Valley, CA 95420
+
+2
+BiffCo inc.
+Hill Valley, CA 95420
