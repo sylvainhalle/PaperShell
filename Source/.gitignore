@@ -15,3 +15,7 @@
 
 # ...except those in the fig folder
 !fig/*.pdf
+
+# Don't version auto-generated LaTeX files
+preamble*.inc.tex
+postamble*.inc.tex
