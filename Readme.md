@@ -11,7 +11,7 @@ provides:
 - A very advanced Makefile (by [Chris
   Monson](https://github.com/shiblon/latex-makefile)) taking care of the
   compilation/cleaning process
-- A `.gitignore` file suitable for a LaTeX project
+- A `.gitignore` file suitable for a single-document LaTeX project
 
 Using this template, switching a paper from any stylesheet to any other
 simply amounts to selecting one line to de-comment in the main, `paper.tex`
@@ -85,7 +85,7 @@ authors and institutions in `llncs`:
     }
 
 Three different sets of commands and syntax for the same data, and all this
-while `article.cls` already provides commands doing exactly that which could
+while `article.cls` already provides commands doing exactly that, which could
 have easily been overridden! Therefore, switching between classes requires
 some amount of braindead, yet frustrating copy-pasting from existing files
 you have, which arguably becomes quite mind-numbing when you've been doing
@@ -113,14 +113,14 @@ files with the proper syntax for each of the document classes from that
 same data. These files are called `preamble-xxxx.inc.tex`, where xxxx is
 the document class.
 
-In the he main paper file, called `paper.tex`, it suffices to uncomment the
+In the main paper file, called `paper.tex`, it suffices to uncomment the
 `\input` line for the desired preamble and compile:
 
     %\input preamble-ieee.inc.tex
     %\input preamble-lncs.inc.tex
     \input preamble-acm.inc.tex
 
-To change the authors or title, modify `article.tex` and call
+To change the authors or title, modify `authors.txt` and call
 `generate-preamble.php` again. To switch between document classes, select
 another `\input` line to uncomment and recompile. Voilà!
 
