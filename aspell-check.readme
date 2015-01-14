@@ -1,0 +1,10 @@
+You need to have the GNU Aspell <http://aspell.net/> spell checker
+installed for this to work.
+
+In Ubuntu, do:
+
+  > sudo apt-get install aspell aspell-en aspell-fr
+
+In Windows, download the Win32 version of Aspell <http://aspell.net/win32>,
+the precompiled dictionaries you need, and make sure the bin directory
+containing aspell.exe is in your system's path.

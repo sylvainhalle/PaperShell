@@ -11,6 +11,9 @@ provides:
 - A very advanced Makefile (by [Chris
   Monson](https://github.com/shiblon/latex-makefile)) taking care of the
   compilation/cleaning process
+- Scripts (for both Windows and Linux) to perform spell checking of the
+  LaTeX source with [GNU Aspell](http://aspell.net). The words added to the
+  dictionary while checking are also versioned with the project.
 - A `.gitignore` file suitable for a single-document LaTeX project
 
 Using this template, switching a paper from any stylesheet to any other
@@ -144,6 +147,12 @@ Quick Use
 4. To compile, use `make all`. To remove temporary files, use `make clean`.
    The Makefile has a very comprehensive list of other useful features. To
    read them, run `make help`.
+
+5. To spell check, type `./aspell-check.sh` (in Linux) or `aspell-check.bat`
+   (in Windows) from the project's top folder. Any additions to the
+   personal dictionary will be reflected in changes to files
+   `.aspell.en.prepl` and `.aspell.en.pws`, which are versioned with the
+   rest of the project. See the file `aspell-check.readme` for instructions.
 
 Extras
 ------
