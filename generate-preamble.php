@@ -186,6 +186,11 @@ EOD;
   $out .= "}\n";
   file_put_contents($out_folder."preamble-ieee.inc.tex", $out);
   
+  // IEEE Journal: just replace conf by journal in documentclass
+  $out = str_replace("\\documentclass[conference]", "\\documentclass[journal]", $out);
+  $out .= "\n% Fixing bug in the definition of \\markboth in IEEEtran class\n% See http://tex.stackexchange.com/a/88864\n\\makeatletter\n\\let\\l@ENGLISH\\l@english\n\\makeatother\n";
+  file_put_contents($out_folder."preamble-ieee-journal.inc.tex", $out);
+  
   // Postamble
   $out = "";
   $out .= <<<EOD
@@ -196,6 +201,9 @@ EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
   $out .= "\\bibliography{paper}\n";
   file_put_contents($out_folder."postamble-ieee.inc.tex", $out);
+  
+  // IEEE Journal: samething
+  file_put_contents($out_folder."postamble-ieee-journal.inc.tex", $out);
 } // }}}
 
 { // ACM {{{

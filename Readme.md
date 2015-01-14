@@ -116,6 +116,7 @@ the document class.
 In the main paper file, called `paper.tex`, it suffices to uncomment the
 `\input` line for the desired preamble and compile:
 
+    %\input preamble-ieee-journal.inc.tex
     %\input preamble-ieee.inc.tex
     %\input preamble-lncs.inc.tex
     \input preamble-acm.inc.tex
@@ -143,6 +144,16 @@ Quick Use
 4. To compile, use `make all`. To remove temporary files, use `make clean`.
    The Makefile has a very comprehensive list of other useful features. To
    read them, run `make help`.
+
+Extras
+------
+
+As an extra, the generated preamble files add a few commands that fix bugs
+in some document classes.
+
+- The preamble for IEEE journal fixes a [problem with a redefinition of the
+  `\markboth` command](http://tex.stackexchange.com/a/88864) that would
+  otherwise prevent the document from compiling
 
 About the Author
 ----------------
