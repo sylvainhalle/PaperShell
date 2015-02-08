@@ -312,6 +312,76 @@ EOD;
   file_put_contents($out_folder."postamble-acm.inc.tex", $out);
 } // }}}
 
+{ // Elsevier article {{{
+  
+  // Preamble
+  $out = "";
+  $out .= <<<EOD
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This is an auto-generated file. DO NOT EDIT!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[preprint,12pt]{elsarticle}
+
+% Usual packages
+\usepackage[utf8]{inputenc}  % UTF-8 input encoding
+\usepackage[T1]{fontenc}     % Type1 fonts
+\usepackage{lmodern}         % Improved Computer Modern font
+\usepackage{microtype}       % Better handling of typo
+\usepackage[english]{babel}  % Hyphenation
+\usepackage{graphicx}        % Import graphics
+\usepackage{hyperref}        % Better handling of references in PDFs
+\usepackage{comment}         % To comment out blocks of text
+\biboptions{sort&compress}   % Sort and compress citations
+
+\journal{Nuclear Physics B}
+
+% \begin{frontmatter}
+EOD;
+
+  $out .= "\n\n% Title\n";
+  $out .= "\\title{".$title."}\n\n";
+  
+  // Group all authors with same affiliation
+  $out .= "% Authors and affiliations\n";
+  foreach ($authors as $name => $aff)
+  {
+    $out .= "\\author{";
+    $out .= $name."\\fnref{label".$aff."}";
+    $out .= "}\n";
+  }
+  foreach ($affiliations as $key => $lines)
+  {
+    $out .= "\\fntext[label$key]{";
+    $first = true;
+    foreach ($lines as $line)
+    {
+      if ($first)
+      {
+        $first = false;
+      }
+      else
+      {
+        $out .= ", ";
+      }
+      $out .= $line;
+    }
+    $out .= "}\n";
+  }
+  file_put_contents($out_folder."preamble-elsarticle.inc.tex", $out);
+  
+  // Postamble
+  $out = "";
+  $out .= <<<EOD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This is an auto-generated file. DO NOT EDIT!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+EOD;
+  $out .= "\n\\bibliographystyle{elsarticle-num}\n";
+  $out .= "\\bibliography{paper}\n";
+  file_put_contents($out_folder."postamble-elsarticle.inc.tex", $out);
+} // }}}
+
 // }}}
 
 // :wrap=none:folding=explicit:

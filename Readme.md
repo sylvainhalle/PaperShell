@@ -2,10 +2,10 @@ A Flexible LaTeX Article Environment
 ====================================
 
 This repository provides a boilerplate environment for writing LaTeX
-articles using the popular templates from Springer, IEEE and ACM. It
-provides:
+articles using the popular templates from Springer, IEEE, ACM and Elsevier.
+It provides:
 
-- The up-to-date style and bibliography files of all three publishers
+- The up-to-date style and bibliography files of all four publishers
 - A script that generates the proper preamble (title, list of authors and
   institution) specific to each style
 - A very advanced Makefile (by [Chris
@@ -24,11 +24,12 @@ Why this template?
 ------------------
 
 If you have been writing lots of Computer Science papers, you may have
-been mostly using LaTeX with three different document classes:
+been mostly using LaTeX with four different document classes:
 
 - `llncs` for Springer' Lecture Notes in Computer Science series
 - `sig-alternate` for ACM conference proceedings
 - `IEEEtran` for IEEE conference proceedings and journals
+- `elsarticle` for Elsevier journals
 
 First off, this repository provides a well-structured template project where
 all these classes are included, so you can pick the one you wish when
@@ -75,7 +76,7 @@ authors and institutions in `llncs`:
     }
     }
 
-...and in `sig-alternate`:
+...in `sig-alternate`:
 
     \numberofauthors{2}
     \author{%
@@ -87,12 +88,20 @@ authors and institutions in `llncs`:
     \affaddr{Hill Valley, CA 90193} \\
     }
 
-Three different sets of commands and syntax for the same data, and all this
-while `article.cls` already provides commands doing exactly that, which could
-have easily been overridden! Therefore, switching between classes requires
-some amount of braindead, yet frustrating copy-pasting from existing files
-you have, which arguably becomes quite mind-numbing when you've been doing
-that once in a while for the past ten years.
+...and in `elsarticle`:
+
+    \author{Emmett Brown\fnref{label1}}
+    \author{Marty McFly\fnref{label1}}
+    \author{Biff Tannen\fnref{label2}}
+    \fntext{Temporal Industries, Hill Valley, CA 90193}
+    \fntext{BiffCo inc., Hill Valley, CA 90193}
+
+Four different sets of commands and syntax for the same data, and all this
+while `article.cls` already provides commands doing exactly that, which
+could have easily been overridden! Therefore, switching between classes
+requires some amount of braindead, yet frustrating copy-pasting from
+existing files you have, which arguably becomes quite mind-numbing when
+you've been doing that once in a while for the past ten years.
 
 In this project, the paper's title, authors and institutions is written in
 a separate file called `authors.txt`:
