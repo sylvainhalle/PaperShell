@@ -98,7 +98,10 @@ authors and institutions in `llncs`:
 
 Four different sets of commands and syntax for the same data, and all this
 while `article.cls` already provides commands doing exactly that, which
-could have easily been overridden! Therefore, switching between classes
+could have easily been overridden! To make things even worse, elsarticle
+does not even use `\maketitle` to print the title, which must be enclosed
+(along with the abstract) within a `frontmatter` environment *after* the
+`\begin{document}`. Therefore, switching between classes
 requires some amount of braindead, yet frustrating copy-pasting from
 existing files you have, which arguably becomes quite mind-numbing when
 you've been doing that once in a while for the past ten years.
@@ -151,7 +154,9 @@ Quick Use
 
 3. Write your text as usual in `Source/paper.tex`. Uncomment the `\input`
    line corresponding to the document class you wish to use. Figures should
-   be placed in the `fig` subfolder.
+   be placed in the `fig` subfolder. Write your abstract in
+   `Source/abstract.tex`, and put any other imports and declarations in
+   `Source/includes.tex`.
 
 4. To compile, use `make all`. To remove temporary files, use `make clean`.
    The Makefile has a very comprehensive list of other useful features. To

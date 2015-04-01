@@ -123,7 +123,11 @@ EOD;
       $out .= $line." \\\\\n";
     }
   }
-  $out .= "}\n";
+  $out .= "}\n\n";
+  $out .= "\\input includes.tex\n\n";
+  $out .= "\\begin{document}\n\n";
+  $out .= "\\maketitle\n";
+  $out .= "\\input abstract.tex\n";
   file_put_contents($out_folder."preamble-lncs.inc.tex", $out);
   
   // Postamble
@@ -135,6 +139,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{splncs03}\n";
   $out .= "\\bibliography{paper}\n";
+  $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-lncs.inc.tex", $out);
 } // }}}
 
@@ -200,7 +205,11 @@ EOD;
     }
     $out .= "}\n";
   }
-  $out .= "}\n";
+  $out .= "}\n\n";
+  $out .= "\\input includes.tex\n\n";
+  $out .= "\\begin{document}\n\n";
+  $out .= "\\maketitle\n";
+  $out .= "\\input abstract.tex\n";
   file_put_contents($out_folder."preamble-ieee.inc.tex", $out);
   
   // IEEE Journal: just replace conf by journal in documentclass
@@ -217,6 +226,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
   $out .= "\\bibliography{paper}\n";
+  $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-ieee.inc.tex", $out);
   
   // IEEE Journal: samething
@@ -297,6 +307,10 @@ EOD;
     }
   }
   $out .= "}\n";
+  $out .= "\\input includes.tex\n\n";
+  $out .= "\\begin{document}\n\n";
+  $out .= "\\maketitle\n";
+  $out .= "\\input abstract.tex\n";
   file_put_contents($out_folder."preamble-acm.inc.tex", $out);
   
   // Postamble
@@ -309,6 +323,7 @@ EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
   $out .= "\\bibliography{paper}\n";
   $out .= "\\balancecolumns\n";
+  $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-acm.inc.tex", $out);
 } // }}}
 
@@ -336,7 +351,12 @@ EOD;
 
 \journal{Nuclear Physics B}
 
-% \begin{frontmatter}
+% User-defined includes
+\input includes.tex
+
+\begin{document}
+
+\begin{frontmatter}
 EOD;
 
   $out .= "\n\n% Title\n";
@@ -368,6 +388,8 @@ EOD;
     }
     $out .= "}\n";
   }
+  $out .= "\\input abstract.tex\n";
+  $out .= "\\end{frontmatter}\n";
   file_put_contents($out_folder."preamble-elsarticle.inc.tex", $out);
   
   // Postamble
@@ -379,6 +401,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{elsarticle-num}\n";
   $out .= "\\bibliography{paper}\n";
+  $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-elsarticle.inc.tex", $out);
 } // }}}
 
