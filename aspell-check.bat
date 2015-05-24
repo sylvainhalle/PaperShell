@@ -10,7 +10,7 @@ for %%X in (aspell.exe) do (set FOUND=%%~$PATH:X)
 if defined FOUND goto :error
 
 REM Run Aspell
-aspell --home-dir=. --lang=en --mode=tex Source/paper.tex
+aspell --home-dir=. --lang=en --mode=tex --add-tex-command="nospellcheck p" check Source/paper.tex
 goto :end
 
 REM Print instructions
