@@ -5,7 +5,7 @@
 # ------------------------------------------------------------------
 
 # Check if Aspell exists, otherwise print instructions and exits
-hash foo 2>/dev/null || { cat aspell-check.readme; exit 1; }
+hash aspell 2>/dev/null || { cat aspell-check.readme; exit 1; }
 
 # Run Aspell
 aspell --home-dir=. --lang=en --mode=tex Source/paper.tex
