@@ -6,6 +6,7 @@ articles using the popular templates from Springer, IEEE, ACM and Elsevier.
 It provides:
 
 - The up-to-date style and bibliography files of all four publishers
+  (journals and conferences)
 - A script that generates the proper preamble (title, list of authors and
   institution) specific to each style
 - A very advanced Makefile (by [Chris
@@ -24,12 +25,13 @@ Why this template?
 ------------------
 
 If you have been writing lots of Computer Science papers, you may have
-been mostly using LaTeX with four different document classes:
+been mostly using LaTeX with a couple of different document classes:
 
 - `llncs` for Springer' Lecture Notes in Computer Science series
 - `sig-alternate` for ACM conference proceedings
 - `IEEEtran` for IEEE conference proceedings and journals
 - `elsarticle` for Elsevier journals
+- `svjour` for Springer journals
 
 First off, this repository provides a well-structured template project where
 all these classes are included, so you can pick the one you wish when
@@ -132,6 +134,7 @@ In the main paper file, called `paper.tex`, it suffices to uncomment the
     %\input preamble-ieee.inc.tex
     %\input preamble-lncs.inc.tex
     \input preamble-acm.inc.tex
+    ...
 
 To change the authors or title, modify `authors.txt` and call
 `generate-preamble.php` again. To switch between document classes, select
