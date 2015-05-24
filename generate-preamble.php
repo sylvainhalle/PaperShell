@@ -470,8 +470,8 @@ EOD;
     {
       $out .= $line."\\\\\n";
     }
-    $out .= "}\n";
   }
+  $out .= "}\n";
   $out .= "\\titlerunning{".$title."}\n";
   $out .= "\\authorrunning{";
   foreach ($authors as $name => $aff)
