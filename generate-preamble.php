@@ -127,7 +127,7 @@ EOD;
   $out .= "\\input includes.tex\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
-  $out .= "\\input abstract.tex\n";
+  $out .= "\\begin{abstract}\n\\input abstract.tex\n\\end{abstract}\n";
   file_put_contents($out_folder."preamble-lncs.inc.tex", $out);
   
   // Postamble
@@ -209,7 +209,7 @@ EOD;
   $out .= "\\input includes.tex\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
-  $out .= "\\input abstract.tex\n";
+  $out .= "\\begin{abstract}\n\\input abstract.tex\n\\end{abstract}\n";
   file_put_contents($out_folder."preamble-ieee.inc.tex", $out);
   
   // IEEE Journal: just replace conf by journal in documentclass
@@ -310,7 +310,7 @@ EOD;
   $out .= "\\input includes.tex\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
-  $out .= "\\input abstract.tex\n";
+  $out .= "\\begin{abstract}\n\\input abstract.tex\n\\end{abstract}\n";
   file_put_contents($out_folder."preamble-acm.inc.tex", $out);
   
   // Postamble
@@ -388,7 +388,7 @@ EOD;
     }
     $out .= "}\n";
   }
-  $out .= "\\input abstract.tex\n";
+  $out .= "\\begin{abstract}\n\\input abstract.tex\n\\end{abstract}\n";
   $out .= "\\end{frontmatter}\n";
   file_put_contents($out_folder."preamble-elsarticle.inc.tex", $out);
   
@@ -482,7 +482,7 @@ EOD;
   }
   $out .= "}\n";
   $out .= "\n\\maketitle\n";
-  $out .= "\\input abstract.tex\n";
+  $out .= "\\begin{abstract}\n\\input abstract.tex\n\\end{abstract}\n";
   file_put_contents($out_folder."preamble-svjour.inc.tex", $out);
   
   // Postamble
@@ -496,6 +496,109 @@ EOD;
   $out .= "\\bibliography{paper}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-svjour.inc.tex", $out);
+} // }}}
+
+{ // AAAI {{{
+  
+  // Preamble
+  $out = "";
+  $out .= <<<EOD
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This is an auto-generated file. DO NOT EDIT!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[letterpaper]{article}
+
+% Usual packages
+\usepackage[utf8]{inputenc}  % UTF-8 input encoding
+\usepackage{aaai}
+\usepackage{mathptmx}
+\usepackage{helvet}
+\usepackage{courier}
+\\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\usepackage{microtype}       % Better handling of typo
+\usepackage[english]{babel}  % Hyphenation
+\usepackage{graphicx}        % Import graphics
+\usepackage{cite}            % Better handling of citations
+\usepackage{comment}         % To comment out blocks of text
+\setcounter{secnumdepth}{0}
+
+EOD;
+
+  $out .= "\\pdfinfo{\n";
+  $out .= " /Title (".$title.")\n";
+  $out .= " /Author (";
+  $first = true;
+  foreach ($authors as $name => $aff)
+  {
+    if ($first)
+    {
+      $first = false;
+    }
+    else
+    {
+      $out .= ", ";
+    }
+    $out .= $name;
+  }
+  $out .= ")\n";
+  $out .= "}\n";
+  $out .= "\n\n% Title\n";
+  $out .= "\\title{".$title."}\n\n";
+  $first_aff = true;
+  $out .= "% Authors and affiliations\n";
+  $out .= "\\author{%\n";
+  foreach ($authors_aff as $aff => $names)
+  {
+    if (!$first_aff)
+    {
+      $out .= "\\And\n";
+    }
+    else
+    {
+      $first_aff = false;
+    }
+    $first = true;
+    foreach ($names as $name)
+    {
+      if ($first)
+      {
+        $first = false;
+      }
+      else
+      {
+        $out .= " \\and ";
+      }
+      $out .= $name;
+    }
+    $out .= "\\\\\n";
+    foreach ($affiliations[$aff] as $line)
+    {
+      $out .= $line."\\\\\n";
+    }
+  }
+  $out .= "}\n\n";
+  $out .= "\\input includes.tex\n\n";
+  $out .= "\\begin{document}\n\n";
+  $out .= "\\maketitle\n";
+  $out .= "\\begin{abstract}\n\\begin{quote}\n";
+  $out .= "\\input abstract.tex\n";
+  $out .= "\\end{quote}\n\\end{abstract}\n";
+  file_put_contents($out_folder."preamble-aaai.inc.tex", $out);
+  
+  // Postamble
+  $out = "";
+  $out .= <<<EOD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This is an auto-generated file. DO NOT EDIT!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+EOD;
+  $out .= "\n\\bibliographystyle{aaai}\n";
+  $out .= "\\bibliography{paper}\n";
+  $out .= "\\end{document}\n";
+  file_put_contents($out_folder."postamble-aaai.inc.tex", $out);
 } // }}}
 
 // }}}
