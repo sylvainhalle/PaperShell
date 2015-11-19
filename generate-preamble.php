@@ -20,6 +20,16 @@
 // Read author-title file
 $input_filename = "authors.txt";
 $out_folder = "Source/";
+
+// Read config settings
+$config = array(
+	"tex-name" => "paper",
+	"bib-name" => "paper"
+);
+if (file_exists("settings.inc.php"))
+{
+  include("settings.inc.php");
+}
 $lines = explode("\n", file_get_contents($input_filename));
 
 { // Parse file {{{
@@ -138,7 +148,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{splncs03}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-lncs.inc.tex", $out);
 } // }}}
@@ -225,7 +235,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-ieee.inc.tex", $out);
   
@@ -321,7 +331,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\balancecolumns\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-acm.inc.tex", $out);
@@ -400,7 +410,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{elsarticle-num}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-elsarticle.inc.tex", $out);
 } // }}}
@@ -493,7 +503,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{abbrv}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-svjour.inc.tex", $out);
 } // }}}
@@ -596,7 +606,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{aaai}\n";
-  $out .= "\\bibliography{paper}\n";
+  $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-aaai.inc.tex", $out);
 } // }}}
