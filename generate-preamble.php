@@ -24,7 +24,8 @@ $out_folder = "Source/";
 // Read config settings
 $config = array(
 	"tex-name" => "paper",
-	"bib-name" => "paper"
+	"bib-name" => "paper",
+	"journal-name" => "Nuclear Physics B"
 );
 if (file_exists("settings.inc.php"))
 {
@@ -359,7 +360,7 @@ EOD;
 \usepackage{comment}         % To comment out blocks of text
 \biboptions{sort&compress}   % Sort and compress citations
 
-\journal{Nuclear Physics B}
+\journal{{$config["journal-name"]}}
 
 % User-defined includes
 \input includes.tex
@@ -410,6 +411,7 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
   $out .= "\n\\bibliographystyle{elsarticle-num}\n";
+  $out .= "\n\\section*{References}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-elsarticle.inc.tex", $out);

@@ -181,6 +181,8 @@ in some document classes.
 - The preamble for IEEE journal fixes a [problem with a redefinition of the
   `\markboth` command](http://tex.stackexchange.com/a/88864) that would
   otherwise prevent the document from compiling
+- The postamble for Elsevier fixes the fact that the bibliography [does not have a section
+  title](http://tex.stackexchange.com/questions/188625/no-references-title-using-elsevier-document-class)
 
 About the Author
 ----------------
