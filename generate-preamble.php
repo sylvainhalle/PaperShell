@@ -208,7 +208,7 @@ EOD;
       }
       $out .= $name;
     }
-    $out .= "}\n";
+    $out .= "}\\\\\n";
     $out .= "\\IEEEauthorblockA{%\n";
     foreach ($affiliations[$aff] as $line)
     {
