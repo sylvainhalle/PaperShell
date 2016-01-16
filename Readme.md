@@ -28,9 +28,10 @@ If you have been writing lots of Computer Science papers, you may have
 been mostly using LaTeX with a couple of different document classes:
 
 - `aaai` for AAAI journals
+- `acmsmall` for ACM journals
 - `elsarticle` for Elsevier journals
 - `IEEEtran` for IEEE conference proceedings and journals
-- `llncs` for Springer' Lecture Notes in Computer Science series
+- `llncs` for Springer's *Lecture Notes in Computer Science* series
 - `sig-alternate` for ACM conference proceedings
 - `svjour` for Springer journals
 
@@ -183,6 +184,17 @@ in some document classes.
   otherwise prevent the document from compiling
 - The postamble for Elsevier fixes the fact that the bibliography [does not have a section
   title](http://tex.stackexchange.com/questions/188625/no-references-title-using-elsevier-document-class)
+
+Overriding defaults
+-------------------
+
+Default settings can be overridden by giving values to parameters found
+in `settings.inc.php`. All these settings are documented in detail in the
+file. Make sure to call `generate-preamble.php` again after you change the
+file.
+
+In the case of ACM journals, you also have to overwrite `acm-ccs.tex` and
+`acm-bottom.tex` with appropriate content.
 
 About the Author
 ----------------
