@@ -57,14 +57,56 @@ While lot of work has been done on reporting the presence of an error, much less
 
 
 %% ---------------------------
-%% Introduction
+%% Witnesses
 %% ---------------------------
-\section{Witnesses} %% {{{
+\section{Defining Witnesses} %% {{{
 
+Let $\mathcal{D}$ be a set of \emph{domain elements}, with a special element $\sz \in \mathcal{D}$ we shall name the \emph{empty} element, and a partial ordering $\sqsubseteq$. Let us define a commutative and associative binary operator $\spl$ over $\mathcal{D}$, with $\sz \in \mathcal{D}$ as its neutral element. The inverse operator $\smn$ is defined such that $d \smn \sz \triangleq d$, and $d \smn d \triangleq \sz$, and $d \spl (\sz \smn d) \triangleq \sz$. Intuitively, $\spl$ and $\smn$ are intended to have the properties of ``addition'' and ``subtraction'' over domain elements. They are linked with the ordering relationship in such a way that $d \sqsubseteq (d \spl d')$ and $(d \smn d') \sqsubseteq d$ for every $d, d' \in \mathcal{D}$.
+
+Let $\Phi$ be a set of \emph{language expressions} equipped with a satisfaction relation $\models : \mathcal{D} \times \Phi \rightarrow \{\top,\bot,?\}$. For an expression $\varphi \in \Phi$ and a domain structure $d \in \mathcal{D}$, we will abuse notation and write $d \models \varphi$ if and only if $\models(d,\varphi) = \top$.
+
+Let $d \in \mathcal{D}$ be a structure such that $d \not\models \varphi$ for some expression $\varphi \in \Phi$. A \emph{witness} is defined as a tuple $(w_\spl,w_\smn) \in \mathcal{D}^2$ such that:
+%
+\begin{enumerate}
+\item $(d \spl w_\spl) \smn w_\smn \models \varphi$
+\item For every $(w'_\spl,w'_\smn) \in \mathcal{D}^2$, either $(d \spl w'_\spl) \smn w'_\smn \not\models \varphi$ or $((d \spl w_\spl) \smn w_\smn) \sqsubseteq ((d \spl w'_\spl) \smn w'_\smn)$.
+\end{enumerate}
+
+Intuitively, a witness is a set of ``changes'' (additions and subtractions) to a domain element $d$ that make it satisfy $\varphi$, such that no ``smaller'' change restores satisfiability. Since $\sqsubseteq$ is a partial order, there may be multiple, mutually uncomparable witnesses.
+
+\subsection{Propositional Logic}
+
+As a first example, let $\Phi$ be the set of propositional logic formul\ae{} with at most $n$ variables $x_1, \dots, x_n$ for some $n \geq 1$. Let $\mathcal{D}$ be the set of functions $\{\top,\bot\}^n \rightarrow \{\top,\bot\}$, which we shall call \emph{valuations}. The satisfaction relation $\models$ is defined as $\models(d, \varphi) = \top$ if $\varphi$ evaluates to true when its variables are replaced by the corresponding truth value specified by $d$, and $\bot$ otherwise.
+
+The ordering relation $\sqsubseteq$ can be defined as $d \sqsubseteq d'$ if and only if for all $i \in \{1, \dots, n\}$, $d(x_i) = \top$ entails $d'(x_i) = \top$. Similarly, the expression $d \spl d'$ can be defined as the valuation $d''$ such as for all $i \in \{1, \dots, n\}$, $d''(x_i) = \top$ whenever $d(x_i) = \top$ or $d'(x_i) = \top$. Likewise, the subtraction $d \spl d'$ is defined as the valuation $d''$ such that for all $i \in \{1, \dots, n\}$, $d''(x_i) = \top$ if and only if $d(x_i) = \top$ and $d'(x_i) = \bot$. Intuitively, addition sets more variables to $\top$, while subtraction sets more variables to $\bot$.
+
+\begin{example}
+Let $d$ be the valuation $\{a \mapsto \top, b \mapsto \bot, c \mapsto \bot\}$ and $\varphi$ the propositional formula $a \wedge b$. One can easily observe that $d \not\models \varphi$. A witness is the tuple $(d_\spl,d_\smn)$ where $d_\spl = d_\smn =  \{a \mapsto \top, b \mapsto \top, c \mapsto \bot\}$. This corresponds to the intuition that the explanation for the falsehood of $\varphi$ is that $b$ is false while it should be true. Note that although $d'_\spl = d'_\smn =  \{a \mapsto \top, b \mapsto \top, c \mapsto \top\}$ would also make $\varphi$ true, it does not count as a witness, since $d_\spl \sqsubseteq d'_\spl$. This corresponds to the intuition that the truth value of $c$ is not relevant to the falsehood of $\varphi$.
+\end{example}
+
+\begin{example}
+Let $d$ be the valuation $\{(a,\top),(b,\bot),(c,\bot)\}$ and $\varphi$ the propositional formula $a \rightarrow b$. This time, two witnesses exist:
+%
+\begin{eqnarray*}
+& w_1 = (\{(a,\top),(b,\top),(c,\bot)\}, \{(a,\top),(b,\top),(c,\bot)\}) & \\
+& w_2 = (\{(a,\bot),(b,\bot),(c,\bot)\}, \{(a,\bot),(b,\bot),(c,\bot)\}) & 
+\end{eqnarray*}
+
+It is possible to check that both fix the truth value of the original valuation, and that no smaller pair of valuations (with respect to the ordering relation $\sqsubseteq$) can achieve the same thing. Informally, the first witness accounts the falsehood of $\varphi$ on the fact that $a$ is true, while the other one rather explains it by the fact that $b$ is false --which indeed corresponds to the intuition. Since both witnesses are uncomparable, none of these explanations is ``preferred''.
+\end{example}
 
 
 %% }}} --- Section
 
+
+%% ---------------------------
+%% Witnesses
+%% ---------------------------
+\section{Computing Witnesses} %% {{{
+
+
+
+%% }}} --- Section
 
 %% ---------------------------
 %% A section
