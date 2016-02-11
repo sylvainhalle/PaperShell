@@ -10,6 +10,18 @@
 %% Usage: I like the word \nospellcheck{kwijibo}
 \newcommand{\nospellcheck}[1]{#1}
 
+%% --------------------------
+%% Personalized todo notes
+%% --------------------------
+\usepackage[x11names]{xcolor}
+\usepackage{todonotes}
+\newcommand{\todosylvain}[1]{\todo[inline,caption={},color=LightBlue2]{\sf\small \textbf{@Sylvain:} #1}}
+\newcommand{\todoalex}[1]{\todo[inline,caption={},color=LavenderBlush2]{\sf\small \textbf{@Alex:} #1}}
+\newcommand{\todosebastien}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Sébastien:} #1}}
+\newcommand{\todomichael}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Michaël:} #1}}
+\newcommand{\todotous}[1]{\todo[inline,caption={},color=yellow]{\sf\small #1}}
+\newcommand{\todoedmond}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Edmond:} #1}}
+
 \usepackage{amsmath,amsfonts,amssymb}
 
 \newcommand{\spl}{\ensuremath{\boxplus}}

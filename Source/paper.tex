@@ -59,9 +59,20 @@ While lot of work has been done on reporting the presence of an error, much less
 %% ---------------------------
 %% Witnesses
 %% ---------------------------
+\section{Context} %% {{{
+
+%% }}} --- Section
+
+%% ---------------------------
+%% Witnesses
+%% ---------------------------
 \section{Defining Witnesses} %% {{{
 
-Let $\mathcal{D}$ be a set of \emph{domain elements}, with a special element $\sz \in \mathcal{D}$ we shall name the \emph{empty} element, and a partial ordering $\sqsubseteq$. Let us define a commutative and associative binary operator $\spl$ over $\mathcal{D}$, with $\sz \in \mathcal{D}$ as its neutral element. The inverse operator $\smn$ is defined such that $d \smn \sz \triangleq d$, and $d \smn d \triangleq \sz$, and $d \spl (\sz \smn d) \triangleq \sz$. Intuitively, $\spl$ and $\smn$ are intended to have the properties of ``addition'' and ``subtraction'' over domain elements. They are linked with the ordering relationship in such a way that $d \sqsubseteq (d \spl d')$ and $(d \smn d') \sqsubseteq d$ for every $d, d' \in \mathcal{D}$.
+Let $\mathcal{D}$ be a set of \emph{domain elements}, with a special element $\sz \in \mathcal{D}$ we shall name the \emph{empty} element, and a partial ordering $\sqsubseteq$. 
+
+\todosylvain{Reformuler. On devrait plutôt avoir un ensemble d'actions de modification (ajouter/supprimer), et un witness est un ensemble de ces actions. Pas besoin d'une relation d'ordre custom; la relation d'inclusion sur les ensembles d'actions fait l'affaire.
+
+Let us define a commutative and associative binary operator $\spl$ over $\mathcal{D}$, with $\sz \in \mathcal{D}$ as its neutral element. The inverse operator $\smn$ is defined such that $d \smn \sz \triangleq d$, and $d \smn d \triangleq \sz$, and $d \spl (\sz \smn d) \triangleq \sz$. Intuitively, $\spl$ and $\smn$ are intended to have the properties of ``addition'' and ``subtraction'' over domain elements. They are linked with the ordering relationship in such a way that $d \sqsubseteq (d \spl d')$ and $(d \smn d') \sqsubseteq d$ for every $d, d' \in \mathcal{D}$.
 
 Let $\Phi$ be a set of \emph{language expressions} equipped with a satisfaction relation $\models : \mathcal{D} \times \Phi \rightarrow \{\top,\bot,?\}$. For an expression $\varphi \in \Phi$ and a domain structure $d \in \mathcal{D}$, we will abuse notation and write $d \models \varphi$ if and only if $\models(d,\varphi) = \top$.
 
@@ -92,9 +103,21 @@ Let $d$ be the valuation $\{(a,\top),(b,\bot),(c,\bot)\}$ and $\varphi$ the prop
 & w_2 = (\{(a,\bot),(b,\bot),(c,\bot)\}, \{(a,\bot),(b,\bot),(c,\bot)\}) & 
 \end{eqnarray*}
 
-It is possible to check that both fix the truth value of the original valuation, and that no smaller pair of valuations (with respect to the ordering relation $\sqsubseteq$) can achieve the same thing. Informally, the first witness accounts the falsehood of $\varphi$ on the fact that $a$ is true, while the other one rather explains it by the fact that $b$ is false --which indeed corresponds to the intuition. Since both witnesses are uncomparable, none of these explanations is ``preferred''.
+It is possible to check that both fix the truth value of the original valuation, and that no smaller pair of valuations (with respect to the ordering relation $\sqsubseteq$) can achieve the same thing. Informally, the first witness accounts the falsehood of $\varphi$ on the fact that $a$ is true, while the other one rather explains it by the fact that $b$ is false ---which indeed corresponds to the intuition. Since both witnesses are uncomparable, none of these explanations is ``preferred''.
 \end{example}
 
+\todosylvain{Faire un lien entre ceci et le incremental SAT}
+
+
+\subsection{First-Order Logic}
+
+\todosylvain{À faire}
+
+\subsection{Temporal Logic}
+
+Let $\Sigma$ be an alphabet of atomic symbols, and $\Sigma^*$ the set of finite traces made from symbols of $\Sigma$.
+
+Define the ordering relation 
 
 %% }}} --- Section
 
