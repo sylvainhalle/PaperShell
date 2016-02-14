@@ -7,5 +7,6 @@ The topic is fault localisation in web applications.
 
 ## Where to send?
 
-- [Workshop on Blabla](#) (CREST 2016)
-- Invited paper, 15 pages Springer
+- [Workshop on Causal Reasoning for Embedded and Safety-Critical Systems Technologies](https://crest2016.inria.fr/) (CREST 2016)
+- Invited paper, 15 pages LNCS
+- Due date: 2016-03-04

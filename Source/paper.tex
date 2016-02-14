@@ -59,7 +59,13 @@ While lot of work has been done on reporting the presence of an error, much less
 %% ---------------------------
 %% Witnesses
 %% ---------------------------
-\section{Context} %% {{{
+\section{Applications} %% {{{
+
+\subsection{Configuration Management}
+
+Narain
+
+\subsection{Web Applications}
 
 %% }}} --- Section
 
@@ -68,42 +74,37 @@ While lot of work has been done on reporting the presence of an error, much less
 %% ---------------------------
 \section{Defining Witnesses} %% {{{
 
-Let $\mathcal{D}$ be a set of \emph{domain elements}, with a special element $\sz \in \mathcal{D}$ we shall name the \emph{empty} element, and a partial ordering $\sqsubseteq$. 
+Let $\mathcal{D}$ be a set of \emph{domain elements}, with a special element $\sz \in \mathcal{D}$ we shall name the \emph{empty} element. Let $\Tau$ be a set of transformations; each transformation $\tau$ is an endomorphism over $\mathcal{D}$, i.e.\ a function $\tau : \mathcal{D} \rightarrow \mathcal{D}$.
 
-\todosylvain{Reformuler. On devrait plutôt avoir un ensemble d'actions de modification (ajouter/supprimer), et un witness est un ensemble de ces actions. Pas besoin d'une relation d'ordre custom; la relation d'inclusion sur les ensembles d'actions fait l'affaire.
+Transformations can be composed in the usual way, i.e.\ $\tau \circ \tau'$ is the endomorphism $\tau''$ such that $\tau''(d) = \tau(\tau'(d))$ for every $d \in \mathcal{D}$. We further expect this composition to be associative and commutative. Then, given a set of transformations $T \subseteq \Tau$, we will note as $\bigcirc T$ the composition of every transformation in $T$; that is, if $T = \{\tau_1, \dots, \tau_n\}$, then $\bigcirc T = \tau_1 \circ \dots \circ \tau_n$. Since we suppose that composition is commutative, the resulting transformation is well defined. Set inclusion induces a partial ordering over sets of transformations.
 
-Let us define a commutative and associative binary operator $\spl$ over $\mathcal{D}$, with $\sz \in \mathcal{D}$ as its neutral element. The inverse operator $\smn$ is defined such that $d \smn \sz \triangleq d$, and $d \smn d \triangleq \sz$, and $d \spl (\sz \smn d) \triangleq \sz$. Intuitively, $\spl$ and $\smn$ are intended to have the properties of ``addition'' and ``subtraction'' over domain elements. They are linked with the ordering relationship in such a way that $d \sqsubseteq (d \spl d')$ and $(d \smn d') \sqsubseteq d$ for every $d, d' \in \mathcal{D}$.
 
 Let $\Phi$ be a set of \emph{language expressions} equipped with a satisfaction relation $\models : \mathcal{D} \times \Phi \rightarrow \{\top,\bot,?\}$. For an expression $\varphi \in \Phi$ and a domain structure $d \in \mathcal{D}$, we will abuse notation and write $d \models \varphi$ if and only if $\models(d,\varphi) = \top$.
 
-Let $d \in \mathcal{D}$ be a structure such that $d \not\models \varphi$ for some expression $\varphi \in \Phi$. A \emph{witness} is defined as a tuple $(w_\spl,w_\smn) \in \mathcal{D}^2$ such that:
+Let $d \in \mathcal{D}$ be a structure such that $d \not\models \varphi$ for some expression $\varphi \in \Phi$. A \emph{witness} is defined as a set of transformations $T \subseteq \Tau$ such that:
 %
 \begin{enumerate}
-\item $(d \spl w_\spl) \smn w_\smn \models \varphi$
-\item For every $(w'_\spl,w'_\smn) \in \mathcal{D}^2$, either $(d \spl w'_\spl) \smn w'_\smn \not\models \varphi$ or $((d \spl w_\spl) \smn w_\smn) \sqsubseteq ((d \spl w'_\spl) \smn w'_\smn)$.
+\item $\bigcirc T(d) \models \varphi$
+\item For every $T' \in \Tau$, either $\bigcirc T'(d) \not\models \varphi$ or $T \subseteq T'$.
 \end{enumerate}
 
-Intuitively, a witness is a set of ``changes'' (additions and subtractions) to a domain element $d$ that make it satisfy $\varphi$, such that no ``smaller'' change restores satisfiability. Since $\sqsubseteq$ is a partial order, there may be multiple, mutually uncomparable witnesses.
+Intuitively, a witness is a set of ``changes'' to a domain element $d$ that make it satisfy $\varphi$, such that no ``smaller'' change restores satisfiability. Since $\subseteq$ is a partial order, there may be multiple, mutually uncomparable witnesses.
 
 \subsection{Propositional Logic}
 
 As a first example, let $\Phi$ be the set of propositional logic formul\ae{} with at most $n$ variables $x_1, \dots, x_n$ for some $n \geq 1$. Let $\mathcal{D}$ be the set of functions $\{\top,\bot\}^n \rightarrow \{\top,\bot\}$, which we shall call \emph{valuations}. The satisfaction relation $\models$ is defined as $\models(d, \varphi) = \top$ if $\varphi$ evaluates to true when its variables are replaced by the corresponding truth value specified by $d$, and $\bot$ otherwise.
 
-The ordering relation $\sqsubseteq$ can be defined as $d \sqsubseteq d'$ if and only if for all $i \in \{1, \dots, n\}$, $d(x_i) = \top$ entails $d'(x_i) = \top$. Similarly, the expression $d \spl d'$ can be defined as the valuation $d''$ such as for all $i \in \{1, \dots, n\}$, $d''(x_i) = \top$ whenever $d(x_i) = \top$ or $d'(x_i) = \top$. Likewise, the subtraction $d \spl d'$ is defined as the valuation $d''$ such that for all $i \in \{1, \dots, n\}$, $d''(x_i) = \top$ if and only if $d(x_i) = \top$ and $d'(x_i) = \bot$. Intuitively, addition sets more variables to $\top$, while subtraction sets more variables to $\bot$.
+Let $b \in \{\top,\bot\}$ and $i \in [1,n]$. We will note $\tau_{x_i,b}$ to denote the transformation $\tau_{x_i,b} : d \mapsto d[x_i/b]$. This transformation sets $x_i$ to $b$ and leaves the rest of the input valuation unchanged. The set of transformations $\Tau$ is then defined as:
+\[
+\Tau \triangleq \{\tau_{b,x_i} : i \in [1,n]\mbox{ and }b \in \{\top,\bot\}\}
+\]
 
 \begin{example}
-Let $d$ be the valuation $\{a \mapsto \top, b \mapsto \bot, c \mapsto \bot\}$ and $\varphi$ the propositional formula $a \wedge b$. One can easily observe that $d \not\models \varphi$. A witness is the tuple $(d_\spl,d_\smn)$ where $d_\spl = d_\smn =  \{a \mapsto \top, b \mapsto \top, c \mapsto \bot\}$. This corresponds to the intuition that the explanation for the falsehood of $\varphi$ is that $b$ is false while it should be true. Note that although $d'_\spl = d'_\smn =  \{a \mapsto \top, b \mapsto \top, c \mapsto \top\}$ would also make $\varphi$ true, it does not count as a witness, since $d_\spl \sqsubseteq d'_\spl$. This corresponds to the intuition that the truth value of $c$ is not relevant to the falsehood of $\varphi$.
+Let $d$ be the valuation $\{a \mapsto \top, b \mapsto \bot, c \mapsto \bot\}$ and $\varphi$ the propositional formula $a \wedge b$. One can easily observe that $d \not\models \varphi$. A witness is the set of transformations $T= \{\tau_{b,\top}\}$. This corresponds to the intuition that the explanation for the falsehood of $\varphi$ is that $b$ is false while it should be true. Note that although $T'=\{\tau_{b,\top}, \tau_{c,\top}\}$ would also make $\varphi$ true, it does not count as a witness, since $T \subseteq T'$. This corresponds to the intuition that the truth value of $c$ is not relevant to the falsehood of $\varphi$.
 \end{example}
 
 \begin{example}
-Let $d$ be the valuation $\{(a,\top),(b,\bot),(c,\bot)\}$ and $\varphi$ the propositional formula $a \rightarrow b$. This time, two witnesses exist:
-%
-\begin{eqnarray*}
-& w_1 = (\{(a,\top),(b,\top),(c,\bot)\}, \{(a,\top),(b,\top),(c,\bot)\}) & \\
-& w_2 = (\{(a,\bot),(b,\bot),(c,\bot)\}, \{(a,\bot),(b,\bot),(c,\bot)\}) & 
-\end{eqnarray*}
-
-It is possible to check that both fix the truth value of the original valuation, and that no smaller pair of valuations (with respect to the ordering relation $\sqsubseteq$) can achieve the same thing. Informally, the first witness accounts the falsehood of $\varphi$ on the fact that $a$ is true, while the other one rather explains it by the fact that $b$ is false ---which indeed corresponds to the intuition. Since both witnesses are uncomparable, none of these explanations is ``preferred''.
+Let $d$ be the valuation $\{a \mapsto \top,b \mapsto \bot,c \mapsto\bot\}$ and $\varphi$ the propositional formula $a \rightarrow b$. This time, two witnesses exist: $T= \{\tau_{b,\top}\}$ and $T' = \{\tau_{a,\bot}\}$. It is possible to check that both fix the truth value of the original valuation. Informally, the first witness accounts the falsehood of $\varphi$ on the fact that $a$ is true, while the other one rather explains it by the fact that $b$ is false ---which indeed corresponds to the intuition. Since both witnesses are uncomparable, none of these explanations is ``preferred''.
 \end{example}
 
 \todosylvain{Faire un lien entre ceci et le incremental SAT}
@@ -111,7 +112,106 @@ It is possible to check that both fix the truth value of the original valuation,
 
 \subsection{First-Order Logic}
 
-\todosylvain{À faire}
+The concept of witness can easily be lifted to the set $\Phi$ of first-order logic formul\ae{} on finite domains. Let $A$ be a set of elements; an $n$-ary predicate is defined as a function $p : A^n \rightarrow \{\top,\bot\}$; let $P^i$ be the set of predicates of arity $i$. A signature is a set of predicates $\{p_1, \dots, p_m\}$, respectively of arity $a_1, \dots, a_m$. For a given signature, the set of domain elements is defined as:
+\[
+\mathcal{D} \triangleq P^{a_1} \times \dots \times P^{a_m}
+\]
+
+The satisfaction relation $\models$ is defined as $\models(d, \varphi) = \top$ if $\varphi$ evaluates to true when evaluating predicates as defined in $d$, and $\bot$ otherwise.
+
+In this context, a transformation will represent the change in the truth value for one input of one predicate. Let $p_k$ be a predicate of arity $i$, $(a_1, \dots, a_k) \in A^n$ be a $k$-tuple of elements of $A$, and $b \in \{\top,\bot\}$. The transformation $\tau_{p_k,(a_1,\dots,a_k),b}$ is defined as the predicate $p_k'$ such that:
+\[
+p_k'(x_1,\dots,x_k) = 
+\begin{cases}
+b & \mbox{if $x_1 = a_1$, \dots, $x_n = a_n$}\\
+p_k(x_1,\dots,x_k) & \mbox{otherwise}
+\end{cases}
+\]
+
+The set of transformations for $p_k$, noted $T_{p_k}$, is defined as:
+\[
+T_{p_k} \triangleq \bigcup_{(a_1,\dots,a_k)\in A^n} \left(\bigcup_{b \in \{\top,\bot\}} \{\tau_{p_k,(a_1,\dots,a_k),b}\}\right)
+\]
+
+The global set of transformations is then:
+\[
+\mathcal{T} \triangleq \bigcup_{i \in [1,m]} T_{p_i}
+\]
+
+\begin{example}
+Let $A = \{0,1,2\}$, $\varphi$ be the first-order formula $\forall x : \exists y : p(x,y)$, and the binary predicate $p$ defined as $\{(0,0), (0,1), (1,1)\}$. There are three witnesses for restoring the truth of $\varphi$: $T_1=\{\tau_{p,(2,0),\top}\}$, $T_2=\{\tau_{p,(2,1),\top}\}$, $T_3=\{\tau_{p,(2,2),\top}\}$.m
+\end{example}
+
+\begin{example}
+Let $A = [1,5]$ be a set of graph vertices, $p$ a binary predicate encoding the adjacency relationship ofn graph edges, and $q_1$,$q_2$,$q_3$ a set of unary predicates such that $q_i(x)$ holds if and only if vertex $x$ has color $i$. Predicates $p$ and $q$ are defined according to the graphical representation shown in Figure \ref{fig:graph-original}.
+
+\begin{figure}
+\begin{center}
+\subfloat[Original graph]{\includegraphics[width=1.5in]{fig/graph-coloring-1}\label{fig:graph-original}}
+%
+\subfloat[After applying $T_1$]{\includegraphics[width=1.5in]{fig/graph-coloring-t1}\label{fig:graph-t1}}
+%
+\subfloat[After applying $T_3$]{\includegraphics[width=1.5in]{fig/graph-coloring-t3}\label{fig:graph-t3}}
+\\
+%
+\subfloat[After applying $T_4$]{\includegraphics[width=1.5in]{fig/graph-coloring-t4}\label{fig:graph-t4}}
+%
+\subfloat[After applying $T_5$]{\includegraphics[width=1.5in]{fig/graph-coloring-t5}\label{fig:graph-t5}}
+\caption{Encoding of a graph}
+\end{center}
+\end{figure}
+
+Let $\varphi_1$ be the following first-order formula:
+\begin{multline*}
+\varphi_1 \triangleq \forall x : (q_1(x) \rightarrow \neg(q_2(x) \vee q_3(x))) \wedge (q_2(x) \rightarrow \neg(q_1(x) \vee q_3(x))) \wedge \\
+(q_3(x) \rightarrow \neg(q_1(x) \vee q_2(x)))
+\end{multline*}
+%
+\begin{displaymath}
+\varphi_2  \triangleq  \forall x : q_1(x) \vee q_2(x) \vee q_3(x)
+\end{displaymath}
+%
+\begin{multline*}
+\varphi_3  \triangleq  \forall x : \forall y : p(x,y) \rightarrow\\
+((q_1(x) \rightarrow \neg q_1(y)) \wedge (q_2(x) \rightarrow \neg q_2(y)) \wedge (q_3(x) \rightarrow \neg q_3(y)))
+\end{multline*}
+%
+\begin{displaymath}
+\varphi_4  \triangleq  \forall x : \forall y : p(x,y) \rightarrow p(y,x)
+\end{displaymath}
+%
+Intuitively, $\varphi_1$ stipulates that each vertex can be of at most one colour, $\varphi_2$ imposes that each vertex be of at least one colour, and $\varphi_3$ expresses the fact that two adjacent vertices cannot be of the same colour. Finally, $\varphi_4$ ensures that the connectivity is symmetric.
+
+One can see that the original graph does not satisfy $\varphi_1 \wedge \varphi_2 \wedge \varphi_3$. There are multiple witnesses, a few of which are shown here:
+\[
+T_1 = \{\tau_{q_1,5,\bot},\tau_{q_2,5,\top}\}
+\]
+\[
+T_2 = \{\tau_{q_1,5,\bot},\tau_{q_3,5,\top}\}
+\]
+\[
+T_3 = \{\tau_{p,(4,5),\bot},\tau_{p,(5,4),\bot}\}
+\]
+\[
+T_4 = \{\tau_{q_1,1,\bot},\tau_{q_3,1,\top},\tau_{q_1,4,\bot},\tau_{q_3,4,\top}\}
+\]
+\[
+T_5 = \{\tau_{p,(2,4),\bot},\tau_{p,(4,2),\bot},\tau_{q_1,4,\bot},\tau_{q_3,4,\top}\}
+\]
+% Yellow = 1
+% Red = 2
+% Green = 3
+
+Witness $T_1$ fixes the graph by changing the colour of vertex 5 to red; similarly, $T_2$ changes it to green. Witness $T_3$ rather alters the adjacency relation and cuts vertex 5 from the graph, so that the colour conflict is resolved.
+
+These correspond to the ``intuitive'' ways of fixing the graph colouring. However, there exist multiple other witnesses that fulfill the definition. For example, witness $T_4$ rather exchanges the colours of vertices 1, 2 and 4. Note that this is indeed a witness, in that no subset of these transformations restore satisfiability of the original formula.
+
+In the same way, $T_5$ cuts the edge between vertices 2 and 4, and turns 4 to green.
+\end{example}
+
+Again, it should be noted that without additional context, none of these witnesses is a more likely explanation to the falsehood of $\varphi_1 \wedge \varphi_2 \wedge \varphi_3$ on the original graph.
+
+\todosylvain{Ménage dans les noms symboles}
 
 \subsection{Temporal Logic}
 
@@ -138,12 +238,6 @@ Define the ordering relation
 
 It works.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.4\textwidth]{fig/square-circle}
-  \caption{A square and a circle}
-  \label{fig:square-circle}
-\end{figure} 
 
 %% }}} --- Section
 
