@@ -1,30 +1,7 @@
-A Flexible LaTeX Article Environment
-====================================
-
-This repository provides a boilerplate environment for writing LaTeX
-articles using the popular templates from Springer, IEEE, ACM and Elsevier.
-It provides:
-
-- The up-to-date style and bibliography files of five different publishers
-  (journals and conferences)
-- A script that generates the proper preamble (title, list of authors and
-  institution) specific to each style
-- A very advanced Makefile (by [Chris
-  Monson](https://github.com/shiblon/latex-makefile)) taking care of the
-  compilation/cleaning process
-- Scripts (for both Windows and Linux) to perform spell checking of the
-  LaTeX source with [GNU Aspell](http://aspell.net). The words added to the
-  dictionary while checking are also versioned with the project.
-- A `.gitignore` file suitable for a single-document LaTeX project
-
-Using this template, switching a paper from any stylesheet to any other
-simply amounts to selecting one line to de-comment in the main, `paper.tex`
-document.
-
 Why this template?
 ------------------
 
-If you have been writing lots of Computer Science papers, you may have
+If you have been writing lots of (Computer Science) papers, you may have
 been mostly using LaTeX with a couple of different document classes:
 
 - `aaai` for AAAI journals
@@ -112,7 +89,7 @@ requires some amount of braindead, yet frustrating copy-pasting from
 existing files you have, which arguably becomes quite mind-numbing when
 you've been doing that once in a while for the past ten years.
 
-In this project, the paper's title, authors and institutions is written in
+In this project, the paper's title, authors and institutions are written in
 a separate file called `authors.txt`:
 
     Applications of the Flux Capacitor
@@ -150,7 +127,7 @@ another `\input` line to uncomment and recompile. Voilà!
 Quick Use
 ---------
 
-0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/archive/master.zip),
+0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/releases/latest),
    or clone the contents of this repository in a folder of your choice.
 
 1. Modify `article.txt` with the desired title, authors and institutions.

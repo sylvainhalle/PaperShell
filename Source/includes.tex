@@ -2,10 +2,57 @@
 %% If you have other packages or command definitions you'd like to
 %% include, write them there
 %% ---------------------------
-% \newcommand{\mycommand}{Blabla}
-% ...
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{subfig}
 
 %% We put one here: this is a dummy command for LaTeX, used to
 %% tell Aspell to skip checking the spelling of what's inside
 %% Usage: I like the word \nospellcheck{kwijibo}
 \newcommand{\nospellcheck}[1]{#1}
+
+%% --------------------------
+%% Personalized todo notes
+%% --------------------------
+\usepackage[x11names]{xcolor}
+\usepackage{todonotes}
+\newcommand{\todosylvain}[1]{\todo[inline,caption={},color=LightBlue2]{\sf\small \textbf{@Sylvain:} #1}}
+\newcommand{\todoalex}[1]{\todo[inline,caption={},color=LavenderBlush2]{\sf\small \textbf{@Alex:} #1}}
+\newcommand{\todosebastien}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Sébastien:} #1}}
+\newcommand{\todomichael}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Michaël:} #1}}
+\newcommand{\todotous}[1]{\todo[inline,caption={},color=yellow]{\sf\small #1}}
+\newcommand{\todoedmond}[1]{\todo[inline,caption={},color=Khaki1]{\sf\small \textbf{@Edmond:} #1}}
+
+%% --------------------------
+%% Placeholder for figure
+%% --------------------------
+\newcommand{\imagevide}{\framebox(200,200){IMAGE}}
+
+%% --------------------------
+%% Alter some LaTeX defaults for better treatment of figures:
+%% See p.105 of "TeX Unbound" for suggested values.
+%% See pp. 199-200 of Lamport's "LaTeX" book for details.
+%% --------------------------
+%% Parameters for all pages
+\renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+
+%% Parameters for TEXT pages (not float pages)
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}                 % 2 may work better
+\setcounter{dbltopnumber}{2}                % for 2-column pages
+\renewcommand{\dbltopfraction}{0.9}         % fit big float above 2-col. text
+\renewcommand{\textfraction}{0.07}          % allow minimal text w. figs
+
+% Parameters for FLOAT pages (not text pages)
+\renewcommand{\floatpagefraction}{0.7}      % require fuller float pages
+% N.B.: floatpagefraction MUST be less than topfraction !!
+\renewcommand{\dblfloatpagefraction}{0.7}   %require fuller float pages
+
+
+\newcommand{\spl}{\ensuremath{\boxplus}}
+\newcommand{\smn}{\ensuremath{\boxminus}}
+\newcommand{\sz}{\ensuremath{d_\emptyset}}
+\newcommand{\Tau}{\ensuremath{\mathcal{T}}}
+
+%\newtheorem{example}{Example}
