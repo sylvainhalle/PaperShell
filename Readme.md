@@ -47,7 +47,9 @@ an existing document from one class to the other. For example, you started
 writing a paper without deciding where to send it, only to find that the
 conference you've chosen has a different publisher than the paper's current
 style. Or, a paper sent to a conference (and perhaps rejected) needs to be
-sent to another venue with a different publisher.
+sent to another venue with a different publisher. (Note that in the past,
+it used to be the *publisher's* job to format your manuscript to their
+taste. But that's another story.)
 
 Alas, it turns out these stylesheets are not directly interchangeable.
 Rather than nicely overriding the behaviour of LaTeX's original commands
@@ -148,14 +150,15 @@ another `\input` line to uncomment and recompile. Voilà!
 Quick Use
 ---------
 
-0. Unzip (or clone) the contents of this repository in a folder of your
-   choice.
+0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/archive/master.zip),
+   or clone the contents of this repository in a folder of your choice.
 
 1. Modify `article.txt` with the desired title, authors and institutions.
    The file is self-document and tells you how to do it.
 
 2. Call `php generate-preamble.php` to generate the include files, which
-   will be placed in the `Source` subfolder.
+   will be placed in the `Source` subfolder. (This requires
+   [PHP](http://php.net/) to be installed in your path.)
 
 3. Write your text as usual in `Source/paper.tex`. Uncomment the `\input`
    line corresponding to the document class you wish to use. Figures should
@@ -184,6 +187,10 @@ in some document classes.
   otherwise prevent the document from compiling
 - The postamble for Elsevier fixes the fact that the bibliography [does not have a section
   title](http://tex.stackexchange.com/questions/188625/no-references-title-using-elsevier-document-class)
+- The ACM conference template can optionally be
+  [fixed](http://jeffe.cs.illinois.edu/pubs/tex/fixacm.sty) to improve some
+  of its "brain-damaged and ugly" fomatting rules (not my words here!)
+
 
 Overriding defaults
 -------------------

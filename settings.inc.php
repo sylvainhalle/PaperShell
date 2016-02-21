@@ -54,6 +54,13 @@ $config = array_merge($config, array(
     //"issn" => "1234-56789",
     
     /*
+     * Whether the preamble of an ACM conference paper will include the
+     * package fixacm.sty, which is not standard. Has no effect in
+     * other styles.
+     */
+    //"fix-acm" => true,
+    
+    /*
      * A dummy parameter, just so you don't bother about removing
      * the comma from the last uncommented parameter above. Leave this
      * uncommented at all times.
