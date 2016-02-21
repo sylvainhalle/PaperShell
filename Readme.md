@@ -1,3 +1,26 @@
+A Flexible LaTeX Article Environment
+====================================
+
+This repository provides a boilerplate environment for writing LaTeX
+articles using the popular templates from Springer, IEEE, ACM and Elsevier.
+It provides:
+
+- The up-to-date style and bibliography files of five different publishers
+  (journals and conferences)
+- A script that generates the proper preamble (title, list of authors and
+  institution) specific to each style
+- A very advanced Makefile (by [Chris
+  Monson](https://github.com/shiblon/latex-makefile)) taking care of the
+  compilation/cleaning process
+- Scripts (for both Windows and Linux) to perform spell checking of the
+  LaTeX source with [GNU Aspell](http://aspell.net). The words added to the
+  dictionary while checking are also versioned with the project.
+- A `.gitignore` file suitable for a single-document LaTeX project
+
+Using this template, switching a paper from any stylesheet to any other
+simply amounts to selecting one line to de-comment in the main, `paper.tex`
+document.
+
 Why this template?
 ------------------
 
