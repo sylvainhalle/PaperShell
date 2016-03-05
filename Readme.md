@@ -30,6 +30,7 @@ been mostly using LaTeX with a couple of different document classes:
 - `aaai` for AAAI journals
 - `acmsmall` for ACM journals
 - `elsarticle` for Elsevier journals
+- `eptcs` for the Electronic Proceedings in Theoretical Computer Science
 - `IEEEtran` for IEEE conference proceedings and journals
 - `llncs` for Springer's *Lecture Notes in Computer Science* series
 - `sig-alternate` for ACM conference proceedings
@@ -190,6 +191,9 @@ in some document classes.
 - The ACM conference template can optionally be
   [fixed](http://jeffe.cs.illinois.edu/pubs/tex/fixacm.sty) to improve some
   of its "brain-damaged and ugly" fomatting rules (not my words here!)
+- The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
+  Since we don't know a workaround, the template uses the `plain` biblioragphy
+  style rather than `eptcs`.
 
 
 Overriding defaults
