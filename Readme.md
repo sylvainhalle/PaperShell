@@ -130,6 +130,10 @@ a separate file called `authors.txt`:
     BiffCo inc.
     Hill Valley, CA 95420
 
+(You can optionally separate first and last names with braces, e.g.
+`{Marty} {McFly}`. This is used in the EPTCS style for writing
+abbreviated author names, e.g. "E. Brown, M. McFly, B. Tannen", etc.)
+
 You then call a script named `generate-preamble.php` to generate include
 files with the proper syntax for each of the document classes from that
 same data. These files are called `preamble-xxxx.inc.tex`, where xxxx is
