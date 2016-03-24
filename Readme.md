@@ -211,6 +211,18 @@ file.
 In the case of ACM journals, you also have to overwrite `acm-ccs.tex` and
 `acm-bottom.tex` with appropriate content.
 
+### Changing the paper's filename
+
+By default, the main paper is called `paper.tex`. We recommend that you leave
+it that way: the whole point of using this environment is to use the same
+commands and structure for all your papers, so customizing it for each paper
+kind of defeats that. If you *must* change it to something else:
+
+1. Make sure the filename does not contain spaces, or the `make` command
+   will not do anything.
+2. Make sure to change `paper.tex` by your filename in
+   `Source/Variables.ini`.
+
 About the Author
 ----------------
 

@@ -61,6 +61,18 @@ $config = array_merge($config, array(
     //"fix-acm" => true,
     
     /*
+     * Whether to use the Computer Modern font or the Times font. This
+     * only works for Springer LNCS, and is ignored in all other styles.
+     */
+    //"use-times" => true,
+    
+    /*
+     * A bibliography style. Use it to override the bib style provided
+     * by each editor. Leave it to the empty string otherwise.
+     */
+    //"bib-style" => "abbrv",
+    
+    /*
      * A dummy parameter, just so you don't bother about removing
      * the comma from the last uncommented parameter above. Leave this
      * uncommented at all times.
