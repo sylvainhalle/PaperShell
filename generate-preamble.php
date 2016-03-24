@@ -176,6 +176,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-lncs.inc.tex", $out);
 } // }}}
@@ -264,6 +265,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-ieee.inc.tex", $out);
   
@@ -366,6 +368,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\balancecolumns\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-acm.inc.tex", $out);
@@ -447,6 +450,7 @@ EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\n\\section*{References}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-elsarticle.inc.tex", $out);
 } // }}}
@@ -541,6 +545,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-svjour.inc.tex", $out);
 } // }}}
@@ -645,6 +650,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-aaai.inc.tex", $out);
 } // }}}
@@ -732,6 +738,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "% History dates\n\\received{".date("F Y")."}{".date("F Y")."}{".date("F Y")."}\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-acm-journal.inc.tex", $out);
@@ -829,6 +836,7 @@ EOD;
 EOD;
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n";
+  $out .= "\\input appendices.tex\n";
   $out .= "\\end{document}\n";
   file_put_contents($out_folder."postamble-eptcs.inc.tex", $out);
 } // }}}

@@ -169,7 +169,8 @@ Quick Use
    line corresponding to the document class you wish to use. Figures should
    be placed in the `fig` subfolder. Write your abstract in
    `Source/abstract.tex`, and put any other imports and declarations in
-   `Source/includes.tex`.
+   `Source/includes.tex`. Write anything that should go after the
+   bibliography (such as appendices) in `Source/appendices.tex`.
 
 4. To compile, use `make all`. To remove temporary files, use `make clean`.
    The Makefile has a very comprehensive list of other useful features. To
@@ -196,7 +197,7 @@ in some document classes.
   [fixed](http://jeffe.cs.illinois.edu/pubs/tex/fixacm.sty) to improve some
   of its "brain-damaged and ugly" fomatting rules (not my words here!)
 - The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
-  Since we don't know a workaround, the template uses the `plain` biblioragphy
+  Since we don't know a workaround, the template uses the `plain` bibliography
   style rather than `eptcs`.
 
 
