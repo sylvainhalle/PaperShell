@@ -8,11 +8,11 @@ $config = array_merge($config, array(
     //"bib-name" => "report",
     
     /*
-     The name of the journal to compile for.
-     - In the ACM journal style, you must use a journal name found in
-       acmsmall.cls.
-     - In the Elsevier journal style, you can use any string you like.
-     - You can ignore this parameter for all other styles.
+     * The name of the journal to compile for.
+     * - In the ACM journal style, you must use a journal name found in
+     *   acmsmall.cls.
+     * - In the Elsevier journal style, you can use any string you like.
+     * - You can ignore this parameter for all other styles.
      */
     "journal-name" => "acmtissec",
     
@@ -35,13 +35,33 @@ $config = array_merge($config, array(
      * The article's publication year (if not the current year).
      * Used only in the ACM journal style.
      */
-    //"year" => 39,
+    //"year" => 1955,
     
     /*
      * The article's publication month (if not the current month).
      * Used only in the ACM journal style.
      */
     //"month" => 3,
+    
+    /*
+     * If the paper is published in a conference, the acronym of
+     * the conference (e.g. "ICFF '16"). Used only in ACM conference
+     * proceedings.
+     */
+    //"conference" => "OUTATIME '55",
+    
+    /*
+     * If the paper is published in a conference, the dates and
+     * location of the conference. Used only in ACM conference
+     * proceedings.
+     */
+    //"conference-loc" => "November 5--12, 1955, Hill Valley, CA",
+    
+    /*
+     * Copyright information to be overridden. Used only in ACM conference
+     * proceedings.
+     */
+    //"copyright" => "0-89791-88-6/97/05",
     
     /*
      * The article's DOI
@@ -52,6 +72,11 @@ $config = array_merge($config, array(
      * The journal's ISSN
      */
     //"issn" => "1234-56789",
+    
+    /*
+     * The journal's ISBN
+     */
+    //"isbn" => "1234-56789",
     
     /*
      * Whether the preamble of an ACM conference paper will include the
