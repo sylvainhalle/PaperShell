@@ -2,8 +2,8 @@ A Flexible LaTeX Article Environment
 ====================================
 
 This repository provides a boilerplate environment for writing LaTeX
-articles using the popular templates from Springer, IEEE, ACM and Elsevier.
-It provides:
+articles using the popular templates from Springer, IEEE, ACM, AAAI and
+Elsevier. It provides:
 
 - The up-to-date style and bibliography files of five different publishers
   (journals and conferences)
@@ -103,12 +103,12 @@ authors and institutions in `llncs`:
     \fntext{Temporal Industries, Hill Valley, CA 90193}
     \fntext{BiffCo inc., Hill Valley, CA 90193}
 
-Four different sets of commands and syntax for the same data, and all this
+Four different sets of commands and syntax for the same data ---and all this
 while `article.cls` already provides commands doing exactly that, which
-could have easily been overridden! To make things even worse, elsarticle
-does not even use `\maketitle` to print the title, which must be enclosed
-(along with the abstract) within a `frontmatter` environment *after* the
-`\begin{document}`. Therefore, switching between classes
+could have easily been overridden! To make things even worse, the class
+elsarticle does not even use `\maketitle` to print the title, which must be
+enclosed (along with the abstract) within a `frontmatter` environment *after*
+the `\begin{document}`. Therefore, switching between classes
 requires some amount of braindead, yet frustrating copy-pasting from
 existing files you have, which arguably becomes quite mind-numbing when
 you've been doing that once in a while for the past ten years.
@@ -148,7 +148,7 @@ In the main paper file, called `paper.tex`, it suffices to uncomment the
     \input preamble-acm.inc.tex
     ...
 
-To change the authors or title, modify `authors.txt` and call
+To change the authors or title, modify `authors.txt` and run
 `generate-preamble.php` again. To switch between document classes, select
 another `\input` line to uncomment and recompile. Voilà!
 
@@ -159,7 +159,7 @@ Quick Use
    or clone the contents of this repository in a folder of your choice.
 
 1. Modify `article.txt` with the desired title, authors and institutions.
-   The file is self-document and tells you how to do it.
+   The file is self-documented and tells you how to do it.
 
 2. Call `php generate-preamble.php` to generate the include files, which
    will be placed in the `Source` subfolder. (This requires

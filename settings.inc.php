@@ -8,6 +8,11 @@ $config = array_merge($config, array(
     //"bib-name" => "report",
     
     /*
+     * Whether the paper contains an abstract.
+     */
+    //"abstract" => false,
+    
+    /*
      * The name of the journal to compile for.
      * - In the ACM journal style, you must use a journal name found in
      *   acmsmall.cls.
@@ -96,6 +101,12 @@ $config = array_merge($config, array(
      * by each editor. Leave it to the empty string otherwise.
      */
     //"bib-style" => "abbrv",
+    
+    /*
+     * The default path for images when using the \includegraphics{}
+     * command.
+     */
+    //"graphicspath" => array("fig/", "whatever/"),
     
     /*
      * A dummy parameter, just so you don't bother about removing
