@@ -45,6 +45,7 @@ $config = array(
 	"fix-acm"        => false,
 	"use-times"      => false,
 	"bib-style"      => "",
+	"graphicspath"   => array("fig/")
 );
 if (file_exists("settings.inc.php"))
 {
@@ -167,6 +168,7 @@ EOD;
   }
   $out .= "}\n\n";
   $out .= "\\input includes.tex\n\n";
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
   if ($config["abstract"])
@@ -254,6 +256,7 @@ EOD;
   }
   $out .= "}\n\n";
   $out .= "\\input includes.tex\n\n";
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
   if ($config["abstract"])
@@ -317,6 +320,9 @@ EOD;
 
 \\input includes.tex
 
+EOD;
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
+  $out .= <<<EOD
 \\begin{document}
 
 % Copyright
@@ -430,6 +436,10 @@ EOD;
 % User-defined includes
 \input includes.tex
 
+EOD;
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
+  $out .= <<<EOD
+
 \begin{document}
 
 \begin{frontmatter}
@@ -510,6 +520,10 @@ EOD;
 
 % User-defined includes
 \input includes.tex
+
+EOD;
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
+  $out .= <<<EOD
 
 \begin{document}
 
@@ -668,6 +682,7 @@ EOD;
   }
   $out .= "}\n\n";
   $out .= "\\input includes.tex\n\n";
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
   if ($config["abstract"])
@@ -734,6 +749,10 @@ $autogen_comment
 
 % User-defined includes
 \input includes.tex
+
+EOD;
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
+  $out .= <<<EOD
 
 \begin{document}
 
@@ -862,6 +881,7 @@ EOD;
   $out .= "\\def\\titlerunning{".$title."}\n";
   $out .= "\\def\\authorrunning{".implode(", ", $au_running)."}\n";
   $out .= "\\input includes.tex\n\n";
+  $out .= "%% Default path for graphics\n\\graphicspath".get_graphicspath()."\n\n";
   $out .= "\\begin{document}\n\n";
   $out .= "\\maketitle\n";
   if ($config["abstract"])
@@ -917,6 +937,22 @@ function initialize($name) // {{{
     return $ab_names."\\ ".$names[count($names) - 1];
   }
 
+} // }}}
+
+/**
+ * Produces the graphicspath string from the array of paths
+ * specified in the configuration
+ */
+function get_graphicspath() // {{{
+{
+  global $config;
+  $out = "{";
+  foreach ($config["graphicspath"] as $gp)
+  {
+    $out .= "{".$gp."}";
+  }
+  $out .= "}";
+  return $out;
 } // }}}
 
 // :wrap=none:folding=explicit:
