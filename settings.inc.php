@@ -13,6 +13,12 @@ $config = array_merge($config, array(
     //"abstract" => false,
     
     /*
+     * If you wish to use a different font size than the default,
+     * specify it here (in points)
+     */
+    //"point-size" => 12,
+    
+    /*
      * The name of the journal to compile for.
      * - In the ACM journal style, you must use a journal name found in
      *   acmsmall.cls.
