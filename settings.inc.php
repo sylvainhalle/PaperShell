@@ -115,6 +115,12 @@ $config = array_merge($config, array(
     //"graphicspath" => array("fig/", "whatever/"),
     
     /*
+     * Set whether to use the microtype package. No good reason to
+     * turn it off unless it clashes with some other package.
+     */
+    //"microtype" => false,
+    
+    /*
      * A dummy parameter, just so you don't bother about removing
      * the comma from the last uncommented parameter above. Leave this
      * uncommented at all times.

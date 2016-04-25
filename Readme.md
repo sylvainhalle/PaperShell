@@ -155,8 +155,8 @@ another `\input` line to uncomment and recompile. Voilà!
 Quick Use
 ---------
 
-0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/releases/latest),
-   or clone the contents of this repository in a folder of your choice.
+0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/releases/latest)
+   the PaperShell empty project in a folder of your choice.
 
 1. Modify `article.txt` with the desired title, authors and institutions.
    The file is self-documented and tells you how to do it.
