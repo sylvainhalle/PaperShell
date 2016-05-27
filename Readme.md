@@ -15,6 +15,10 @@ Elsevier. It provides:
 - Scripts (for both Windows and Linux) to perform spell checking of the
   LaTeX source with [GNU Aspell](http://aspell.net). The words added to the
   dictionary while checking are also versioned with the project.
+- A script that can "flatten" your sources into a single compilable .tex file
+  (with all includes and bibliography) and export all resources in a
+  stand-alone folder (ideal for exporting the camera-ready sources to an
+  editor)
 - A `.gitignore` file suitable for a single-document LaTeX project
 
 Using this template, switching a paper from any stylesheet to any other
@@ -200,6 +204,35 @@ in some document classes.
   Since we don't know a workaround, the template uses the `plain` bibliography
   style rather than `eptcs`.
 
+
+Exporting your sources
+----------------------
+
+If your paper is accepted (yay!), you may need to send the sources to the
+editor so they can produce the final, "camera-ready version". Just zipping
+your PaperShell `Source` folder will confuse a few of them, especially if
+they have scripts trying to compile it automatically (many of them just
+try to compile the first .tex file they find, which won't be the right one
+in most cases).
+
+From the root folder, you can call
+
+    php export.php
+
+Creates a stand-alone directory with all the sources. This script
+reads the original source file (paper.tex using the defaults) and
+replaces all non-commented
+`\input{...}` instructions with the content of the file. It also includes
+the bibliography (paper.bbl) directly within the file (so no need to
+call BibTeX). The resulting,
+stand-alone LaTeX file is copied to a new folder (`Export`), along with all
+necessary auxiliary files (basically everything in the Source folder that
+is not a .tex file).
+ *
+Normally, what is present in the Export folder is a single compilable .tex
+file (no `\include` or `\input`), plus class files and images. It is suitable
+for sending as a bundle e.g. to an editor to compile the camera-ready
+version.
 
 Overriding defaults
 -------------------
