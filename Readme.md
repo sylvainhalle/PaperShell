@@ -146,10 +146,10 @@ the document class.
 In the main paper file, called `paper.tex`, it suffices to uncomment the
 `\input` line for the desired preamble and compile:
 
-    %\input preamble-ieee-journal.inc.tex
-    %\input preamble-ieee.inc.tex
-    %\input preamble-lncs.inc.tex
-    \input preamble-acm.inc.tex
+    %\input{preamble-ieee-journal.inc.tex}
+    %\input{preamble-ieee.inc.tex}
+    %\input{preamble-lncs.inc.tex}
+    \input{preamble-acm.inc.tex}
     ...
 
 To change the authors or title, modify `authors.txt` and run
