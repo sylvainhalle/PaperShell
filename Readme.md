@@ -5,7 +5,7 @@ This repository provides a boilerplate environment for writing LaTeX
 articles using the popular templates from Springer, IEEE, ACM, AAAI and
 Elsevier. It provides:
 
-- The up-to-date style and bibliography files of five different publishers
+- The up-to-date style and bibliography files of many different publishers
   (journals and conferences)
 - A script that generates the proper preamble (title, list of authors and
   institution) specific to each style
@@ -38,6 +38,7 @@ been mostly using LaTeX with a couple of different document classes:
 - `IEEEtran` for IEEE conference proceedings and journals
 - `llncs` for Springer's *Lecture Notes in Computer Science* series
 - `sig-alternate` for ACM conference proceedings
+- `stvrauth` and similar for Wiley Journals
 - `svjour` for Springer journals
 
 First off, this repository provides a well-structured template project where

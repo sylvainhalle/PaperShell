@@ -2,6 +2,12 @@
 // You can override any defaults by setting values here
 $config = array_merge($config, array(
     /*
+     * A short title for the paper, used for running heads. If unspecified,
+     * the title from authors.txt will be used
+     */
+    //"short-title" => "My Short Title",
+    
+    /*
      * The name (without extension) of the bib file, if not the default
      * "paper.bib".
      */
@@ -119,6 +125,12 @@ $config = array_merge($config, array(
      * turn it off unless it clashes with some other package.
      */
     //"microtype" => false,
+    
+    /*
+     * A string for the corresponding address. Used in STVR, ignored
+     * in other styles
+     */
+    //"corr-addr" => "",
     
     /*
      * A dummy parameter, just so you don't bother about removing
