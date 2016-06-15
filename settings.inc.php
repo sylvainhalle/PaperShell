@@ -127,10 +127,16 @@ $config = array_merge($config, array(
     //"microtype" => false,
     
     /*
-     * A string for the corresponding address. Used in STVR, ignored
+     * A string for the corresponding address. Used in stvrauth, ignored
      * in other styles
      */
     //"corr-addr" => "",
+    
+    /*
+     * Set whether the paper will be typeset using double spacing.
+     * Ignored in all styles except stvrauth.
+     */
+    //"doublespace" => true,
     
     /*
      * A dummy parameter, just so you don't bother about removing
