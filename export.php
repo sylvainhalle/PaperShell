@@ -35,6 +35,8 @@
  * 
  * - An \input instruction for the same file that appears both commented and
  *   uncommented in the source will be replaced for all its occurrences
+ * - A construct of the form \scalebox{0.5}{\input{fig/somefile}} currently does
+ *   not work (it is replaced by nothing)
  */
 
 // Version string
