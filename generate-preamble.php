@@ -219,8 +219,8 @@ EOD;
 % Usual packages
 \usepackage[utf8]{inputenc}      % UTF-8 input encoding
 \usepackage[T1]{fontenc}         % Type1 fonts
-\usepackage{newtxtext,newtxmath} % Times with math support{$microtype_string}
 \usepackage[english]{babel}      % Hyphenation
+\usepackage{newtxtext,newtxmath} % Times with math support{$microtype_string}
 \usepackage{graphicx}            % Import graphics
 \usepackage{cite}                % Better handling of citations
 \usepackage{hyperref}            % Better handling of references in PDFs
@@ -521,8 +521,8 @@ EOD;
 % Usual packages
 \usepackage[utf8]{inputenc}      % UTF-8 input encoding
 \usepackage[T1]{fontenc}         % Type1 fonts
-\usepackage{newtxtext,newtxmath} % Times font with math support{$microtype_string}
 \usepackage[english]{babel}      % Hyphenation
+\usepackage{newtxtext,newtxmath} % Times font with math support{$microtype_string}
 \usepackage{graphicx}            % Import graphics
 \usepackage{hyperref}            % Better handling of references in PDFs
 \usepackage{comment}             % To comment out blocks of text
@@ -622,13 +622,13 @@ EOD;
 % Usual packages
 \usepackage[utf8]{inputenc}  % UTF-8 input encoding
 \usepackage{aaai}
+\usepackage[english]{babel}  % Hyphenation
 \usepackage{newtxtext,newtxmath}
 \usepackage{helvet}
 \usepackage{courier}
 \\frenchspacing
 \setlength{\pdfpagewidth}{8.5in}
 \setlength{\pdfpageheight}{11in}{$microtype_string}
-\usepackage[english]{babel}  % Hyphenation
 \usepackage{graphicx}        % Import graphics
 \usepackage{cite}            % Better handling of citations
 \usepackage{comment}         % To comment out blocks of text
