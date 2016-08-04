@@ -202,9 +202,7 @@ in some document classes.
   [fixed](http://jeffe.cs.illinois.edu/pubs/tex/fixacm.sty) to improve some
   of its "brain-damaged and ugly" fomatting rules (not my words here!)
 - The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
-  Since we don't know a workaround, the template uses the `plain` bibliography
-  style rather than `eptcs`.
-
+  PaperShell contains a fixed version.
 
 Exporting your sources
 ----------------------

@@ -1401,13 +1401,21 @@ FUNCTION {begin.bib}
   write$ newline$
   "\providecommand{\urlprefix}{Available at }"
   write$ newline$
-  "\providecommand{\url}[1]{\texttt{#1}}"
+  "\providecommand{\url}{\begingroup\catcode`_=12 \dourl}"
   write$ newline$
-  "\providecommand{\href}[2]{\texttt{#2}}"
+  "\providecommand{\dourl}[1]{\texttt{#1}\endgroup}"
   write$ newline$
-  "\providecommand{\urlalt}[2]{\href{#1}{#2}}"
+  "\providecommand{\href}{\begingroup\catcode`_=12 \dohref}"
   write$ newline$
-  "\providecommand{\doi}[1]{doi:\urlalt{http://dx.doi.org/#1}{#1}}"
+  "\providecommand{\dohref}[2]{\texttt{#2}\endgroup}"
+  write$ newline$
+  "\providecommand{\urlalt}{\begingroup\catcode`_=12 \dourlalt}"
+  write$ newline$
+  "\providecommand{\dourlalt}[2]{\href{#1}{#2}\endgroup}"
+  write$ newline$
+  "\providecommand{\doi}{\begingroup\catcode`_=12 \dodoi}"
+  write$ newline$
+  "\providecommand{\dodoi}[1]{doi:\urlalt{http://dx.doi.org/#1}{#1}\endgroup}"
   write$ newline$
   "\providecommand{\bibinfo}[2]{#2}"
   write$ newline$
