@@ -1,3 +1,8 @@
+%% Fixed version of eptcs.bst, by Sylvain Hallé
+%% 2016-08-08
+%% This version fixes a compilation problem when DOI fields contain
+%% underscores.
+%%
 %%
 %% This is file `eptcs.bst',
 %% generated with the docstrip utility.
