@@ -20,6 +20,7 @@ Elsevier. It provides:
   stand-alone folder (ideal for exporting the camera-ready sources to an
   editor)
 - A `.gitignore` file suitable for a single-document LaTeX project
+- A script to clean up a BibTeX file
 
 Using this template, switching a paper from any stylesheet to any other
 simply amounts to selecting one line to de-comment in the main, `paper.tex`
@@ -232,6 +233,19 @@ Normally, what is present in the Export folder is a single compilable .tex
 file (no `\include` or `\input`), plus class files and images. It is suitable
 for sending as a bundle e.g. to an editor to compile the camera-ready
 version.
+
+Cleaning up a BibTeX file
+-------------------------
+
+You can uniformize the presentation of BibTeX entries (indentation, etc.) and
+remove duplicate entries by passing it into a script. In the root folder of
+your project, type
+
+    php clean-bibtex.php
+
+This will read and parse `Source/paper.bib` and re-output a cleaned up version
+at `Source/paper-clean.bib`. If everything looks good, you can then overwrite
+the original `paper.bib` with this new file.
 
 Overriding defaults
 -------------------
