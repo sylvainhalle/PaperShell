@@ -139,6 +139,13 @@ $config = array_merge($config, array(
     //"doublespace" => true,
     
     /*
+     * Set whether the hyperref package will be disabled. IEEE requires
+     * the camera-ready version to have no bookmarks, so in that case set
+     * this to true.
+     */
+    //"disable-hr" => true,
+    
+    /*
      * A dummy parameter, just so you don't bother about removing
      * the comma from the last uncommented parameter above. Leave this
      * uncommented at all times.
