@@ -3,6 +3,10 @@
 %% include, write them there
 %% ---------------------------
 \usepackage{amsmath,amsfonts,amssymb}
+
+%% Note: the subfig package is incompatible with the "unfixed" version
+%% of the LIPICS class. It works here only because PaperShell includes
+%% a fixed version --which is not the official version.
 \usepackage{subfig}
 
 %% We put one here: this is a dummy command for LaTeX, used to
@@ -48,11 +52,5 @@
 \renewcommand{\floatpagefraction}{0.7}      % require fuller float pages
 % N.B.: floatpagefraction MUST be less than topfraction !!
 \renewcommand{\dblfloatpagefraction}{0.7}   %require fuller float pages
-
-
-\newcommand{\spl}{\ensuremath{\boxplus}}
-\newcommand{\smn}{\ensuremath{\boxminus}}
-\newcommand{\sz}{\ensuremath{d_\emptyset}}
-\newcommand{\Tau}{\ensuremath{\mathcal{T}}}
 
 %\newtheorem{example}{Example}

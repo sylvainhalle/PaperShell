@@ -37,6 +37,7 @@ been mostly using LaTeX with a couple of different document classes:
 - `elsarticle` for Elsevier journals
 - `eptcs` for the Electronic Proceedings in Theoretical Computer Science
 - `IEEEtran` for IEEE conference proceedings and journals
+- `lipics` for the *Leibniz International Proceedings in Informatics*
 - `llncs` for Springer's *Lecture Notes in Computer Science* series
 - `sig-alternate` for ACM conference proceedings
 - `stvrauth` and similar for Wiley Journals
@@ -204,6 +205,8 @@ in some document classes.
   of its "brain-damaged and ugly" fomatting rules (not my words here!)
 - The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
   PaperShell contains a fixed version.
+- The LIPIcs style is incompatible with the `subfig` package.
+  PaperShell contains a fixed version.
 
 Exporting your sources
 ----------------------
@@ -228,7 +231,7 @@ call BibTeX). The resulting,
 stand-alone LaTeX file is copied to a new folder (`Export`), along with all
 necessary auxiliary files (basically everything in the Source folder that
 is not a .tex file).
- *
+
 Normally, what is present in the Export folder is a single compilable .tex
 file (no `\include` or `\input`), plus class files and images. It is suitable
 for sending as a bundle e.g. to an editor to compile the camera-ready

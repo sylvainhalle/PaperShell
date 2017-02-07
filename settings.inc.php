@@ -61,6 +61,12 @@ $config = array_merge($config, array(
     //"month" => 3,
     
     /*
+     * Keywords associated to the article.
+     * Used only in the ACM journal style and LIPICS.
+     */
+    //"keywords" => "science, magic, art",
+    
+    /*
      * If the paper is published in a conference, the acronym of
      * the conference (e.g. "ICFF '16"). Used only in ACM conference
      * proceedings.
@@ -68,11 +74,24 @@ $config = array_merge($config, array(
     //"conference" => "OUTATIME '55",
     
     /*
-     * If the paper is published in a conference, the dates and
-     * location of the conference. Used only in ACM conference
-     * proceedings.
+     * If the paper is published in a conference, the long name of
+     * the conference. Used only in LIPICS proceedings.
      */
-    //"conference-loc" => "November 5--12, 1955, Hill Valley, CA",
+    //"conf-name" => "42nd Conference on Very Important Topics",
+    
+    /*
+     * If the paper is published in a conference, the location
+     * of the conference. Used in ACM conference proceedings
+     * and LIPICS.
+     */
+    //"conference-loc" => "November 5--12, 1955",
+
+    /*
+     * If the paper is published in a conference, the date
+     * of the conference. Used in ACM conference proceedings
+     * and LIPICS.
+     */
+    //"conference-date" => "November 5--12, 1955",
     
     /*
      * Copyright information to be overridden. Used only in ACM conference
@@ -94,6 +113,11 @@ $config = array_merge($config, array(
      * The journal's ISBN
      */
     //"isbn" => "1234-56789",
+    
+    /*
+     * The 1998 ACM classification; used only in LIPICS
+     */
+    //"acm-class" => "",
     
     /*
      * Whether the preamble of an ACM conference paper will include the
