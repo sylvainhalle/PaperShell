@@ -2,8 +2,8 @@ A Flexible LaTeX Article Environment
 ====================================
 
 This repository provides a boilerplate environment for writing LaTeX
-articles using the popular templates from Springer, IEEE, ACM, AAAI and
-Elsevier. It provides:
+articles using the popular templates from Springer, IEEE, ACM, AAAI,
+Elsevier, etc. It provides:
 
 - The up-to-date style and bibliography files of many different publishers
   (journals and conferences)
@@ -207,6 +207,15 @@ in some document classes.
   PaperShell contains a fixed version.
 - The LIPIcs style is incompatible with the `subfig` package.
   PaperShell contains a fixed version.
+
+It also takes care of using fonts properly:
+
+- The original style files load obsolete font packages; PaperShell overrides
+  them with newer ones with much nicer math support (e.g. `lmodern` and
+  `mathptmx` instead of `cmr` and `times`)
+- In all styles, the Helvetica font (used in `\textsf`) [is larger than the
+  text's normal font](http://www.hep.caltech.edu/~fcp/psnfss2e).
+  PaperShell fixes this issue by scaling down Helvetica.
 
 Exporting your sources
 ----------------------
