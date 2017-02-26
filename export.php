@@ -1,7 +1,7 @@
 <?php
 /**************************************************************************
   A Flexible LaTeX Article Environment
-  Copyright (C) 2015-2016  Sylvain Hallé
+  Copyright (C) 2015-2017  Sylvain Hallé
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@
  */
 
 // Version string
-$version_string = "1.6";
+$version_string = "1.8.3";
 
 // Read config settings
 $config = array(
@@ -56,7 +56,7 @@ if (file_exists("settings.inc.php"))
 }
 
 // Basic info
-echo "PaperShell v".$version_string."\nA nice and flexible template environment for papers written in LaTeX\n(C) 2015-2016 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
+echo "PaperShell v".$version_string."\nA template environment for papers written in LaTeX\n(C) 2015-2017 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
 
 // Creates directory for stand-alone (deletes and re-creates to clean)
 delete_dir($config["new-folder"]);
