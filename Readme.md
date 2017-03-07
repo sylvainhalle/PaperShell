@@ -50,7 +50,10 @@ does all sorts of nifty things, such as suppressing useless output from
 LaTeX and colouring (yes, colouring) its meaningful output (errors in red,
 etc.).
 
-Moreover, there might be various reasons for which you might want to switch
+There do exist products, such as [Overleaf](https://www.overleaf.com),
+which allow you to instantiate a blank LaTeX paper using many of these
+templates. However, there might be various reasons for which you might want
+to switch
 an existing document from one class to the other. For example, you started
 writing a paper without deciding where to send it, only to find that the
 conference you've chosen has a different publisher than the paper's current
@@ -118,7 +121,9 @@ enclosed (along with the abstract) within a `frontmatter` environment *after*
 the `\begin{document}`. Therefore, switching between classes
 requires some amount of braindead, yet frustrating copy-pasting from
 existing files you have, which arguably becomes quite mind-numbing when
-you've been doing that once in a while for the past ten years.
+you've been doing that once in a while for the past ten years. And sadly,
+tools like Overleaf do not allow you to easily switch templates once you've
+started writing.
 
 In this project, the paper's title, authors and institutions are written in
 a separate file called `authors.txt`:
