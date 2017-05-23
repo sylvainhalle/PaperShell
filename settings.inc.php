@@ -1,6 +1,24 @@
 <?php
 // You can override any defaults by setting values here
 $config = array_merge($config, array(
+	/*
+	 * The affiliations. This should be an array of arrays, where
+	 * the first sub-array corresponds to institution 1 in authors.txt,
+	 * the second sub-array corresponds to institution 2, etc. Leave any
+	 * of these fields blank to omit them from the paper.
+	 * Used only in ACM publications; for other styles, the address
+	 * lines in authors.txt are sufficient.
+	 */
+	"author-affiliations" => array(
+		array(
+			"streetaddress" => "123 Riverside Av.",
+			"city"          => "Hill Valley",
+			"state"         => "CA",
+			"country"       => "USA",
+			"postcode"      => "91234"
+		)
+	),
+	
     /*
      * A short title for the paper, used for running heads. If unspecified,
      * the title from authors.txt will be used
@@ -84,14 +102,14 @@ $config = array_merge($config, array(
      * of the conference. Used in ACM conference proceedings
      * and LIPICS.
      */
-    //"conference-loc" => "November 5--12, 1955",
+    //"conference-loc" => "Hill Valley, CA, USA",
 
     /*
      * If the paper is published in a conference, the date
      * of the conference. Used in ACM conference proceedings
      * and LIPICS.
      */
-    //"conference-date" => "November 5--12, 1955",
+    //"conference-date" => "July 1955",
     
     /*
      * Copyright information to be overridden. Used only in ACM conference
