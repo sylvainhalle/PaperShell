@@ -330,6 +330,7 @@ EOD;
 \usepackage{graphicx}        % Import graphics
 \usepackage[$hr_draft]{hyperref}      % Better handling of references in PDFs
 \usepackage{comment}         % To comment out blocks of text
+\usepackage{flushend}        % To balance columns on last page
 
 % Copyright
 \\setcopyright{{$config["acm-copyright"]}}
