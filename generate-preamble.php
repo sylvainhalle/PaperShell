@@ -48,7 +48,7 @@ $config = array(
 	"isbn"            => "123-4567-24-567/08/06",
 	"issn"            => "1234-56789",
 	"acm-class"       => "",
-	"fix-acm"         => false,
+	"acm-copyright"   => "none",
 	"use-times"       => false,
 	"bib-style"       => "",
 	"graphicspath"    => array("fig/"),
@@ -56,7 +56,7 @@ $config = array(
 	"corr-addr"       => "Hill Valley University, CA",
 	"doublespace"     => false,
 	"disable-hr"      => false,
-	"keywords"        => ""
+	"keywords"        => "time travel, flux capacitor"
 );
 if (file_exists("settings.inc.php"))
 {
@@ -332,32 +332,19 @@ EOD;
 \usepackage{comment}         % To comment out blocks of text
 
 % Copyright
-\\setcopyright{acmcopyright}
-%\\setcopyright{acmlicensed}
-%\\setcopyright{rightsretained}
-%\\setcopyright{usgov}
-%\\setcopyright{usgovmixed}
-%\\setcopyright{cagov}
-%\\setcopyright{cagovmixed}
+\\setcopyright{{$config["acm-copyright"]}}
 
 % DOI
 \\acmDOI{{$config["doi"]}}
 
 % ISBN and price
 \\acmISBN{{$config["isbn"]}}
-\\acmPrice{\\$15.00}
+\\acmPrice{15.00}
 
 % Paper Metadata
 \\acmConference[{$config["conference"]}]{{$config["conf-name"]}}{{$config["conference-date"]}}{{$config["conference-loc"]}}
 \\acmYear{{$config["year"]}}
 \\copyrightyear{{$config["year"]}}
-
-EOD;
-  if ($config["fix-acm"] === true)
-  {
-    $out .= "\\usepackage{fixacm}\n";
-  }
-  $out .= <<<EOD
 
 \\input{includes.tex}
 
@@ -378,7 +365,6 @@ EOD;
     $out .= "\\author{".$name."}\n";
     $out .= "\\affiliation{\n";
     $out .= "  \\institution{".$affiliations[$aff][0]."}\n";
-    print_r($config["author-affiliations"]);
     if (isset($config["author-affiliations"][$aff-1]["streetaddress"]))
     {
       $out .= "  \\streetaddress{".$config["author-affiliations"][$aff-1]["streetaddress"]."}\n";
@@ -731,15 +717,13 @@ EOD;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 $autogen_comment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[prodmode,{$config["journal-name"]}{$point_size_string_comma}]{acmsmall}
+\documentclass[format=acmsmall]{acmart}
 
 % Usual packages
 \usepackage[utf8]{inputenc}     % UTF-8 input encoding{$microtype_string}
 \usepackage[english]{babel}     % Hyphenation
 \usepackage{graphicx}           % Import graphics
 \usepackage{comment}            % To comment out blocks of text
-\usepackage{fouriernc}          % Century Schoolbook with math support
-\usepackage[scaled=0.9]{helvet} % Scale Helvetica
 
 % Package to generate and customize Algorithm as per ACM style
 \usepackage[ruled]{algorithm2e}
@@ -751,17 +735,19 @@ $autogen_comment
 \IncMargin{-\parindent}
 
 % Metadata Information
+\acmJournal{{$config["journal-name"]}}
 \acmVolume{{$config["volume"]}}
 \acmNumber{{$config["number"]}}
 \acmArticle{{$config["article-number"]}}
 \acmYear{{$config["year"]}}
 \acmMonth{{$config["month"]}}
+\copyrightyear{{$config["year"]}}
+
+% Copyright
+\\setcopyright{{$config["acm-copyright"]}}
 
 % DOI
-\doi{{$config["doi"]}}
-
-%ISSN
-\issn{{$config["issn"]}}
+\acmDOI{{$config["doi"]}}
 
 % User-defined includes
 \input{includes.tex}
@@ -776,32 +762,41 @@ EOD;
 EOD;
 
   $out .= "\\title{".$title."}\n";
-  $out .= "\\author{";
+  // Authors
+  $authors_aff = array();
   foreach ($authors as $name => $aff)
   {
-    $out .= mb_strtoupper($name, "UTF-8")."\n\\affil{";
-    for ($i = 0; $i < count($affiliations[$aff]) - 1; $i++)
+    $out .= "\\author{".$name."}\n";
+    $out .= "\\affiliation{\n";
+    $out .= "  \\institution{".$affiliations[$aff][0]."}\n";
+    if (isset($config["author-affiliations"][$aff-1]["streetaddress"]))
     {
-      // We append all but the last line of each affiliation
-      // (as this line generally contains a postal code that doesn't
-      // belong here)
-      $line = $affiliations[$aff][$i];
-      if ($i > 0)
-        $out .= ", ";
-      $out .= $line;
+      $out .= "  \\streetaddress{".$config["author-affiliations"][$aff-1]["streetaddress"]."}\n";
     }
-    $out .= "%\n}\n";
+    if (isset($config["author-affiliations"][$aff-1]["city"]))
+    {
+      $out .= "  \\streetaddress{".$config["author-affiliations"][$aff-1]["city"]."}\n";
+    }
+    if (isset($config["author-affiliations"][$aff-1]["state"]))
+    {
+      $out .= "  \\state{".$config["author-affiliations"][$aff-1]["state"]."}\n";
+    }
+    if (isset($config["author-affiliations"][$aff-1]["postcode"]))
+    {
+      $out .= "  \\postcode{".$config["author-affiliations"][$aff-1]["postcode"]."}\n";
+    }
+    if (isset($config["author-affiliations"][$aff-1]["country"]))
+    {
+      $out .= "  \\country{".$config["author-affiliations"][$aff-1]["country"]."}\n";
+    }
+    $out .= "}\n";
   }
-  $out .= "%\n}\n";
   if ($config["abstract"])
   {
-    $out .= "\\begin{abstract}\n\\input{abstract.tex}\n\\end{abstract}\n";
+    $out .= "\\begin{abstract}\n\\input{abstract.tex}\n\\end{abstract}\n\n";
   }
   $out .= "\\input{acm-ccs.tex}\n";
-  $out .= "\n\\acmformat{";
-  $out .= implode(", ", array_keys($authors));
-  $out .= ", ".date("Y").". ".$title.".}\n";
-  $out .= "\begin{bottomstuff}\\input{acm-bottom.tex}\n\\end{bottomstuff}\n";
+  $out .= "\\keywords{".$config["keywords"]."%\n}\n\n";
   $out .= "\\maketitle\n";
   file_put_contents($out_folder."preamble-acm-journal.inc.tex", $out);
   
@@ -812,6 +807,7 @@ EOD;
 {$autogen_comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 EOD;
+  $out .= "\n\\input{acm-bottom.tex}\n";
   $out .= "\n\\bibliographystyle{".$bib_style."}\n";
   $out .= "\\bibliography{".$config["bib-name"]."}\n\n";
   $out .= "\\input{appendices.tex}\n";

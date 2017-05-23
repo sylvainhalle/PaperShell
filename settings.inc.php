@@ -9,15 +9,15 @@ $config = array_merge($config, array(
 	 * Used only in ACM publications; for other styles, the address
 	 * lines in authors.txt are sufficient.
 	 */
-	"author-affiliations" => array(
-		array(
-			"streetaddress" => "123 Riverside Av.",
-			"city"          => "Hill Valley",
-			"state"         => "CA",
-			"country"       => "USA",
-			"postcode"      => "91234"
-		)
-	),
+	//"author-affiliations" => array(
+	//	array(
+	//		"streetaddress" => "123 Riverside Av.",
+	//		"city"          => "Hill Valley",
+	//		"state"         => "CA",
+	//		"country"       => "USA",
+	//		"postcode"      => "91234"
+	//	)
+	//),
 	
     /*
      * A short title for the paper, used for running heads. If unspecified,
@@ -45,11 +45,11 @@ $config = array_merge($config, array(
     /*
      * The name of the journal to compile for.
      * - In the ACM journal style, you must use a journal name found in
-     *   acmsmall.cls.
+     *   acmart.cls.
      * - In the Elsevier journal style, you can use any string you like.
      * - You can ignore this parameter for all other styles.
      */
-    "journal-name" => "acmtissec",
+    "journal-name" => "TISSEC",
     
     /*
      * The journal volume. Used only in the ACM journal style.
@@ -138,11 +138,11 @@ $config = array_merge($config, array(
     //"acm-class" => "",
     
     /*
-     * Whether the preamble of an ACM conference paper will include the
-     * package fixacm.sty, which is not standard. Has no effect in
-     * other styles.
+     * The ACM copyright status. One of none, acmcopyright,
+     * acmlicensed, rightsretained, usgov, usgovmixed, cagov,
+     * cagovmixed. Has no effect on other stylesheets.
      */
-    //"fix-acm" => true,
+    // "acm-copyright" => "none",
     
     /*
      * Whether to use the Computer Modern font or the Times font. This
