@@ -287,9 +287,43 @@ kind of defeats that. If you *must* change it to something else:
 2. Make sure to change `paper.tex` by your filename in
    `Source/Variables.ini`.
 
+Good practices
+--------------
+
+### Use a single tex file
+
+Try to keep your paper in a single file (`paper.tex` if you use the
+project defaults) ---that is, do not split the paper into `section-1.tex`,
+`section-2.tex`, etc. that you `\input` inside `paper.tex`. A few reasons
+for doing so:
+
+- When spell checking, you have to run Aspell on a single file. Otherwise,
+  you need to run it on every input file every time, and you cannot use
+  the bundled script.
+- Some publishers require you to upload a single stand-alone TeX file when
+  submitting. PaperShell has a script that can do it for you if you use
+  the defaults, but it may not work if your paper has multiple parts in
+  separate files (this has not been tested).
+- When searching for a word or an expression in your text editor, you have
+  to search in a single file ---otherwise you have to search in all files.
+- If your text editor has a "Compile with LaTeX" button, clicking on it
+  when editing one of the `section-x.tex` will try to compile only that
+  file and will fail. You have to go back to the main file every time you
+  need to compile.
+- If the goal is to make it possible to edit different parts of the same
+  paper in parallel, don't forget you are using Git and that it should take
+  care of this even if you edit the same file.
+- If you move parts of text around, the changes are easier to track in Git
+  if they don't jump from one file to another 
+  
+In all honesty, we don't see much benefit in splitting a 10-page paper
+into multiple parts in separate files.
+
 About the Author
 ----------------
 
 This project is maintained by [Sylvain Hallé](http://leduotang.ca/sylvain),
 Associate Professor at [Université du Québec à
 Chicoutimi](http://www.uqac.ca), Canada.
+
+<!-- :wrap=soft:maxLineLen=80: -->

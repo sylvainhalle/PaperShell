@@ -40,7 +40,7 @@
  */
 
 // Version string
-$version_string = "1.7.3";
+$version_string = "1.7.3b";
 
 // Read config settings
 $config = array(
@@ -69,7 +69,13 @@ for ($i = 0; $i < $config["num-repeats"]; $i++)
   preg_match_all("/^[^\\%]*\\\\input\\{(.*?)\\}/m", $input_text, $matches);
   foreach ($matches[1] as $include_filename)
   {
-    $file_contents = file_get_contents($config["src-folder"]."/".$include_filename);
+  	$actual_filename = $include_filename;
+  	if (!ends_with($actual_filename, ".tex"))
+  	{
+  	  // The .tex extension is optional
+  	  $actual_filename .= ".tex";
+  	}
+    $file_contents = file_get_contents($config["src-folder"]."/".$actual_filename);
     $input_text = str_replace("\\input{".$include_filename."}", $file_contents, $input_text);
   }
 }
@@ -92,6 +98,7 @@ file_put_contents($config["new-folder"]."/".$config["tex-name"].".tex", $input_t
 // Done
 echo "\nDone. A stand-alone version of the sources is available in folder `".$config["new-folder"]."`\n";
 echo "You should go compile it to make sure everything is OK.\n";
+echo "Once done, use the script `zip-export.sh` to create an archive.\n";
 exit(0);
 
 /**
@@ -124,13 +131,12 @@ function rcopy($src, $dst) // {{{
   if (file_exists($dst)) rrmdir($dst);
   if (is_dir($src))
   {
-    echo "IS DIR\n";
     mkdir($dst);
     $files = scandir($src);
-    print_r($files);
+    //print_r($files);
     foreach ($files as $file)
     {
-      echo "Can copy? $src,$file\n";
+      //echo "Can copy? $src,$file\n";
       if ($file !== "." && $file !== ".." && can_copy($src, $file))
       {
       	rcopy("$src/$file", "$dst/$file");
@@ -160,7 +166,7 @@ function rrmdir($dir) // {{{
 function can_copy($folder, $filename) // {{{
 {
   global $config;
-  echo "FOLDER : $folder\n";
+  //echo "FOLDER : $folder\n";
   //echo "\n".$filename;
   if (substr($filename, strlen($filename) - 1) === "~" || substr($filename, strlen($filename) - 3) === "tmp")
   {
@@ -170,13 +176,23 @@ function can_copy($folder, $filename) // {{{
   if (is_dir($config["src-folder"]."/".$filename) || strpos($folder, "/") !== false)
   {
     // Anything within a subfolder is OK
-    echo " CAN COPY";
+    //echo " CAN COPY";
     return true;
   }
   $extension = substr($filename, strlen($filename) - 3);
   // In the main folder, anything with these extensions is OK too
   return $extension === "sty" || $extension === "cls"
     || $extension === "bbl";
+} // }}}
+
+/**
+ * Checks if a string ends with something
+ * @param $string The strign
+ * @param $pattern The pattern to look for
+ */
+function ends_with($string, $pattern) // {{{
+{
+  return substr($string, strlen($string) - strlen($pattern)) === $pattern;
 } // }}}
 
 // :wrap=none:folding=explicit:
