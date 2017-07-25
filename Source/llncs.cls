@@ -1,4 +1,4 @@
-% LLNCS DOCUMENT CLASS -- version 2.18 (27-Sep-2013)
+% LLNCS DOCUMENT CLASS -- version 2.20 (24-JUN-2015)
 % Springer Verlag LaTeX2e support for Lecture Notes in Computer Science
 %
 %%
@@ -19,7 +19,7 @@
 %%   Right brace   \}     Tilde         \~}
 %%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesClass{llncs}[2013/09/27 v2.18
+\ProvidesClass{llncs}[2015/06/24 v2.20
 ^^J LaTeX document class for Lecture Notes in Computer Science]
 % Options
 \let\if@envcntreset\iffalse
@@ -77,40 +77,40 @@
   \fi}
 %
 \def\switcht@albion{%
-\def\abstractname{Abstract.}
-\def\ackname{Acknowledgement.}
-\def\andname{and}
-\def\lastandname{\unskip, and}
-\def\appendixname{Appendix}
-\def\chaptername{Chapter}
-\def\claimname{Claim}
-\def\conjecturename{Conjecture}
-\def\contentsname{Table of Contents}
-\def\corollaryname{Corollary}
-\def\definitionname{Definition}
-\def\examplename{Example}
-\def\exercisename{Exercise}
-\def\figurename{Fig.}
-\def\keywordname{{\bf Keywords:}}
-\def\indexname{Index}
-\def\lemmaname{Lemma}
-\def\contriblistname{List of Contributors}
-\def\listfigurename{List of Figures}
-\def\listtablename{List of Tables}
-\def\mailname{{\it Correspondence to\/}:}
-\def\noteaddname{Note added in proof}
-\def\notename{Note}
-\def\partname{Part}
-\def\problemname{Problem}
-\def\proofname{Proof}
-\def\propertyname{Property}
-\def\propositionname{Proposition}
-\def\questionname{Question}
-\def\remarkname{Remark}
-\def\seename{see}
-\def\solutionname{Solution}
-\def\subclassname{{\it Subject Classifications\/}:}
-\def\tablename{Table}
+\def\abstractname{Abstract.}%
+\def\ackname{Acknowledgement.}%
+\def\andname{and}%
+\def\lastandname{\unskip, and}%
+\def\appendixname{Appendix}%
+\def\chaptername{Chapter}%
+\def\claimname{Claim}%
+\def\conjecturename{Conjecture}%
+\def\contentsname{Table of Contents}%
+\def\corollaryname{Corollary}%
+\def\definitionname{Definition}%
+\def\examplename{Example}%
+\def\exercisename{Exercise}%
+\def\figurename{Fig.}%
+\def\keywordname{{\bf Keywords:}}%
+\def\indexname{Index}%
+\def\lemmaname{Lemma}%
+\def\contriblistname{List of Contributors}%
+\def\listfigurename{List of Figures}%
+\def\listtablename{List of Tables}%
+\def\mailname{{\it Correspondence to\/}:}%
+\def\noteaddname{Note added in proof}%
+\def\notename{Note}%
+\def\partname{Part}%
+\def\problemname{Problem}%
+\def\proofname{Proof}%
+\def\propertyname{Property}%
+\def\propositionname{Proposition}%
+\def\questionname{Question}%
+\def\remarkname{Remark}%
+\def\seename{see}%
+\def\solutionname{Solution}%
+\def\subclassname{{\it Subject Classifications\/}:}%
+\def\tablename{Table}%
 \def\theoremname{Theorem}}
 \switcht@albion
 % Names of theorem like environments are already defined
@@ -122,7 +122,7 @@
  \def\ackname{Remerciements.}%
  \def\andname{et}%
  \def\lastandname{ et}%
- \def\appendixname{Appendice}
+ \def\appendixname{Appendice}%
  \def\chaptername{Chapitre}%
  \def\claimname{Pr\'etention}%
  \def\conjecturename{Hypoth\`ese}%
@@ -132,13 +132,13 @@
  \def\examplename{Exemple}%
  \def\exercisename{Exercice}%
  \def\figurename{Fig.}%
- \def\keywordname{{\bf Mots-cl\'e:}}
- \def\indexname{Index}
+ \def\keywordname{{\bf Mots-cl\'e:}}%
+ \def\indexname{Index}%
  \def\lemmaname{Lemme}%
- \def\contriblistname{Liste des contributeurs}
+ \def\contriblistname{Liste des contributeurs}%
  \def\listfigurename{Liste des figures}%
  \def\listtablename{Liste des tables}%
- \def\mailname{{\it Correspondence to\/}:}
+ \def\mailname{{\it Correspondence to\/}:}%
  \def\noteaddname{Note ajout\'ee \`a l'\'epreuve}%
  \def\notename{Remarque}%
  \def\partname{Partie}%
@@ -148,9 +148,9 @@
 %\def\propositionname{Proposition}%
  \def\questionname{Question}%
  \def\remarkname{Remarque}%
- \def\seename{voir}
+ \def\seename{voir}%
  \def\solutionname{Solution}%
- \def\subclassname{{\it Subject Classifications\/}:}
+ \def\subclassname{{\it Subject Classifications\/}:}%
  \def\tablename{Tableau}%
  \def\theoremname{Th\'eor\`eme}%
 }
@@ -171,13 +171,13 @@
  \def\examplename{Beispiel}%
  \def\exercisename{\"Ubung}%
  \def\figurename{Abb.}%
- \def\keywordname{{\bf Schl\"usselw\"orter:}}
- \def\indexname{Index}
+ \def\keywordname{{\bf Schl\"usselw\"orter:}}%
+ \def\indexname{Index}%
 %\def\lemmaname{Lemma}%
- \def\contriblistname{Mitarbeiter}
+ \def\contriblistname{Mitarbeiter}%
  \def\listfigurename{Abbildungsverzeichnis}%
  \def\listtablename{Tabellenverzeichnis}%
- \def\mailname{{\it Correspondence to\/}:}
+ \def\mailname{{\it Correspondence to\/}:}%
  \def\noteaddname{Nachtrag}%
  \def\notename{Anmerkung}%
  \def\partname{Teil}%
@@ -187,9 +187,9 @@
 %\def\propositionname{Proposition}%
  \def\questionname{Frage}%
  \def\remarkname{Anmerkung}%
- \def\seename{siehe}
+ \def\seename{siehe}%
  \def\solutionname{L\"osung}%
- \def\subclassname{{\it Subject Classifications\/}:}
+ \def\subclassname{{\it Subject Classifications\/}:}%
  \def\tablename{Tabelle}%
 %\def\theoremname{Theorem}%
 }
@@ -1063,7 +1063,7 @@ to0pt{\kern0.55\wd0\vrule height0.45\ht0\hss}\box0}}}}
   \global\@namedef{end#1}{\@endtheorem}}}}
 
 \def\@spthm#1#2#3#4{\topsep 7\p@ \@plus2\p@ \@minus4\p@
-\refstepcounter{#1}%
+\refstepcounter{#1}\phantomsection
 \@ifnextchar[{\@spythm{#1}{#2}{#3}{#4}}{\@spxthm{#1}{#2}{#3}{#4}}}
 
 \def\@spxthm#1#2#3#4{\@spbegintheorem{#2}{\csname the#1\endcsname}{#3}{#4}%
