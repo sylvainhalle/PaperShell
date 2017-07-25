@@ -40,7 +40,7 @@
  */
 
 // Version string
-$version_string = "1.8.1";
+$version_string = "1.8";
 
 // Read config settings
 $config = array(
