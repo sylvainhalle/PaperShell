@@ -33,9 +33,9 @@ If you have been writing lots of (Computer Science) papers, you may have
 been mostly using LaTeX with a couple of different document classes:
 
 - `aaai` for AAAI journals
-- `acmsmall` for ACM journals
+- `acmart` for ACM conferences and journals
 - `elsarticle` for Elsevier journals
-- `eptcs` for the Electronic Proceedings in Theoretical Computer Science
+- `eptcs` for the *Electronic Proceedings in Theoretical Computer Science*
 - `IEEEtran` for IEEE conference proceedings and journals
 - `lipics` for the *Leibniz International Proceedings in Informatics*
 - `llncs` for Springer's *Lecture Notes in Computer Science* series
@@ -53,13 +53,12 @@ etc.).
 There do exist products, such as [Overleaf](https://www.overleaf.com),
 which allow you to instantiate a blank LaTeX paper using many of these
 templates. However, there might be various reasons for which you might want
-to switch
-an existing document from one class to the other. For example, you started
-writing a paper without deciding where to send it, only to find that the
-conference you've chosen has a different publisher than the paper's current
-style. Or, a paper sent to a conference (and perhaps rejected) needs to be
-sent to another venue with a different publisher. (Note that in the past,
-it used to be the *publisher's* job to format your manuscript to their
+to switch an existing document from one class to the other. For example, you
+started writing a paper without deciding where to send it, only to find that
+the conference you've chosen has a different publisher than the paper's
+current style. Or, a paper sent to a conference (and perhaps rejected) needs
+to be sent to another venue with a different publisher. (Note that in the
+past, it used to be the *publisher's* job to format your manuscript to their
 taste. But that's another story.)
 
 Alas, it turns out these stylesheets are not directly interchangeable.
@@ -93,16 +92,21 @@ authors and institutions in `llncs`:
     }
     }
 
-...in `sig-alternate`:
+...in `acmart`:
 
-    \numberofauthors{2}
-    \author{%
-    \alignauthor Emmett Brown, Marty McFly\\
-    \affaddr{Temporal Industries} \\
-    \affaddr{Hill Valley, CA 90193} \\
-    \alignauthor Biff Tannen\\
-    \affaddr{BiffCo inc.} \\
-    \affaddr{Hill Valley, CA 90193} \\
+    \author{Emmett Brown}
+    \affiliation{
+      \institution{Temporal Industries}
+      \streetaddress{Hill Valley}
+      \state{CA}
+      \postcode{90193}
+    }
+    \author{Biff Tannen}
+    \affiliation{
+      \institution{BiffCo inc.}
+      \streetaddress{Hill Valley}
+      \state{CA}
+      \postcode{90193}
     }
 
 ...and in `elsarticle`:
@@ -205,9 +209,6 @@ in some document classes.
   otherwise prevent the document from compiling
 - The postamble for Elsevier fixes the fact that the bibliography [does not have a section
   title](http://tex.stackexchange.com/questions/188625/no-references-title-using-elsevier-document-class)
-- The ACM conference template can optionally be
-  [fixed](http://jeffe.cs.illinois.edu/pubs/tex/fixacm.sty) to improve some
-  of its "brain-damaged and ugly" fomatting rules (not my words here!)
 - The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
   PaperShell contains a fixed version.
 - The LIPIcs style is incompatible with the `subfig` package.
@@ -246,10 +247,10 @@ stand-alone LaTeX file is copied to a new folder (`Export`), along with all
 necessary auxiliary files (basically everything in the Source folder that
 is not a .tex file).
 
-Normally, what is present in the Export folder is a single compilable .tex
+Normally, what is present in the `Export` folder is a single compilable .tex
 file (no `\include` or `\input`), plus class files and images. It is suitable
 for sending as a bundle e.g. to an editor to compile the camera-ready
-version.
+version. You can also bundle the whole thing (except the main .pdf file and auxiliary files) in a single zip file using `zip-export.sh`.
 
 Cleaning up a BibTeX file
 -------------------------
@@ -287,9 +288,43 @@ kind of defeats that. If you *must* change it to something else:
 2. Make sure to change `paper.tex` by your filename in
    `Source/Variables.ini`.
 
+Good practices
+--------------
+
+### Use a single tex file
+
+Try to keep your paper in a single file (`paper.tex` if you use the
+project defaults) ---that is, do not split the paper into `section-1.tex`,
+`section-2.tex`, etc. that you `\input` inside `paper.tex`. A few reasons
+for doing so:
+
+- When spell checking, you have to run Aspell on a single file. Otherwise,
+  you need to run it on every input file every time, and you cannot use
+  the bundled script.
+- Some publishers require you to upload a single stand-alone TeX file when
+  submitting. PaperShell has a script that can do it for you if you use
+  the defaults, but it may not work if your paper has multiple parts in
+  separate files (this has not been tested).
+- When searching for a word or an expression in your text editor, you have
+  to search in a single file ---otherwise you have to search in all files.
+- If your text editor has a "Compile with LaTeX" button, clicking on it
+  when editing one of the `section-x.tex` will try to compile only that
+  file and will fail. You have to go back to the main file every time you
+  need to compile.
+- If the goal is to make it possible to edit different parts of the same
+  paper in parallel, don't forget you are using Git and that it should take
+  care of this even if you edit the same file.
+- If you move parts of text around, the changes are easier to track in Git
+  if they don't jump from one file to another 
+  
+In all honesty, we don't see much benefit in splitting a 10-page paper
+into multiple parts in separate files.
+
 About the Author
 ----------------
 
 This project is maintained by [Sylvain Hallé](http://leduotang.ca/sylvain),
 Associate Professor at [Université du Québec à
 Chicoutimi](http://www.uqac.ca), Canada.
+
+<!-- :wrap=soft:maxLineLen=80: -->

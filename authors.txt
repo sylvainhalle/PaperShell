@@ -15,7 +15,10 @@ Marty McFly (1)
 Biff Tannen (2)
 
 # Affiliation lines begin with a single digit (indictating the affiliation)
-# Any following line is appended to the affiliation
+# Any following line is appended to the affiliation.
+# The first line after the number should be the institution.
+# For ACM publications, please define the remaining elements of
+# the address in settings.inc.php.
 
 1
 Temporal Industries
