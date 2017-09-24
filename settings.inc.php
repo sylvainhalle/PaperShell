@@ -188,6 +188,14 @@ $config = array_merge($config, array(
     //"disable-hr" => true,
     
     /*
+     * Sets the sub-type of the document, for EasyChair proceedings.
+     * Valid values are EPiC, EPiCempty, debug, verbose, notimes, withtimes,
+     * a4paper, letterpaper, or the empty string. This setting is ignored in
+     * every other document class.
+     */
+    //"easychair-type" => "",
+    
+    /*
      * A dummy parameter, just so you don't bother about removing
      * the comma from the last uncommented parameter above. Leave this
      * uncommented at all times.

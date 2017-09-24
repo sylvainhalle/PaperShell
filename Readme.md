@@ -34,6 +34,7 @@ been mostly using LaTeX with a couple of different document classes:
 
 - `aaai` for AAAI journals
 - `acmart` for ACM conferences and journals
+- `easychair` for [EasyChair EPiC Series and Kalpa Publications series](https://easychair.org/publications/for_authors)
 - `elsarticle` for Elsevier journals
 - `eptcs` for the *Electronic Proceedings in Theoretical Computer Science*
 - `IEEEtran` for IEEE conference proceedings and journals
