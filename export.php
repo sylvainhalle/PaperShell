@@ -40,7 +40,7 @@
  */
 
 // Version string
-$version_string = "1.8";
+$version_string = `php generate-preamble.php --show-version`;
 
 // Read config settings
 $config = array(
@@ -90,6 +90,8 @@ else
 {
   echo "File $bib_filename does not exist. Have you compiled the original paper first?\n";
 }
+// Comment out \bibliographystyle, we don't need it
+$input_text = str_replace("\\bibliographystyle{", "%\\bibliographystyle{", $input_text);
 
 // Puts contents in stand-alone folder
 rcopy($config["src-folder"], $config["new-folder"]);
@@ -125,12 +127,13 @@ function delete_dir($path) // {{{
 /**
  * Copies files and non-empty directories
  */
-function rcopy($src, $dst) // {{{
+function rcopy($src, $dst, $indent="") // {{{
 {
-  echo "Copying $src to $dst\n";
+  echo $indent."$src -> $dst\n";
   if (file_exists($dst)) rrmdir($dst);
   if (is_dir($src))
   {
+    echo $indent."Creating $dst\n";
     mkdir($dst);
     $files = scandir($src);
     //print_r($files);
@@ -139,7 +142,7 @@ function rcopy($src, $dst) // {{{
       //echo "Can copy? $src,$file\n";
       if ($file !== "." && $file !== ".." && can_copy($src, $file))
       {
-      	rcopy("$src/$file", "$dst/$file");
+      	rcopy("$src/$file", "$dst/$file", $indent." ");
       }
     }
   }
@@ -182,7 +185,7 @@ function can_copy($folder, $filename) // {{{
   $extension = substr($filename, strlen($filename) - 3);
   // In the main folder, anything with these extensions is OK too
   return $extension === "sty" || $extension === "cls"
-    || $extension === "bbl";
+    || $extension === "bbl"; // || $extension === "bst";
 } // }}}
 
 /**
