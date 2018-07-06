@@ -325,7 +325,7 @@ About the Author
 ----------------
 
 This project is maintained by [Sylvain Hallé](http://leduotang.ca/sylvain),
-Associate Professor at [Université du Québec à
+Full Professor at [Université du Québec à
 Chicoutimi](http://www.uqac.ca), Canada.
 
 <!-- :wrap=soft:maxLineLen=80: -->
