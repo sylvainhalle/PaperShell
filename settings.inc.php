@@ -1,6 +1,14 @@
 <?php
 // You can override any defaults by setting values here
 $config = array_merge($config, array(
+	
+	/*
+	 * The style to generate when calling set-style.php. Instead of
+	 * providing it at the command line, you can set it by default here
+	 * and call the script without any argument.
+	 */
+	//"style" => "lncs",
+	
 	/*
 	 * The affiliations. This should be an array of arrays, where
 	 * the first sub-array corresponds to institution 1 in authors.txt,

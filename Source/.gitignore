@@ -30,7 +30,3 @@
 
 # ...and this LabPal plots file if you use LabPal
 !labpal-plots.pdf
-
-# Don't version auto-generated LaTeX files
-preamble*.inc.tex
-postamble*.inc.tex
