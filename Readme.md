@@ -51,16 +51,16 @@ does all sorts of nifty things, such as suppressing useless output from
 LaTeX and colouring (yes, colouring) its meaningful output (errors in red,
 etc.).
 
-There do exist products, such as [Overleaf](https://www.overleaf.com),
-which allow you to instantiate a blank LaTeX paper using many of these
-templates. However, there might be various reasons for which you might want
-to switch an existing document from one class to the other. For example, you
-started writing a paper without deciding where to send it, only to find that
-the conference you've chosen has a different publisher than the paper's
-current style. Or, a paper sent to a conference (and perhaps rejected) needs
-to be sent to another venue with a different publisher. (Note that in the
-past, it used to be the *publisher's* job to format your manuscript to their
-taste. But that's another story.)
+There do exist products, such as [Overleaf](https://www.overleaf.com), which
+allow you to instantiate a blank LaTeX paper using many of these templates
+(PaperShell can interact nicely with Overleaf; see below). However, there might
+be various reasons for which you might want to switch an existing document from
+one class to the other. For example, you started writing a paper without
+deciding where to send it, only to find that the conference you've chosen has a
+different publisher than the paper's current style. Or, a paper sent to a
+conference (and perhaps rejected) needs to be sent to another venue with a
+different publisher. (Note that in the past, it used to be the *publisher's* job
+to format your manuscript to their taste. But that's another story.)
 
 Alas, it turns out these stylesheets are not directly interchangeable.
 Rather than nicely overriding the behaviour of LaTeX's original commands
@@ -151,23 +151,13 @@ a separate file called `authors.txt`:
 `{Marty} {McFly}`. This is used in the EPTCS style for writing
 abbreviated author names, e.g. "E. Brown, M. McFly, B. Tannen", etc.)
 
-You then call a script named `generate-preamble.php` to generate include
-files with the proper syntax for each of the document classes from that
-same data. These files are called `preamble-xxxx.inc.tex`, where xxxx is
-the document class.
+You then call a script named `set-style.php` to generate a preamble and
+postamble with the proper syntax for the document classes you want to use. These
+files are called `preamble.inc.tex` and `postamble.inc.tex`.
 
-In the main paper file, called `paper.tex`, it suffices to uncomment the
-`\input` line for the desired preamble and compile:
-
-    %\input{preamble-ieee-journal.inc.tex}
-    %\input{preamble-ieee.inc.tex}
-    %\input{preamble-lncs.inc.tex}
-    \input{preamble-acm.inc.tex}
-    ...
-
-To change the authors or title, modify `authors.txt` and run
-`generate-preamble.php` again. To switch between document classes, select
-another `\input` line to uncomment and recompile. Voilà!
+To change the authors or title, or to switch between document classes, modify
+`authors.txt` and run`set-style.php` again. You then just need to recompile.
+Voilà!
 
 Quick Use
 ---------
@@ -178,9 +168,12 @@ Quick Use
 1. Modify `article.txt` with the desired title, authors and institutions.
    The file is self-documented and tells you how to do it.
 
-2. Call `php generate-preamble.php` to generate the include files, which
+2. Call `php set-style.php <style>` to generate the include files, which
    will be placed in the `Source` subfolder. (This requires
-   [PHP](http://php.net/) to be installed in your path.)
+   [PHP](http://php.net/) to be installed in your path.) The `style` argument
+   can be any of a long list of paper templates. Available styles are: lncs,
+   ieee, acmconf, elsevier, springer, aaai, acmjour, eptcs, stvr, lipics,
+   easychair.
 
 3. Write your text as usual in `Source/paper.tex`. Uncomment the `\input`
    line corresponding to the document class you wish to use. Figures should
@@ -252,6 +245,23 @@ Normally, what is present in the `Export` folder is a single compilable .tex
 file (no `\include` or `\input`), plus class files and images. It is suitable
 for sending as a bundle e.g. to an editor to compile the camera-ready
 version. You can also bundle the whole thing (except the main .pdf file and auxiliary files) in a single zip file using `zip-export.sh`.
+
+Overleaf integration
+--------------------
+
+[Overleaf](https://www.overleaf.com) is an online collaborative platform for
+editing LaTeX documents. Provided you have run `set-style.php` once, you can
+import the whole project structure into overleaf and edit it there; don't forget
+to set `Source/paper.tex` as the main file.
+
+If you want to change the document to another article class, simply re-run
+`set-style.php` on your computer and re-upload `preamble.inc.tex` and
+`postamble.inc.tex` to Overleaf. This is even easier if you keep Overleaf in
+sync with a GitHub repository.
+
+Note that you need a little
+[hack](https://github.com/sylvainhalle/PaperShell/issues/11) if you want the
+compilation of references to work in Overleaf.
 
 Cleaning up a BibTeX file
 -------------------------
