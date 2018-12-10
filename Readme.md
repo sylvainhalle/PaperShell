@@ -251,17 +251,13 @@ Overleaf integration
 
 [Overleaf](https://www.overleaf.com) is an online collaborative platform for
 editing LaTeX documents. Provided you have run `set-style.php` once, you can
-import the whole project structure into overleaf and edit it there; don't forget
+import the whole project structure into Overleaf and edit it there; don't forget
 to set `Source/paper.tex` as the main file.
 
 If you want to change the document to another article class, simply re-run
-`set-style.php` on your computer and re-upload `preamble.inc.tex` and
-`postamble.inc.tex` to Overleaf. This is even easier if you keep Overleaf in
-sync with a GitHub repository.
-
-Note that you need a little
-[hack](https://github.com/sylvainhalle/PaperShell/issues/11) if you want the
-compilation of references to work in Overleaf.
+`set-style.php` on your computer and re-upload `preamble.inc.tex`,
+`midamble.inc.tex` and `postamble.inc.tex` to Overleaf. This is even easier if
+you keep Overleaf in sync with a GitHub repository.
 
 Cleaning up a BibTeX file
 -------------------------
