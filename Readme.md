@@ -175,8 +175,7 @@ Quick Use
    ieee, acmconf, elsevier, springer, aaai, acmjour, eptcs, stvr, lipics,
    easychair.
 
-3. Write your text as usual in `Source/paper.tex`. Uncomment the `\input`
-   line corresponding to the document class you wish to use. Figures should
+3. Write your text as usual in `Source/paper.tex`. Figures should
    be placed in the `fig` subfolder. Write your abstract in
    `Source/abstract.tex`, and put any other imports and declarations in
    `Source/includes.tex`. Write anything that should go after the
@@ -191,6 +190,8 @@ Quick Use
    personal dictionary will be reflected in changes to files
    `.aspell.en.prepl` and `.aspell.en.pws`, which are versioned with the
    rest of the project. See the file `aspell-check.readme` for instructions.
+   (Hint: you may also want to try
+   [TeXtidote](https://github.com/sylvainhalle/textidote)).
 
 Extras
 ------
@@ -244,7 +245,8 @@ is not a .tex file).
 Normally, what is present in the `Export` folder is a single compilable .tex
 file (no `\include` or `\input`), plus class files and images. It is suitable
 for sending as a bundle e.g. to an editor to compile the camera-ready
-version. You can also bundle the whole thing (except the main .pdf file and auxiliary files) in a single zip file using `zip-export.sh`.
+version. You can also bundle the whole thing (except the main .pdf file and
+auxiliary files) in a single zip file using `zip-export.sh`.
 
 Overleaf integration
 --------------------
@@ -322,7 +324,7 @@ for doing so:
   paper in parallel, don't forget you are using Git and that it should take
   care of this even if you edit the same file.
 - If you move parts of text around, the changes are easier to track in Git
-  if they don't jump from one file to another 
+  if they don't jump from one file to another.
   
 In all honesty, we don't see much benefit in splitting a 10-page paper
 into multiple parts in separate files.
