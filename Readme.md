@@ -43,6 +43,7 @@ been mostly using LaTeX with a couple of different document classes:
 - `sig-alternate` for ACM conference proceedings
 - `stvrauth` and similar for Wiley Journals
 - `svjour` for Springer journals
+- `usenix2019_v3` for USENIX publications
 
 First off, this repository provides a well-structured template project where
 all these classes are included, so you can pick the one you wish when
