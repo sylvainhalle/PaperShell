@@ -168,7 +168,7 @@ Quick Use
 0. [Download and unzip](https://github.com/sylvainhalle/PaperShell/releases/latest)
    the PaperShell empty project in a folder of your choice.
 
-1. Modify `article.txt` with the desired title, authors and institutions.
+1. Modify `authors.txt` with the desired title, authors and institutions.
    The file is self-documented and tells you how to do it.
 
 2. Call `php set-style.php <style>` to generate the include files, which
@@ -176,7 +176,7 @@ Quick Use
    [PHP](http://php.net/) to be installed in your path.) The `style` argument
    can be any of a long list of paper templates. Available styles are: lncs,
    ieee, acmconf, elsevier, springer, aaai, acmjour, eptcs, stvr, lipics,
-   easychair.
+   easychair, usenix.
 
 3. Write your text as usual in `Source/paper.tex`. Figures should
    be placed in the `fig` subfolder. Write your abstract in
