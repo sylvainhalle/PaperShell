@@ -23,8 +23,10 @@ Elsevier, etc. It provides:
 - A script to clean up a BibTeX file
 
 Using this template, switching a paper from any stylesheet to any other
-simply amounts to selecting one line to de-comment in the main, `paper.tex`
-document.
+simply amounts to regenerating two files with an included PHP script. You
+don't need to change a single line of the main, `paper.tex` document you
+are working on. What is more, the project's structure can be imported and
+used within [Overleaf](https://www.overleaf.com).
 
 Why this template?
 ------------------
