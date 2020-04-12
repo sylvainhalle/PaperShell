@@ -54,18 +54,21 @@ $config = array_merge($config, array(
      * The name of the journal to compile for.
      * - In the ACM journal style, you must use a journal name found in
      *   acmart.cls.
-     * - In the Elsevier journal style, you can use any string you like.
+     * - In the Elsevier and IEEE transactions journal style, you can use any
+     *   string you like.
      * - You can ignore this parameter for all other styles.
      */
     "journal-name" => "TISSEC",
     
     /*
-     * The journal volume. Used only in the ACM journal style.
+     * The journal volume. Used only in the ACM and IEEE transactions
+     * journal style.
      */
     //"volume" => 9,
     
     /*
-     * The journal number. Used only in the ACM journal style.
+     * The journal number. Used only in the ACM and IEEE transactions
+     * journal style.
      */
     //"number" => 4,
     
@@ -76,19 +79,19 @@ $config = array_merge($config, array(
     
     /*
      * The article's publication year (if not the current year).
-     * Used only in the ACM journal style.
+     * Used only in the ACM and IEEE transactions journal style.
      */
     //"year" => 1955,
     
     /*
      * The article's publication month (if not the current month).
-     * Used only in the ACM journal style.
+     * Used only in the ACM and IEEE transactions journal style.
      */
     //"month" => 3,
     
     /*
      * Keywords associated to the article.
-     * Used only in the ACM journal style and LIPICS.
+     * Used only in the ACM journal, IEEE transactions and LIPICS styles.
      */
     //"keywords" => "science, magic, art",
     
