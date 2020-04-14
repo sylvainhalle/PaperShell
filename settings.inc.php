@@ -205,6 +205,13 @@ $config = array_merge($config, array(
      * every other document class.
      */
     //"easychair-type" => "",
+
+    /*
+     * Any other string to be appended to the parameters of the
+     * \documentclass instruction. You should probably start this string
+     * with a comma, since it comes after other options.
+     */
+    "otheropts" => "",
     
     /*
      * A dummy parameter, just so you don't bother about removing
