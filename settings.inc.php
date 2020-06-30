@@ -73,19 +73,20 @@ $config = array_merge($config, array(
     //"number" => 4,
     
     /*
-     * The journal article number. Used only in the ACM journal style.
+     * The journal article number. Used only in the ACM journal style
+     * and IEEE CS magazine style.
      */
     //"article-number" => 39,
     
     /*
      * The article's publication year (if not the current year).
-     * Used only in the ACM and IEEE transactions journal style.
+     * Used only in the ACM, IEEE transactions and IEEE CS magazine styles.
      */
     //"year" => 1955,
     
     /*
      * The article's publication month (if not the current month).
-     * Used only in the ACM and IEEE transactions journal style.
+     * Used only in the ACM and IEEE transactions/magazine journal style.
      */
     //"month" => 3,
     
@@ -205,7 +206,17 @@ $config = array_merge($config, array(
      * every other document class.
      */
     //"easychair-type" => "",
-
+    
+    /*
+     * The name of the editor. Used only in IEEE CS magazine style.
+     */
+    "editor-name" => "Stanford S.\\ Strickland",
+    
+    /*
+     * The editor e-mail. Used only in IEEE CS magazine style.
+     */
+    "editor-email" => "strickland@hillvalley.edu",
+    
     /*
      * Any other string to be appended to the parameters of the
      * \documentclass instruction. You should probably start this string
