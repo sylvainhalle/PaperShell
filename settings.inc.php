@@ -145,9 +145,14 @@ $config = array_merge($config, array(
     //"isbn" => "1234-56789",
     
     /*
-     * The 1998 ACM classification; used only in LIPICS
+     * The 2012 ACM classification string; used only in LIPICS
      */
     //"acm-class" => "",
+    
+    /*
+     * The 2012 ACM classification number; used only in LIPICS
+     */
+    //"acm-number" => "",
     
     /*
      * The ACM copyright status. One of none, acmcopyright,

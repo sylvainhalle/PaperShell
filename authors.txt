@@ -8,11 +8,12 @@ Applications of the Flux Capacitor
 
 # What remains of the file is the list of authors and affiliations.
 # Author lines end with (x), where x is the number associated with the
-# author's affiliation
+# author's affiliation. The author's e-mail address and ORCID can follow,
+# separated by a comma. These fields are optional.
 
-Emmett Brown (1)
+Emmett Brown (1) ebrown@temporal.com, 0000-0000-1234-5678
 Marty McFly (1)
-Biff Tannen (2)
+Biff Tannen (2) biff@biffco.com
 
 # Affiliation lines begin with a single digit (indictating the affiliation)
 # Any following line is appended to the affiliation.

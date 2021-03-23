@@ -1,7 +1,7 @@
 <?php
 /**************************************************************************
   A Flexible LaTeX Article Environment
-  Copyright (C) 2015-2021  Sylvain Hallé
+  Copyright (C) 2015-2020  Sylvain Hallé
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -149,7 +149,7 @@ $lines = explode("\n", file_get_contents($input_filename));
 } // }}}
 
 // Basic info
-echo "PaperShell v".$version_string."\nA template environment for papers written in LaTeX\n(C) 2015-2021 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
+echo "PaperShell v".$version_string."\nA template environment for papers written in LaTeX\n(C) 2015-2020 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
 
 // Now that authors and affiliations are known, generate the preamble
 // specific to each stylesheet
