@@ -119,7 +119,6 @@ $lines = explode("\n", file_get_contents($input_filename));
     $matches = array();
     if (preg_match("/^(.*?)\\(([\\d, ]+?)\\)(.*?)$/", $line, $matches))
     {
-      echo "LINE: $line\n";
       $author_data = array("aff" => trim($matches[2]), "orcid" => "", "email" => "");
       $optional_part = trim($matches[3]);
       if ($optional_part !== "")
