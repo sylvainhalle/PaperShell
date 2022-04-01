@@ -211,6 +211,8 @@ in some document classes.
   PaperShell contains a fixed version.
 - The LIPIcs style is incompatible with the `subfig` package.
   PaperShell contains a fixed version.
+- The Springer Nature journal style has a [bug causing Tikz to break compilation](https://tex.stackexchange.com/q/615012). PaperShell contains a fixed version.
+- The Springer Nature journal style also redefines the `\href` command of the `hyperref` package in a way that the link's text is never shown. PaperShell has a version where this redefinition is commented out.
 
 It also takes care of using fonts properly:
 
