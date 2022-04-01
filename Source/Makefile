@@ -30,7 +30,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha10
+version		:= 2.2.1
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -126,6 +126,10 @@ export LC_ALL		?= C
 #
 #
 # CHANGES:
+# Chris Monson (2020-12-11):
+# * Fix bcf datasource collection, add some tests, thanks to k4rtik on issue 126
+# Chris Monson (2018-11-28):
+# * Add bcf datasource collection for biber - thanks to llbit on issue 126
 # Chris Monson (2014-09-04):
 # * Allow graphic dependencies in texmf directories (anything .fls knows about).
 # Chris Monson (2014-02-14):
@@ -1001,13 +1005,15 @@ cleanse-filename	= $(subst .,_,$(subst /,__,$1))
 
 # Escape dots and forward slashes.
 # $(call escape-fname-regex,str)
-escape-fname-regex	= $(subst /,\\/,$(subst .,\\.,$1))
+escape-fname-regex	= $(subst /,\/,$(subst .,\.,$1))
 
 # Test that a file exists
 # $(call test-exists,file)
 test-exists		= [ -e '$1' ]
 # $(call test-not-exists,file)
 test-not-exists   = [ ! -e '$1' ]
+# $(call test-non-empty,file)
+test-non-empty    = [ -s '$1' ]
 
 # $(call move-files,source,destination)
 move-if-exists		= $(call test-exists,$1) && $(MV) '$1' '$2'
@@ -2044,6 +2050,20 @@ $(SED) \
 $(SORT) | $(UNIQ)
 endef
 
+# Outputs bcf bibs to stdout. Arg 1 is the bcf file stem, arg 2 is the
+# list of targets for each dependency found.
+define get-bcf-bibs
+if $(call test-non-empty,$1); then \
+  $(SED) \
+-e '/datasource/!d' \
+-e 's/^[^>]*>//g' \
+-e 's/<.*$$//g' \
+-e '/\.bib$$/!s/$$/.bib/' \
+-e 's!^!$2: !' \
+'$1' | $(SORT) | $(UNIQ); \
+fi
+endef
+
 # Makes a an aux file that only has stuff relevant to the target in it
 # $(call make-auxtarget-file,<flattened-aux>,<new-aux>)
 define make-auxtarget-file
@@ -2818,7 +2838,7 @@ endef
 # $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>],[<beamer info>])
 make-ps		= \
 	$(DVIPS) -z -o '$2' $(if $(strip $4),-t$(strip $4),) '$1' \
-		$(if $5,| $(enlarge_beamer)) > $3 2>&1
+		$(if $(strip $5),| $(enlarge_beamer)) > $3 2>&1
 
 # Convert Postscript to PDF
 # $(call make-pdf,<ps file>,<pdf file>,<log file>,<embed file>)
@@ -3334,6 +3354,7 @@ endif
 	$(call get-graphics,$*) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
+	$(call get-bcf-bibs,$*.bcf,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	$(EGREP) -q "# MISSING stem" $*.d && $(SLEEP) 1 && $(RM) $*.pdf; \
 	$(EGREP) -q "# MISSING format" $*.d && $(RM) $*.pdf; \
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \
