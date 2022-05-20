@@ -1,7 +1,7 @@
 <?php
 /**************************************************************************
   A Flexible LaTeX Article Environment
-  Copyright (C) 2015-2021  Sylvain Hallé
+  Copyright (C) 2015-2022  Sylvain Hallé
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -76,7 +76,10 @@ for ($i = 0; $i < $config["num-repeats"]; $i++)
   	  $actual_filename .= ".tex";
   	}
     $file_contents = file_get_contents($config["src-folder"]."/".$actual_filename);
-    $input_text = str_replace("\\input{".$include_filename."}", $file_contents, $input_text);
+    $file_contents = str_replace("$1", "\\$1", $file_contents);
+    $file_contents = str_replace("\\", "\\\\", $file_contents);
+    file_put_contents("fn-".$actual_filename, $file_contents);
+    $input_text = preg_replace("/^([^\\%]*)\\\\input\\{".$include_filename."\\}/m", "$1".$file_contents, $input_text);
   }
 }
 
