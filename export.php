@@ -78,7 +78,6 @@ for ($i = 0; $i < $config["num-repeats"]; $i++)
     $file_contents = file_get_contents($config["src-folder"]."/".$actual_filename);
     $file_contents = str_replace("$1", "\\$1", $file_contents);
     $file_contents = str_replace("\\", "\\\\", $file_contents);
-    file_put_contents("fn-".$actual_filename, $file_contents);
     $input_text = preg_replace("/^([^\\%]*)\\\\input\\{".$include_filename."\\}/m", "$1".$file_contents, $input_text);
   }
 }
