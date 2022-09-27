@@ -15,6 +15,7 @@
 *.synctex
 *.dvi
 *.vtc
+\#
 #preamble*
 #postamble*
 #midamble*
