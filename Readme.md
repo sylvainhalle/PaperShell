@@ -254,6 +254,8 @@ for sending as a bundle e.g. to an editor to compile the camera-ready
 version. You can also bundle the whole thing (except the main .pdf file and
 auxiliary files) in a single zip file using `zip-export.sh`.
 
+As an option, the `export.php` script can also create a "flat" structure with no folders (some publishers ask for this when submitting source files). Use the `--flatten` command line option when invoking the script.
+
 Overleaf integration
 --------------------
 

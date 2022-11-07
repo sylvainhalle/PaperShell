@@ -33,12 +33,14 @@
  * This script does a crude pattern matching to resolve includes. It has
  * a few caveats:
  * 
+ * - An \input instruction for the same file that appears both commented and
+ *   uncommented in the source will be replaced for all its occurrences
  * - A construct of the form \scalebox{0.5}{\input{fig/somefile}} currently does
  *   not work (it is replaced by nothing)
  */
 
 // Version string
-$version_string = `php generate-preamble.php --show-version`;
+$version_string = `php set-style.php --show-version`;
 
 // Read config settings
 $config = array(
@@ -47,14 +49,25 @@ $config = array(
 	"src-folder"     => "Source",
 	"num-repeats"    => 3,
 	"new-folder"     => "Export",
+	"flatten"        => false
 );
 if (file_exists("settings.inc.php"))
 {
   include("settings.inc.php");
 }
 
+// Override with any command line arguments
+for ($i = 1; $i < count($argv); $i++)
+{
+	$arg = $argv[$i];
+	if ($arg === "--flatten")
+	{
+		$config["flatten"] = true;
+	}
+}
+
 // Basic info
-echo "PaperShell v".$version_string."\nA template environment for papers written in LaTeX\n(C) 2015-2021 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
+echo "PaperShell v".$version_string."\nA template environment for papers written in LaTeX\n(C) 2015-2022 Sylvain Hallé, Université du Québec à Chicoutimi\nhttps://github.com/sylvainhalle/PaperShell\n";
 
 // Creates directory for stand-alone (deletes and re-creates to clean)
 delete_dir($config["new-folder"]);
@@ -94,7 +107,7 @@ else
 $input_text = str_replace("\\bibliographystyle{", "%\\bibliographystyle{", $input_text);
 
 // Puts contents in stand-alone folder
-rcopy($config["src-folder"], $config["new-folder"]);
+rcopy($config["src-folder"], "", $config["new-folder"], "", $config["flatten"]);
 file_put_contents($config["new-folder"]."/".$config["tex-name"].".tex", $input_text);
 
 // Done
@@ -127,38 +140,33 @@ function delete_dir($path) // {{{
 /**
  * Copies files and non-empty directories
  */
-function rcopy($src, $dst, $indent="") // {{{
+function rcopy($src, $dst, $dst_root, $indent="", $flatten = false) // {{{
 {
   echo $indent."$src -> $dst\n";
-  if (file_exists($dst)) rrmdir($dst);
   if (is_dir($src))
   {
-    echo $indent."Creating $dst\n";
-    mkdir($dst);
+  	if (!$flatten)
+  	{
+      echo $indent."Creating $dst\n";
+      mkdir($dst_root."/".$dst);
+    }
     $files = scandir($src);
     foreach ($files as $file)
     {
       if ($file !== "." && $file !== ".." && can_copy($src, $file))
       {
-      	rcopy("$src/$file", "$dst/$file", $indent." ");
+      	if ($flatten)
+      	{
+      	  rcopy("$src/$file", "$dst_root/$file", $dst_root, $indent." ", $flatten);
+      	}
+      	else
+      	{
+      	  rcopy("$src/$file", "$dst_root/$dst/$file", $dst_root, $indent." ", $flatten);
+      	}
       }
     }
   }
   else if (file_exists($src)) copy($src, $dst);
-} // }}}
-
-/**
- * Removes files and non-empty directories
- */
-function rrmdir($dir) // {{{
-{
-  if (is_dir($dir)) {
-    $files = scandir($dir);
-    foreach ($files as $file)
-    if ($file != "." && $file != "..") rrmdir("$dir/$file");
-    rmdir($dir);
-  }
-  else if (file_exists($dir)) unlink($dir);
 } // }}}
 
 /**
