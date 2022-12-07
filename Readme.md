@@ -171,10 +171,11 @@ Quick Use
 1. Modify `authors.txt` with the desired title, authors and institutions.
    The file is self-documented and tells you how to do it.
 
-2. Call `php set-style.php <style>` to generate the include files, which
+2. Call `php set-style.php style` to generate the include files, which
    will be placed in the `Source` subfolder. (This requires
-   [PHP](http://php.net/) to be installed in your path.) The `style` argument
-   can be any of a long list of paper templates. Available styles are: lncs,
+   [PHP](http://php.net/) to be installed in your path.) The word `style`
+   must be replaced by the name of a paper template, which you can select
+   from a long list. Some of the available styles are: lncs,
    ieee, acmconf, elsevier, springer, aaai, acmjour, eptcs, stvr, lipics,
    easychair, usenix.
 
