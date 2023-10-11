@@ -1,4 +1,4 @@
-% LLNCS DOCUMENT CLASS -- version 2.21 (12-Jan-2022)
+% LLNCS DOCUMENT CLASS -- version 2.22 (05-Sep-2022)
 % Springer Verlag LaTeX2e support for Lecture Notes in Computer Science
 %
 %%
@@ -19,7 +19,7 @@
 %%   Right brace   \}     Tilde         \~}
 %%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesClass{llncs}[2022/01/12 v2.21
+\ProvidesClass{llncs}[2022/09/05 v2.22
 ^^J LaTeX document class for Lecture Notes in Computer Science]
 % Options
 \let\if@envcntreset\iffalse
@@ -374,7 +374,7 @@ You should not use \verb|\subparagraph| with this class.\vskip0.5cm}
 \let\footnotesize\small
 
 \if@custvec
-\def\vec#1{\mathchoice{\mbox{\boldmath$\displaystyle#1$}}
+\DeclareRobustCommand\vec[1]{\mathchoice{\mbox{\boldmath$\displaystyle#1$}}
 {\mbox{\boldmath$\textstyle#1$}}
 {\mbox{\boldmath$\scriptstyle#1$}}
 {\mbox{\boldmath$\scriptscriptstyle#1$}}}
