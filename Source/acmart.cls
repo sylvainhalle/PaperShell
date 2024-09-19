@@ -35,9 +35,10 @@
 %%   Right bracket \]     Circumflex    \^     Underscore    \_
 %%   Grave accent  \`     Left brace    \{     Vertical bar  \|
 %%   Right brace   \}     Tilde         \~}
+
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{acmart}
-[2022/02/19 v1.83 Typesetting articles for the Association for Computing Machinery]
+[2024/05/27 v2.08 Typesetting articles for the Association for Computing Machinery]
 \def\@classname{acmart}
 \InputIfFileExists{acmart-preload-hook.tex}{%
   \ClassWarning{\@classname}{%
@@ -48,7 +49,7 @@
 \RequirePackage{iftex}
 \define@choicekey*+{acmart.cls}{format}[\ACM@format\ACM@format@nr]{%
   manuscript, acmsmall, acmlarge, acmtog, sigconf, siggraph,
-  sigplan, sigchi, sigchi-a}[manuscript]{}{%
+  sigplan, sigchi, sigchi-a, acmengage, acmcp}[manuscript]{}{%
   \ClassError{\@classname}{The option format must be manuscript,
     acmsmall, acmlarge, acmtog, sigconf, siggraph,
     sigplan, sigchi or sigchi-a}}
@@ -62,6 +63,8 @@
 \@DeclareACMFormat{sigplan}
 \@DeclareACMFormat{sigchi}
 \@DeclareACMFormat{sigchi-a}
+\@DeclareACMFormat{acmengage}
+\@DeclareACMFormat{acmcp}
 \ExecuteOptionsX{format}
 \define@boolkey+{acmart.cls}[@ACM@]{screen}[true]{%
   \if@ACM@screen
@@ -159,6 +162,7 @@
     false}}
 \ExecuteOptionsX{authordraft=false}
 \def\ACM@fontsize{}
+\DeclareOptionX{8pt}{\edef\ACM@fontsize{\CurrentOption}}
 \DeclareOptionX{9pt}{\edef\ACM@fontsize{\CurrentOption}}
 \DeclareOptionX{10pt}{\edef\ACM@fontsize{\CurrentOption}}
 \DeclareOptionX{11pt}{\edef\ACM@fontsize{\CurrentOption}}
@@ -175,7 +179,12 @@
 \newif\if@ACM@manuscript
 \newif\if@ACM@journal
 \newif\if@ACM@journal@bibstrip
+\newif\if@ACM@journal@bibstrip@or@tog
 \newif\if@ACM@sigchiamode
+\newif\if@ACM@engage
+\@ACM@engagefalse
+\newif\if@ACM@acmcp
+\@ACM@acmcpfalse
 \ifnum\ACM@format@nr=5\relax % siggraph
 \ClassWarning{\@classname}{%
   The format siggraph is now obsolete.\MessageBreak
@@ -216,6 +225,7 @@
   \@ACM@journaltrue
 \or % acmtog
   \@ACM@journaltrue
+  \@ACM@journal@bibstrip@or@togtrue
 \or % sigconf
   \@ACM@journalfalse
 \or % siggraph
@@ -227,9 +237,17 @@
 \or % sigchi-a
   \@ACM@journalfalse
   \@ACM@sigchiamodetrue
+\or % acmengage
+  \@ACM@journalfalse
+  \@ACM@engagetrue
+\or % acmcp
+  \@ACM@journaltrue
+  \@ACM@acmcptrue
+  \AtBeginDocument{\@ACM@printacmreffalse}%
 \fi
 \if@ACM@journal
- \@ACM@journal@bibstriptrue
+  \@ACM@journal@bibstriptrue
+  \@ACM@journal@bibstrip@or@togtrue
 \else
  \@ACM@journal@bibstripfalse
 \fi
@@ -253,6 +271,10 @@
     \def\ACM@fontsize{9pt}%
   \or % sigchi-a
     \def\ACM@fontsize{10pt}%
+  \or % acmengage
+    \def\ACM@fontsize{10pt}%
+  \or % acmcp
+    \def\ACM@fontsize{9pt}%
   \fi
 \fi
 \ClassInfo{\@classname}{Using fontsize \ACM@fontsize}
@@ -268,6 +290,12 @@
 \onehalfspacing
 \fi
 \RequirePackage{textcase}
+\if@ACM@acmcp
+\RequirePackage{framed}
+\RequirePackage{zref-savepos, zref-user}
+\fi
+\newdimen\@ACM@acmcp@delta
+\@ACM@acmcp@delta=0pt\relax
 \if@ACM@natbib
   \RequirePackage{natbib}
   \renewcommand{\bibsection}{%
@@ -367,6 +395,9 @@
 \else
   \renewcommand\keywordsname{Keywords}%
 \fi
+\if@ACM@engage
+   \renewcommand\abstractname{Synopsis}%
+\fi
 \ifx\ACM@languages\@empty
 \else
   \RequirePackage[\ACM@languages]{babel}%
@@ -377,6 +408,9 @@
         \renewcommand\keywordsname{Keywords}%
       \fi
       \renewcommand\acksname{Acknowledgements}%
+      \if@ACM@engage
+         \renewcommand\abstractname{Synopsis}%
+      \fi
   }%
   \addto\captionsfrench{%
       \if@ACM@journal
@@ -388,9 +422,9 @@
   }%
   \addto\captionsgerman{%
       \if@ACM@journal
-        \renewcommand\keywordsname{Zusätzliche Schlüsselwörter und Phrasen}%
+        \renewcommand\keywordsname{Zusätzliche Schlagwörter und Phrasen}%
       \else
-        \renewcommand\keywordsname{Schlüsselwörter}%
+        \renewcommand\keywordsname{Schlagwörter}%
       \fi
       \renewcommand\acksname{Danksagungen}%
   }%
@@ -567,10 +601,10 @@
         \rule\z@\footnotesep\ignorespaces#1\@finalstrut\strutbox}%
     \color@endgroup}}
 \def\@makefnmark{\hbox{\@textsuperscript{\normalfont\@thefnmark}}}
-\RequirePackage{hyperxmp}
 \let\@footnotemark@nolink\@footnotemark
 \let\@footnotetext@nolink\@footnotetext
 \RequirePackage[bookmarksnumbered,unicode]{hyperref}
+\RequirePackage{hyperxmp}
 \pdfstringdefDisableCommands{%
   \def\addtocounter#1#2{}%
   \def\unskip{}%
@@ -591,6 +625,8 @@
 \or % sigchi
 \or % sigchi-a
   \urlstyle{sf}
+\or % acmengage
+\or % acmcp
 \fi
 \AtEndPreamble{%
   \if@ACM@urlbreakonhyphens
@@ -724,6 +760,20 @@
      }%
      \@mparswitchfalse
      \reversemarginpar
+\or % acmengage
+   \geometry{twoside=true, head=13pt,
+     paperwidth=8.5in, paperheight=11in,
+     includeheadfoot, columnsep=2pc,
+     top=57pt, bottom=73pt, inner=54pt, outer=54pt,
+     marginparwidth=2pc,heightrounded
+     }%
+\or % acmcp
+   \geometry{twoside=true,
+     includeheadfoot, head=13pt, foot=2pc,
+     paperwidth=6.75in, paperheight=10in,
+     top=58pt, bottom=44pt, inner=46pt, outer=46pt,
+     marginparwidth=2pc,heightrounded
+   }%
 \fi
 \setlength\parindent{10\p@}
 \setlength\parskip{\z@}
@@ -738,6 +788,8 @@
 \or % sigplan
 \or % sigchi
 \or % sigchi-a
+\or % acmengage
+\or % acmcp
 \fi
 \setlength\normalparindent{\parindent}
 \def\copyrightpermissionfootnoterule{\kern-3\p@
@@ -778,6 +830,10 @@
 \or % sigchi
   \flushbottom
 \or % sigchi-a
+\or % acmengage
+  \flushbottom
+\or % acmcp
+  \flushbottom
 \fi
 \ifPDFTeX
 \input{glyphtounicode}
@@ -900,6 +956,8 @@
       textfont={bf, small}}
     \captionsetup[table]{labelfont={bf, small},
       textfont={bf, small}}
+  \or % acmengage
+  \or % acmcp
   \fi
 \fi
 \newfloat{sidebar}{}{sbar}
@@ -960,6 +1018,8 @@
 \def\labelenumiv{\theenumiv.}
 \or % sigchi
 \or % sigchi-a
+\or % acmengage
+\or % acmcp
 \fi
 \newdimen\@ACM@labelwidth
 \AtBeginDocument{%
@@ -1012,23 +1072,31 @@
 \newif\if@ACM@maketitle@typeset
 \@ACM@maketitle@typesetfalse
 \define@choicekey*+{ACM}{acmJournal}[\@journalCode\@journalCode@nr]{%
+  ACMJCSS,%
   CIE,%
   CSUR,%
   DGOV,%
   DLT,%
   DTRAP,%
   FAC,%
+  GAMES,%
   HEALTH,%
   IMWUT,%
   JACM,%
+  JATS,%
   JDIQ,%
+  JDS,%
   JEA,%
   JERIC,%
   JETC,%
   JOCCH,%
+  JRC,%
   PACMCGIT,%
   PACMHCI,%
+  PACMMOD,%
+  PACMNET,%
   PACMPL,%
+  PACMSE,%
   POMACS,%
   TAAS,%
   TACCESS,%
@@ -1063,8 +1131,10 @@
   TOMPECS,%
   TOMS,%
   TOPC,%
-  TOPS,%
   TOPLAS,%
+  TOPML,%
+  TOPS,%
+  TORS,%
   TOS,%
   TOSEM,%
   TOSN,%
@@ -1077,7 +1147,12 @@
   FACMP%
 }{%
 \ifcase\@journalCode@nr
-\relax % CIE
+\relax % ACMJCSS
+  \def\@journalName{ACM Journal on Computing and Sustainable Societies}%
+  \def\@journalNameShort{ACM J. Comput. Sustain. Soc.}%
+  \def\@permissionCodeOne{2834-5533}%
+  \def\@permissionCodeTwo{2834-5533}%
+\or % CIE
   \def\@journalName{ACM Computers in Entertainment}%
   \def\@journalNameShort{ACM Comput. Entertain.}%
   \def\@permissionCodeOne{1544-3574}%
@@ -1085,46 +1160,70 @@
   \def\@journalName{ACM Computing Surveys}%
   \def\@journalNameShort{ACM Comput. Surv.}%
   \def\@permissionCodeOne{0360-0300}%
+  \def\@permissionCodeTwo{1557-7341}%
 \or % DGOV
   \def\@journalName{Digital Government: Research and Practice}%
   \def\@journalNameShort{Digit. Gov. Res. Pract.}%
   \def\@permissionCodeOne{2639-0175}%
+  \def\@permissionCodeTwo{2639-0175}%
 \or % DLT
   \def\@journalName{Distributed Ledger Technologies: Research and Practice}%
   \def\@journalNameShort{Distrib. Ledger Technol.}%
   \def\@permissionCodeOne{2769-6472}%
+  \def\@permissionCodeTwo{2769-6480}%
 \or % DTRAP
   \def\@journalName{Digital Threats: Research and Practice}%
   \def\@journalNameShort{Digit. Threat. Res. Pract.}%
   \def\@permissionCodeOne{2576-5337}%
+  \def\@permissionCodeTwo{2576-5337}%
 \or % FAC
   \def\@journalName{Formal Aspects of Computing}%
   \def\@journalNameShort{Form. Asp. Comput.}%
   \def\@permissionCodeOne{0934-5043}%
   \def\@permissionCodeTwo{1433-299X}%
+\or % GAMES
+  \def\@journalName{ACM Games: Research and Practice}%
+  \def\@journalNameShort{ACM Games}%
+  \def\@permissionCodeOne{2832-5516}%
+  \def\@permissionCodeTwo{2832-5516}%
 \or % HEALTH
   \def\@journalName{ACM Transactions on Computing for Healthcare}%
   \def\@journalNameShort{ACM Trans. Comput. Healthcare}%
   \def\@permissionCodeOne{2637-8051}%
+  \def\@permissionCodeTwo{2637-8051}%
 \or % IMWUT
   \def\@journalName{Proceedings of the ACM on Interactive, Mobile,
     Wearable and Ubiquitous Technologies}%
   \def\@journalNameShort{Proc. ACM Interact. Mob. Wearable Ubiquitous Technol.}%
   \def\@permissionCodeOne{2474-9567}%
+  \def\@permissionCodeTwo{2474-9567}%
   \@ACM@screentrue
   \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
 \or % JACM
   \def\@journalName{Journal of the ACM}%
   \def\@journalNameShort{J. ACM}%
   \def\@permissionCodeOne{0004-5411}%
+  \def\@permissionCodeTwo{1557-735X}%
+\or % JATS
+  \def\@journalName{Journal on Autonomous Transportation Systems}%
+  \def\@journalNameShort{ACM J. Auton. Transport. Syst.}%
+  \def\@permissionCodeOne{2833-0528}%
+  \def\@permissionCodeTwo{2833-0528}%
 \or % JDIQ
   \def\@journalName{ACM Journal of Data and Information Quality}%
   \def\@journalNameShort{ACM J. Data Inform. Quality}%
   \def\@permissionCodeOne{1936-1955}%
+  \def\@permissionCodeTwo{1936-1963}%
+\or % JDS
+  \def\@journalName{ACM/IMS Journal of Data Science}%
+  \def\@journalNameShort{ACM/IMS J. Data Sci.}%
+  \def\@permissionCodeOne{2831-3194}%
+  \def\@permissionCodeTwo{2831-3194}%
 \or % JEA
   \def\@journalName{ACM Journal of Experimental Algorithmics}%
   \def\@journalNameShort{ACM J. Exp. Algor.}%
   \def\@permissionCodeOne{1084-6654}%
+  \def\@permissionCodeTwo{1084-6654}%
 \or % JERIC
   \def\@journalName{ACM Journal of Educational Resources in Computing}%
   \def\@journalNameShort{ACM J. Edu. Resources in Comput.}%
@@ -1133,43 +1232,72 @@
   \def\@journalName{ACM Journal on Emerging Technologies in Computing Systems}%
   \def\@journalNameShort{ACM J. Emerg. Technol. Comput. Syst.}%
   \def\@permissionCodeOne{1550-4832}%
+  \def\@permissionCodeTwo{1550-4840}%
 \or % JOCCH
   \def\@journalName{ACM Journal on Computing and Cultural Heritage}%
   \def\@journalNameShort{ACM J. Comput. Cult. Herit.}%
   \def\@permissionCodeOne{1556-4673}%
   \def\@permissionCodeTwo{1556-4711}%
+\or % JRC
+  \def\@journalName{ACM Journal on Responsible Computing}%
+  \def\@journalNameShort{ACM J. Responsib. Comput.}%
+  \def\@permissionCodeOne{2832-0565}%
+  \def\@permissionCodeTwo{2832-0565}%
 \or % PACMCGIT
   \def\@journalName{Proceedings of the ACM on Computer Graphics and Interactive Techniques}%
   \def\@journalNameShort{Proc. ACM Comput. Graph. Interact. Tech.}%
   \def\@permissionCodeOne{2577-6193}%
+  \def\@permissionCodeTwo{2577-6193}%
   \@ACM@screentrue
   \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
 \or % PACMHCI
   \def\@journalName{Proceedings of the ACM on Human-Computer Interaction}%
   \def\@journalNameShort{Proc. ACM Hum.-Comput. Interact.}%
   \def\@permissionCodeOne{2573-0142}%
+  \def\@permissionCodeTwo{2573-0142}%
   \@ACM@screentrue
   \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
+\or % PACMMOD
+  \def\@journalName{Proceedings of the ACM on Management of Data}%
+  \def\@journalNameShort{Proc. ACM Manag. Data}%
+  \def\@permissionCodeOne{2836-6573}%
+  \def\@permissionCodeTwo{2836-6573}%
+\or % PACMNET
+  \def\@journalName{Proceedings of the ACM on Networkng}%
+  \def\@journalNameShort{Proc. ACM Netw.}%
+  \def\@permissionCodeOne{2834-5509}%
+  \def\@permissionCodeTwo{2834-5509}%
 \or % PACMPL
   \def\@journalName{Proceedings of the ACM on Programming Languages}%
   \def\@journalNameShort{Proc. ACM Program. Lang.}%
   \def\@permissionCodeOne{2475-1421}%
+  \def\@permissionCodeTwo{2475-1421}%
+  \@ACM@screentrue
+  \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
+\or % PACMSE
+  \def\@journalName{Proceedings of the ACM on Software Engineering}%
+  \def\@journalNameShort{Proc. ACM Softw. Eng.}%
+  \def\@permissionCodeOne{2994-970X}%
+  \def\@permissionCodeTwo{2994-970X}%
   \@ACM@screentrue
   \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
 \or % POMACS
   \def\@journalName{Proceedings of the ACM on Measurement and Analysis of Computing Systems}%
   \def\@journalNameShort{Proc. ACM Meas. Anal. Comput. Syst.}%
   \def\@permissionCodeOne{2476-1249}%
+  \def\@permissionCodeTwo{2476-1249}%
   \@ACM@screentrue
   \PackageInfo{\@classname}{Using screen mode due to \@journalCode}%
 \or % TAAS
   \def\@journalName{ACM Transactions on Autonomous and Adaptive Systems}%
   \def\@journalNameShort{ACM Trans. Autonom. Adapt. Syst.}%
   \def\@permissionCodeOne{1556-4665}%
+  \def\@permissionCodeTwo{1556-4703}%
 \or % TACCESS
   \def\@journalName{ACM Transactions on Accessible Computing}%
   \def\@journalNameShort{ACM Trans. Access. Comput.}%
   \def\@permissionCodeOne{1936-7228}%
+  \def\@permissionCodeTwo{1936-7236}%
 \or % TACO
   \def\@journalName{ACM Transactions on Architecture and Code Optimization}%
   \def\@journalNameShort{ACM Trans. Arch. Code Optim.}%
@@ -1179,18 +1307,22 @@
   \def\@journalName{ACM Transactions on Algorithms}%
   \def\@journalNameShort{ACM Trans. Algor.}%
   \def\@permissionCodeOne{1549-6325}%
+  \def\@permissionCodeTwo{1549-6333}%
 \or % TALLIP
   \def\@journalName{ACM Transactions on Asian and Low-Resource Language Information Processing}%
   \def\@journalNameShort{ACM Trans. Asian Low-Resour. Lang. Inf. Process.}%
   \def\@permissionCodeOne{2375-4699}%
+  \def\@permissionCodeTwo{2375-4702}%
 \or % TAP
   \def\@journalName{ACM Transactions on Applied Perception}%
   \def\@journalNameShort{ACM Trans. Appl. Percept.}%
   \def\@permissionCodeOne{1544-3558}%
+  \def\@permissionCodeTwo{1544-3965}%
 \or % TCPS
   \def\@journalName{ACM Transactions on Cyber-Physical Systems}%
   \def\@journalNameShort{ACM Trans. Cyber-Phys. Syst.}%
   \def\@permissionCodeOne{2378-962X}%
+  \def\@permissionCodeTwo{2378-9638}%
 \or % TDS
   \def\@journalName{ACM/IMS Transactions on Data Science}%
   \def\@journalNameShort{ACM/IMS Trans. Data Sci.}%
@@ -1199,26 +1331,32 @@
   \def\@journalName{ACM Transactions on Economics and Computation}%
   \def\@journalNameShort{ACM Trans. Econ. Comput.}%
   \def\@permissionCodeOne{2167-8375}%
+  \def\@permissionCodeTwo{2167-8383}%
 \or % TECS
   \def\@journalName{ACM Transactions on Embedded Computing Systems}%
   \def\@journalNameShort{ACM Trans. Embedd. Comput. Syst.}%
   \def\@permissionCodeOne{1539-9087}%
+  \def\@permissionCodeTwo{1558-3465}%
 \or % TELO
-  \def\@journalName{ACM Transactions on Evolutionary Learning}%
-  \def\@journalNameShort{ACM Trans. Evol. Learn.}%
-  \def\@permissionCodeOne{2688-3007}%
+  \def\@journalName{ACM Transactions on Evolutionary Learning and Optimization}%
+  \def\@journalNameShort{ACM Trans. Evol. Learn. Optim.}%
+  \def\@permissionCodeOne{2688-299X}%
+  \def\@permissionCodeTwo{2688-3007}%
 \or % THRI
   \def\@journalName{ACM Transactions on Human-Robot Interaction}%
   \def\@journalNameShort{ACM Trans. Hum.-Robot Interact.}%
   \def\@permissionCodeOne{2573-9522}%
+  \def\@permissionCodeTwo{2573-9522}%
 \or % TIIS
   \def\@journalName{ACM Transactions on Interactive Intelligent Systems}%
   \def\@journalNameShort{ACM Trans. Interact. Intell. Syst.}%
   \def\@permissionCodeOne{2160-6455}%
+  \def\@permissionCodeTwo{2160-6463}%
 \or % TIOT
   \def\@journalName{ACM Transactions on Internet of Things}%
   \def\@journalNameShort{ACM Trans. Internet Things}%
   \def\@permissionCodeOne{2577-6207}%
+  \def\@permissionCodeTwo{2577-6207}%
 \or % TISSEC
   \def\@journalName{ACM Transactions on Information and System Security}%
   \def\@journalNameShort{ACM Trans. Info. Syst. Sec.}%
@@ -1227,54 +1365,67 @@
   \def\@journalName{ACM Transactions on Intelligent Systems and Technology}%
   \def\@journalNameShort{ACM Trans. Intell. Syst. Technol.}%
   \def\@permissionCodeOne{2157-6904}%
+  \def\@permissionCodeTwo{2157-6912}%
 \or % TKDD
   \def\@journalName{ACM Transactions on Knowledge Discovery from Data}%
   \def\@journalNameShort{ACM Trans. Knowl. Discov. Data.}%
   \def\@permissionCodeOne{1556-4681}%
+  \def\@permissionCodeTwo{1556-472X}%
 \or % TMIS
   \def\@journalName{ACM Transactions on Management Information Systems}%
   \def\@journalNameShort{ACM Trans. Manag. Inform. Syst.}%
   \def\@permissionCodeOne{2158-656X}%
+  \def\@permissionCodeTwo{2158-6578}%
 \or % TOCE
   \def\@journalName{ACM Transactions on Computing Education}%
   \def\@journalNameShort{ACM Trans. Comput. Educ.}%
   \def\@permissionCodeOne{1946-6226}%
+  \def\@permissionCodeTwo{1946-6226}%
 \or % TOCHI
   \def\@journalName{ACM Transactions on Computer-Human Interaction}%
   \def\@journalNameShort{ACM Trans. Comput.-Hum. Interact.}%
   \def\@permissionCodeOne{1073-0516}%
+  \def\@permissionCodeTwo{1557-7325}%
 \or % TOCL
   \def\@journalName{ACM Transactions on Computational Logic}%
   \def\@journalNameShort{ACM Trans. Comput. Logic}%
   \def\@permissionCodeOne{1529-3785}%
+  \def\@permissionCodeTwo{1557-945X}%
 \or % TOCS
   \def\@journalName{ACM Transactions on Computer Systems}%
   \def\@journalNameShort{ACM Trans. Comput. Syst.}%
   \def\@permissionCodeOne{0734-2071}%
+  \def\@permissionCodeTwo{1557-7333}%
 \or % TOCT
   \def\@journalName{ACM Transactions on Computation Theory}%
   \def\@journalNameShort{ACM Trans. Comput. Theory}%
   \def\@permissionCodeOne{1942-3454}%
+  \def\@permissionCodeTwo{1942-3462}%
 \or % TODAES
   \def\@journalName{ACM Transactions on Design Automation of Electronic Systems}%
   \def\@journalNameShort{ACM Trans. Des. Autom. Electron. Syst.}%
   \def\@permissionCodeOne{1084-4309}%
+  \def\@permissionCodeTwo{1557-7309}%
 \or % TODS
   \def\@journalName{ACM Transactions on Database Systems}%
   \def\@journalNameShort{ACM Trans. Datab. Syst.}%
   \def\@permissionCodeOne{0362-5915}%
+  \def\@permissionCodeTwo{1557-4644}%
 \or % TOG
   \def\@journalName{ACM Transactions on Graphics}%
   \def\@journalNameShort{ACM Trans. Graph.}%
-  \def\@permissionCodeOne{0730-0301}
+  \def\@permissionCodeOne{0730-0301}%
+  \def\@permissionCodeTwo{1557-7368}%
 \or % TOIS
   \def\@journalName{ACM Transactions on Information Systems}%
   \def\@journalNameShort{ACM Trans. Inf. Syst.}%
   \def\@permissionCodeOne{1046-8188}%
+  \def\@permissionCodeTwo{1558-2868}%
 \or % TOIT
   \def\@journalName{ACM Transactions on Internet Technology}%
   \def\@journalNameShort{ACM Trans. Internet Technol.}%
   \def\@permissionCodeOne{1533-5399}%
+  \def\@permissionCodeTwo{1557-6051}%
 \or % TOMACS
   \def\@journalName{ACM Transactions on Modeling and Computer Simulation}%
   \def\@journalNameShort{ACM Trans. Model. Comput. Simul.}%
@@ -1289,58 +1440,82 @@
   \def\@journalName{ACM Transactions on Modeling and Performance Evaluation of Computing Systems}%
   \def\@journalNameShort{ACM Trans. Model. Perform. Eval. Comput. Syst.}%
   \def\@permissionCodeOne{2376-3639}%
+  \def\@permissionCodeTwo{2376-3647}%
 \or % TOMS
   \def\@journalName{ACM Transactions on Mathematical Software}%
   \def\@journalNameShort{ACM Trans. Math. Softw.}%
   \def\@permissionCodeOne{0098-3500}%
+  \def\@permissionCodeTwo{1557-7295}%
 \or % TOPC
   \def\@journalName{ACM Transactions on Parallel Computing}%
   \def\@journalNameShort{ACM Trans. Parallel Comput.}%
-  \def\@permissionCodeOne{1539-9087}%
-\or % TOPS
-  \def\@journalName{ACM Transactions on Privacy and Security}%
-  \def\@journalNameShort{ACM Trans. Priv. Sec.}%
-  \def\@permissionCodeOne{2471-2566}%
+  \def\@permissionCodeOne{2329-4949}%
+  \def\@permissionCodeTwo{2329-4957}%
 \or % TOPLAS
   \def\@journalName{ACM Transactions on Programming Languages and Systems}%
   \def\@journalNameShort{ACM Trans. Program. Lang. Syst.}%
   \def\@permissionCodeOne{0164-0925}%
+  \def\@permissionCodeTwo{1558-4593}%
+\or % TOPML
+  \def\@journalName{ACM Transactions on Probabilistic Machine Learning}%
+  \def\@journalNameShort{ACM Trans. Probab. Mach. Learn.}%
+  \def\@permissionCodeOne{2836-8924}%
+  \def\@permissionCodeTwo{2836-8924}%
+\or % TOPS
+  \def\@journalName{ACM Transactions on Privacy and Security}%
+  \def\@journalNameShort{ACM Trans. Priv. Sec.}%
+  \def\@permissionCodeOne{2471-2566}%
+  \def\@permissionCodeTwo{2471-2574}%
+\or % TORS
+  \def\@journalName{ACM Transactions on Recommender Systems}%
+  \def\@journalNameShort{ACM Trans. Recomm. Syst.}%
+  \def\@permissionCodeOne{2770-6699}%
+  \def\@permissionCodeTwo{2770-6699}%
 \or % TOS
   \def\@journalName{ACM Transactions on Storage}%
   \def\@journalNameShort{ACM Trans. Storage}%
   \def\@permissionCodeOne{1553-3077}%
+  \def\@permissionCodeTwo{1553-3093}%
 \or % TOSEM
   \def\@journalName{ACM Transactions on Software Engineering and Methodology}%
   \def\@journalNameShort{ACM Trans. Softw. Eng. Methodol.}%
   \def\@permissionCodeOne{1049-331X}%
+  \def\@permissionCodeTwo{1557-7392}%
 \or % TOSN
   \def\@journalName{ACM Transactions on Sensor Networks}%
   \def\@journalNameShort{ACM Trans. Sensor Netw.}%
   \def\@permissionCodeOne{1550-4859}%
+  \def\@permissionCodeTwo{1550-4867}%
 \or % TQC
   \def\@journalName{ACM Transactions on Quantum Computing}%
   \def\@journalNameShort{ACM Trans. Quantum Comput.}%
   \def\@permissionCodeOne{2643-6817}%
+  \def\@permissionCodeTwo{2643-6817}%
 \or % TRETS
   \def\@journalName{ACM Transactions on Reconfigurable Technology and Systems}%
   \def\@journalNameShort{ACM Trans. Reconfig. Technol. Syst.}%
   \def\@permissionCodeOne{1936-7406}%
+  \def\@permissionCodeTwo{1936-7414}%
 \or % TSAS
   \def\@journalName{ACM Transactions on Spatial Algorithms and Systems}%
   \def\@journalNameShort{ACM Trans. Spatial Algorithms Syst.}%
   \def\@permissionCodeOne{2374-0353}%
+  \def\@permissionCodeTwo{2374-0361}%
 \or % TSC
   \def\@journalName{ACM Transactions on Social Computing}%
   \def\@journalNameShort{ACM Trans. Soc. Comput.}%
   \def\@permissionCodeOne{2469-7818}%
+  \def\@permissionCodeTwo{2469-7826}%
 \or % TSLP
   \def\@journalName{ACM Transactions on Speech and Language Processing}%
   \def\@journalNameShort{ACM Trans. Speech Lang. Process.}%
   \def\@permissionCodeOne{1550-4875}%
+  \def\@permissionCodeTwo{2329-9304}%
 \or % TWEB
   \def\@journalName{ACM Transactions on the Web}%
   \def\@journalNameShort{ACM Trans. Web}%
   \def\@permissionCodeOne{1559-1131}%
+  \def\@permissionCodeTwo{1559-114X}%
 \else % FACMP, a dummy journal
   \def\@journalName{ACM Just Accepted}%
   \def\@journalNameShort{ACM Accepted}%
@@ -1351,12 +1526,13 @@
   \ClassError{\@classname}{Incorrect journal #1}%
 }%
 \def\acmJournal#1{\setkeys{ACM}{acmJournal=#1}%
-  \global\@ACM@journal@bibstriptrue}
+  \global\@ACM@journal@bibstriptrue
+  \global\@ACM@journal@bibstrip@or@togtrue}
 \def\@journalCode@nr{0}
 \def\@journalName{}%
 \def\@journalNameShort{\@journalName}%
 \def\@permissionCodeOne{XXXX-XXXX}%
-\def\@permissionCodeTwo{}%
+\def\@permissionCodeTwo{\@permissionCodeOne}%
 \newcommand\acmConference[4][]{%
   \gdef\acmConference@shortname{#1}%
   \gdef\acmConference@name{#2}%
@@ -1366,6 +1542,11 @@
     \gdef\acmConference@shortname{#2}%
   \fi
   \global\@ACM@journal@bibstripfalse
+  \ifx\@acmBooktitle\@empty\relax
+    \acmBooktitle{Proceedings of \acmConference@name
+      \ifx\acmConference@name\acmConference@shortname\else
+      \ (\acmConference@shortname)\fi}%
+  \fi
 }
 \if@ACM@journal\else
 \acmConference[Conference'17]{ACM Conference}{July 2017}{Washington,
@@ -1373,11 +1554,6 @@
 \fi
 \def\acmBooktitle#1{\gdef\@acmBooktitle{#1}}
 \acmBooktitle{}
-\ifx\acmConference@name\@undefined\else
-\acmBooktitle{Proceedings of \acmConference@name
-       \ifx\acmConference@name\acmConference@shortname\else
-       \ (\acmConference@shortname)\fi}
-\fi
 \def\@editorsAbbrev{(Ed.)}
 \def\@acmEditors{}
 \def\editor#1{\ifx\@acmEditors\@empty
@@ -1457,10 +1633,8 @@
   \def\institution##1{##1\ignorespaces}%
   \def\department{\@ifnextchar[{\@department}{\@department[]}}%
   \def\@department[##1]##2{\unskip, ##2\ignorespaces}%
-  \let\streetaddress\position
   \let\city\position
   \let\state\position
-  \let\postcode\position
   \let\country\position
   Also with #1\unskip.\egroup}
 \renewcommand{\email}[2][]{%
@@ -1531,31 +1705,48 @@
   January\or February\or March\or April\or May\or June\or
   July\or August\or September\or October\or November\or
   December\fi~\@acmYear}
-\def\acmPrice#1{\def\@acmPrice{#1}}
-\acmPrice{15.00}
+\def\acmPrice#1{\ClassWarning{\@classname}{The macro \string\acmPrice
+    is obsolete.  ACM no longer prints the price in bibstrip.}}
 \def\acmSubmissionID#1{\def\@acmSubmissionID{#1}}
 \acmSubmissionID{}
 \def\acmISBN#1{\def\@acmISBN{#1}}
 \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
 \def\acmDOI#1{\def\@acmDOI{#1}}
 \acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\newif\if@ACM@badge
-\@ACM@badgefalse
 \newlength\@ACM@badge@width
-\setlength\@ACM@badge@width{5pc}
+\setlength\@ACM@badge@width{3pc}
 \newlength\@ACM@title@width
 \newlength\@ACM@badge@skip
-\setlength\@ACM@badge@skip{1pc}
-\newcommand\acmBadgeR[2][]{\@ACM@badgetrue
-  \def\@acmBadgeR@url{#1}%
-  \def\@acmBadgeR@image{#2}}
-\def\@acmBadgeR@url{}
-\def\@acmBadgeR@image{}
-\newcommand\acmBadgeL[2][]{\@ACM@badgetrue
-  \def\@acmBadgeL@url{#1}%
-  \def\@acmBadgeL@image{#2}}
-\def\@acmBadgeL@url{}
-\def\@acmBadgeL@image{}
+\setlength\@ACM@badge@skip{1pt}
+\def\@acmBadgeR{}
+\def\@acmBadgeL{}
+\newcommand\acmBadgeR[2][]{%
+  \ifx\@acmBadgeR\@empty
+    \gdef\@acmBadgeR{%
+      \smash{%
+        \raisebox{0.5\height}{%
+          \href{#1}{\includegraphics[width=\@ACM@badge@width]{#2}}}}}%
+  \else
+    \g@addto@macro{\@acmBadgeR}{%
+      \hspace{\@ACM@badge@skip}%
+      \smash{%
+        \raisebox{0.5\height}{%
+          \href{#1}{\includegraphics[width=\@ACM@badge@width]{#2}}}}}%
+  \fi}
+\newcommand\acmBadgeL[2][]{%
+  \ifx\@acmBadgeL\@empty
+    \gdef\@acmBadgeL{%
+      \smash{%
+        \raisebox{0.5\height}{%
+          \href{#1}{\includegraphics[width=\@ACM@badge@width]{#2}}}}}%
+  \else
+    \g@addto@macro{\@acmBadgeL}{%
+      \hspace{\@ACM@badge@skip}%
+      \smash{%
+        \raisebox{0.5\height}{%
+          \href{#1}{\includegraphics[width=\@ACM@badge@width]{#2}}}}}%
+  \fi}
+\let\acmBadge=\acmBadgeR
 \def\startPage#1{\def\@startPage{#1}}
 \startPage{}
 \def\terms#1{\ClassWarning{\@classname}{The command \string\terms{} is
@@ -1635,6 +1826,44 @@
   \ifx\@received\@empty\else
     \par\bigskip\noindent\small\normalfont\@received\par
   \fi}
+\define@choicekey+{ACM}{articletype}[\ACM@ArticleType\ACM@ArticleType@nr]{%
+  Research,Review,Discussion,Invited,Position}[Review]{%
+  \ifcase\ACM@ArticleType@nr
+  \relax % Research
+     \colorlet{@ACM@Article@color}{ACMBlue}%
+  \or % Review
+     \colorlet{@ACM@Article@color}{ACMOrange}%
+  \or % Discussion
+     \colorlet{@ACM@Article@color}{ACMGreen}%
+  \or % Invited
+     \colorlet{@ACM@Article@color}{ACMPurple}%
+  \or % Position
+     \colorlet{@ACM@Article@color}{ACMRed}%
+  \fi
+}{%
+ \ClassError{\@classname}{Article Type must be Research, Review,\MessageBreak
+   Discussion, Invited, or Position}}
+\def\acmArticleType#1{\setkeys{ACM}{articletype=#1}}
+\if@ACM@acmcp
+\acmArticleType{Research}%
+\fi
+ %    \end{macrocode}
+\newenvironment{@ACM@color@frame}{%
+  \def\FrameCommand{\hspace*{-6.5pc}%
+    \colorbox{@ACM@Article@color!10!white}}%
+  \MakeFramed {\advance\hsize
+    -6.5pc\relax\FrameRestore}}{\zsaveposy{@ACM@acmcpframe@y}%
+  \endMakeFramed}
+\def\acmCodeLink#1{%
+  \ifx\@acmCodeDataLink\@empty
+     \gdef\@acmCodeDataLink{\url{#1}}%
+  \else
+     \g@addto@macro{\@acmCodeDataLink}{\\ \url{#1}}%
+  \fi}
+\def\@acmCodeDataLink{}
+\def\acmContributions#1{\gdef\@acmContributions{#1}}
+\acmContributions{}
+\let\acmDataLink\acmCodeLink
 \RequirePackage{comment}
 \excludecomment{CCSXML}
 \let\@concepts\@empty
@@ -1680,7 +1909,7 @@
     acmcopyright,acmlicensed,rightsretained,%
     usgov,usgovmixed,cagov,cagovmixed,licensedusgovmixed,%
     licensedcagov,licensedcagovmixed,othergov,licensedothergov,%
-    iw3c2w3,iw3c2w3g}{%
+    iw3c2w3,iw3c2w3g,cc}{%
   \@printpermissiontrue
   \@printcopyrighttrue
   \@acmownedtrue
@@ -1694,13 +1923,11 @@
   \fi
   \ifnum\acm@copyrightmode=3\relax % rightsretained
    \@acmownedfalse
-   \AtBeginDocument{\acmPrice{}}%
   \fi
   \ifnum\acm@copyrightmode=4\relax % usgov
    \@printpermissiontrue
    \@printcopyrightfalse
    \@acmownedfalse
-   \AtBeginDocument{\acmPrice{}}%
   \fi
   \ifnum\acm@copyrightmode=6\relax % cagov
    \@acmownedfalse
@@ -1722,18 +1949,23 @@
   \fi
   \ifnum\acm@copyrightmode=13\relax % iw3c2w3
    \@acmownedfalse
-   \AtBeginDocument{\acmPrice{}}%
   \fi
   \ifnum\acm@copyrightmode=14\relax % iw3c2w3g
    \@acmownedfalse
-   \AtBeginDocument{\acmPrice{}}%
+  \fi
+  \ifnum\acm@copyrightmode=15\relax % cc
+   \@acmownedfalse
   \fi}
 \def\setcopyright#1{\setkeys{ACM@}{acmcopyrightmode=#1}}
-\setcopyright{acmcopyright}
+\setcopyright{acmlicensed}
+\newcommand\setcctype[2][4.0]{%
+  \def\ACM@cc@version{#1}%
+  \def\ACM@cc@type{#2}}
+\setcctype{by}
 \def\@copyrightowner{%
   \ifcase\acm@copyrightmode\relax % none
   \or % acmcopyright
-  Association for Computing Machinery.
+  ACM\@.
   \or % acmlicensed
   Copyright held by the owner/author(s). Publication rights licensed to
   ACM\@.
@@ -1741,22 +1973,21 @@
   Copyright held by the owner/author(s).
   \or % usgov
   \or % usgovmixed
-  Association for Computing Machinery.
+  Copyright held by the owner/author(s).
   \or % cagov
-  Crown in Right of Canada.
+  Copyright Crown in Right of Canada.
   \or %cagovmixed
-  Association for Computing Machinery.
+  Copyright held by the owner/author(s).
   \or %licensedusgovmixed
   Copyright held by the owner/author(s). Publication rights licensed to
   ACM\@.
   \or % licensedcagov
-  Crown in Right of Canada. Publication rights licensed to
-  ACM\@.
+  Copyright held by the owner/author(s).
   \or %licensedcagovmixed
   Copyright held by the owner/author(s). Publication rights licensed to
   ACM\@.
   \or % othergov
-  Association for Computing Machinery.
+  Copyright held by the owner/author(s).
   \or % licensedothergov
   Copyright held by the owner/author(s). Publication rights licensed to
   ACM\@.
@@ -1766,8 +1997,26 @@
   \or % ic2w3wwwgoogle
   IW3C2 (International World Wide Web Conference Committee), published
   under Creative Commons CC-BY-NC-ND~4.0 License.
+  \or % cc
+  Copyright held by the owner/author(s).
   \fi}
 \def\@formatdoi#1{\url{https://doi.org/#1}}
+\def\@ACM@copyright@check@cc{%
+  \if@ACM@nonacm
+     \ClassInfo{\@classname}{Using CC license with a non-acm
+       material}%
+  \else
+     \if@ACM@engage
+        \ClassInfo{\@classname}{Using CC license with ACM Enage
+          material}%
+      \else
+      \ClassWarning{\@classname}{%
+        Sorry, Creative Commons licenses are\MessageBreak
+        currently not used with ACM publications\MessageBreak
+        typeset by the authors}{Please use nonacm
+           option or ACM Engage class to enable CC licenses}%
+      \fi
+  \fi}
 \def\@copyrightpermission{%
   \ifcase\acm@copyrightmode\relax % none
   \or % acmcopyright
@@ -1777,10 +2026,10 @@
    advantage and that copies bear this notice and the full citation on
    the first page. Copyrights for components of this work owned by
    others than ACM must be honored. Abstracting with credit is
-   permitted. To copy otherwise, or republish, to post on servers or to
-   redistribute to lists, requires prior specific permission
-   and\hspace*{.5pt}/or  a fee. Request permissions from
-   permissions@acm.org.
+   permitted. To copy otherwise, or republish, to post on servers or
+   to redistribute to lists, requires prior specific permission
+   and\hspace*{.5pt}/or
+   a fee. Request permissions from permissions@acm.org.
   \or % acmlicensed
    Permission to make digital or hard copies of all or part of this
    work for personal or classroom use is granted without fee provided
@@ -1788,97 +2037,102 @@
    advantage and that copies bear this notice and the full citation on
    the first page. Copyrights for components of this work owned by
    others than the author(s) must be honored. Abstracting with credit
-   is permitted.  To copy otherwise, or republish, to post on servers
-   or to  redistribute to lists, requires prior specific permission
-   and\hspace*{.5pt}/or  a fee. Request permissions from
+   is permitted. To copy otherwise, or republish, to post on servers
+   or to redistribute to lists, requires prior specific permission
+   and\hspace*{.5pt}/or a fee. Request permissions from
    permissions@acm.org.
   \or % rightsretained
-   Permission to make digital or hard copies of part or all of this work
-   for personal or classroom use is granted without fee provided that
-   copies are not made or distributed for profit or commercial advantage
-   and that copies bear this notice and the full citation on the first
-   page. Copyrights for third-party components of this work must be
-   honored. For all other uses, contact the
+   Permission to make digital or hard copies of all or part of this
+   work for personal or classroom use is granted without fee provided
+   that copies are not made or distributed for profit or commercial
+   advantage and that copies bear this notice and the full citation on
+   the first page. Copyrights for third-party components of this work
+   must be honored. For all other uses, contact the
    owner\hspace*{.5pt}/author(s).
   \or % usgov
    This paper is authored by an employee(s) of the United States
    Government and is in the public domain. Non-exclusive copying or
    redistribution is allowed, provided that the article citation is
    given and the authors and agency are clearly identified as its
-   source.
+   source. All others Request permissions from
+   owner\hspace*{.5pt}/author(s).
   \or % usgovmixed
    ACM acknowledges that this contribution was authored or co-authored
    by an employee, contractor, or affiliate of the United States
    government. As such, the United States government retains a
    nonexclusive, royalty-free right to publish or reproduce this
-   article, or to allow others to do so, for government purposes only.
+   article, or to allow others to do so, for government purposes
+   only. Request permissions from owner\hspace*{.5pt}/author(s).
   \or % cagov
-   This article was authored by employees of the Government of Canada.
-   As such, the Canadian government retains all interest in the
-   copyright to this work and grants to ACM a nonexclusive,
-   royalty-free right to publish or reproduce this article, or to allow
-   others to do so, provided that clear attribution is given both to
-   the authors and the Canadian government agency employing them.
-   Permission to make digital or hard copies for personal or classroom
-   use is granted. Copies must bear this notice and the full citation
-   on the first page.  Copyrights for components of this work owned by
-   others than the Canadian Government must be honored. To copy
-   otherwise, distribute, republish, or post, requires prior specific
-   permission and\hspace*{.5pt}/or a fee. Request permissions from
-   permissions@acm.org.
+   This article was authored by employees of the Government of
+   Canada. As such, the Canadian government retains all interest in
+   the copyright to this work and grants to ACM a nonexclusive,
+   royalty-free right to publish or reproduce this article, or to
+   allow others to do so, provided that clear attribution is given
+   both to the authors and the Canadian government agency employing
+   them. Permission to make digital or hard copies for personal or
+   classroom use is granted. Copies must bear this notice and the full
+   citation on the first page. Copyrights for components of this work
+   owned by others than the Canadian Government must be honored. To
+   copy otherwise, distribute, republish, or post, requires prior
+   specific permission and/or a fee. Request permissions from
+   owner\hspace*{.5pt}/author(s).
   \or % cagovmixed
    ACM acknowledges that this contribution was co-authored by an
    affiliate of the national government of Canada. As such, the Crown
-   in Right of Canada retains an equal interest in the copyright.
-   Reprints must include clear attribution to ACM and the author's
-   government agency affiliation.  Permission to make digital or hard
-   copies for personal or classroom use is granted.  Copies must bear
-   this notice and the full citation on the first page. Copyrights for
-   components of this work owned by others than ACM must be honored.
-   To copy otherwise, distribute, republish, or post, requires prior
-   specific permission and\hspace*{.5pt}/or a fee. Request permissions
-   from permissions@acm.org.
+   in Right of Canada retains an equal interest in the
+   copyright. Reprints must include clear attribution to ACM and the
+   author’s government agency affiliation. Permission to make digital
+   or hard copies for personal or classroom use is granted. Copies
+   must bear this notice and the full citation on the first
+   page. Copyrights for components of this work owned by others than
+   ACM must be honored. To copy otherwise, distribute, republish, or
+   post, requires prior specific permission and/or a fee. Request
+   permissions from owner\hspace*{.5pt}/author(s).
   \or % licensedusgovmixed
    Publication rights licensed to ACM\@. ACM acknowledges that this
    contribution was authored or co-authored by an employee, contractor
    or affiliate of the United States government. As such, the
    Government retains a nonexclusive, royalty-free right to publish or
    reproduce this article, or to allow others to do so, for Government
-   purposes only.
+   purposes only. Request permissions from
+   owner\hspace*{.5pt}/author(s).
   \or % licensedcagov
-   This article was authored by employees of the Government of Canada.
-   As such, the Canadian government retains all interest in the
-   copyright to this work and grants to ACM a nonexclusive,
-   royalty-free right to publish or reproduce this article, or to allow
-   others to do so, provided that clear attribution is given both to
-   the authors and the Canadian government agency employing them.
-   Permission to make digital or hard copies for personal or classroom
-   use is granted. Copies must bear this notice and the full citation
-   on the first page.  Copyrights for components of this work owned by
-   others than the Canadian Government must be honored. To copy
-   otherwise, distribute, republish, or post, requires prior specific
-   permission and\hspace*{.5pt}/or a fee. Request permissions from
-   permissions@acm.org.
+   This article was authored by employees of the Government of
+   Canada. As such, the Canadian government retains all interest in
+   the copyright to this work and grants to ACM a nonexclusive,
+   royalty-free right to publish or reproduce this article, or to
+   allow others to do so, provided that clear attribution is given
+   both to the authors and the Canadian government agency employing
+   them. Permission to make digital or hard copies for personal or
+   classroom use is granted. Copies must bear this notice and the full
+   citation on the first page. Copyrights for components of this work
+   owned by others than the Canadian Government must be honored. To
+   copy otherwise, distribute, republish, or post, requires prior
+   specific permission and/or a fee. Request permissions from
+   owner\hspace*{.5pt}/author(s).
   \or % licensedcagovmixed
-   Publication rights licensed to ACM\@. ACM acknowledges that this
+   Publication rights licensed to ACM. ACM acknowledges that this
    contribution was authored or co-authored by an employee, contractor
    or affiliate of the national government of Canada. As such, the
    Government retains a nonexclusive, royalty-free right to publish or
    reproduce this article, or to allow others to do so, for Government
-   purposes only.
+   purposes only. Request permissions from
+   owner\hspace*{.5pt}/author(s).
   \or % othergov
    ACM acknowledges that this contribution was authored or co-authored
-   by an employee, contractor or affiliate of a national government. As
-   such, the Government retains a nonexclusive, royalty-free right to
-   publish or reproduce this article, or to allow others to do so, for
-   Government purposes only.
+   by an employee, contractor or affiliate of a national
+   government. As such, the Government retains a nonexclusive,
+   royalty-free right to publish or reproduce this article, or to
+   allow others to do so, for Government purposes only. Request
+   permissions from owner\hspace*{.5pt}/author(s).
   \or % licensedothergov
    Publication rights licensed to ACM\@. ACM acknowledges that this
    contribution was authored or co-authored by an employee, contractor
    or affiliate of a national government. As such, the Government
    retains a nonexclusive, royalty-free right to publish or reproduce
    this article, or to allow others to do so, for Government purposes
-   only.
+   only. Request permissions from owner\hspace*{.5pt}/author(s).
  \or % iw3c2w3
    This paper is published under the Creative Commons Attribution~4.0
    International (CC-BY~4.0) license. Authors reserve their rights to
@@ -1890,7 +2144,26 @@
    (CC-BY-NC-ND~4.0) license. Authors reserve their rights to
    disseminate the work on their personal and corporate Web sites with
    the appropriate attribution.
+ \or % CC
+   \@ACM@copyright@check@cc
+   \IfEq{\ACM@cc@type}{zero}{%
+     \def\ACM@CC@Url{https://creativecommons.org/publicdomain/zero/1.0/legalcode}}{%
+  \edef\ACM@CC@Url{https://creativecommons.org/licenses/\ACM@cc@type/\ACM@cc@version/legalcode}}%
+   \href{\ACM@CC@Url}{\includegraphics[height=5ex]{doclicense-CC-\ACM@cc@type-88x31}}\\
+   \href{\ACM@CC@Url}{%
+   This work is licensed under a Creative Commons
+   \IfEq{\ACM@cc@type}{zero}{CC0 1.0 Universal}{%
+     \IfEq{\ACM@cc@type}{by}{Attribution}{}%
+     \IfEq{\ACM@cc@type}{by-sa}{Attribution-ShareAlike}{}%
+     \IfEq{\ACM@cc@type}{by-nd}{Attribution-NoDerivatives}{}%
+     \IfEq{\ACM@cc@type}{by-nc}{Attribution-NonCommercial}{}%
+     \IfEq{\ACM@cc@type}{by-nc-sa}{Attribution-NonCommercial-ShareAlike}{}%
+     \IfEq{\ACM@cc@type}{by-nc-nd}{Attribution-NonCommercial-NoDerivatives}{}%
+     ~\IfEq{\ACM@cc@version}{4.0}{4.0 International}{3.0 Unported}%
+   }
+   License.}%
  \fi}
+%%
 \def\copyrightyear#1{\def\@copyrightyear{#1}}
 \copyrightyear{\@acmYear}
 \def\@teaserfigures{}
@@ -1913,6 +2186,10 @@
   \let\@beginmaketitlehook\@empty
 \fi
 \def\AtBeginMaketitle{\g@addto@macro\@beginmaketitlehook}
+\def\@acmengagemetadata{}
+\def\setengagemetadata#1#2{%
+  \g@addto@macro{\@acmengagemetadata}{%
+    \@setengagemetadata{#1}{#2}}}
 \newbox\mktitle@bx
 \def\maketitle{\@beginmaketitlehook
   \@ACM@maketitle@typesettrue
@@ -1943,15 +2220,23 @@
     \footnotetextauthorsaddresses{%
       \def\par{\let\par\@par}\parindent\z@\@setthanks}%
   \fi
-  \ifx\@empty\@authorsaddresses\else
-     \if@ACM@anonymous\else
-       \if@ACM@journal@bibstrip
-         \footnotetextauthorsaddresses{%
-           \def\par{\let\par\@par}\parindent\z@\@setauthorsaddresses}%
+  \if@ACM@acmcp\else
+    \ifx\@empty\@authorsaddresses\else
+       \if@ACM@anonymous\else
+         \if@ACM@journal@bibstrip@or@tog
+           \footnotetextauthorsaddresses{%
+             \def\par{\let\par\@par}\parindent\z@\@setauthorsaddresses}%
+         \fi
        \fi
-     \fi
+    \fi
   \fi
-  \if@ACM@nonacm\else\footnotetextcopyrightpermission{%
+  \if@ACM@nonacm
+    \ifnum\acm@copyrightmode=15\relax % cc
+       \footnotetextcopyrightpermission{\@copyrightpermission}%
+    \fi
+  \else
+    \if@ACM@acmcp\else
+    \footnotetextcopyrightpermission{%
     \if@ACM@authordraft
         \raisebox{-2ex}[\z@][\z@]{\makebox[0pt][l]{\large\bfseries
             Unpublished working draft. Not for distribution.}}%
@@ -1963,7 +2248,11 @@
     \fi
     \if@ACM@manuscript\else
        \if@ACM@journal@bibstrip\else % Print the conference information
+         \if@ACM@engage
+            {\itshape \@acmBooktitle, \@acmYear.}\par
+         \else
          {\itshape \acmConference@shortname, \acmConference@date, \acmConference@venue}\par
+         \fi
        \fi
     \fi
     \if@printcopyright
@@ -1991,19 +2280,19 @@
         \else
           \if@ACM@nonacm\else
             \if@ACM@journal@bibstrip
-              \@permissionCodeOne/\@acmYear/\@acmMonth-ART\@acmArticle
-              \ifx\@acmPrice\@empty\else\ \$\@acmPrice\fi\\
+              ACM~\@permissionCodeTwo/\@acmYear/\@acmMonth-ART\@acmArticle\\
               \@formatdoi{\@acmDOI}%
             \else % Conference
-              \ifx\@acmISBN\@empty\else ACM~ISBN~\@acmISBN
-              \ifx\@acmPrice\@empty.\else\dots\$\@acmPrice\fi\\\fi
+              \ifx\@acmISBN\@empty\else ACM~ISBN~\@acmISBN\\\fi
               \ifx\@acmDOI\@empty\else\@formatdoi{\@acmDOI}\fi%
             \fi
           \fi
         \fi
-      \fi}
+      \fi}%
+    \fi
     \fi
   \endgroup
+  \if@ACM@engage\@typesetengagemetadata\fi
   \setcounter{footnote}{0}%
   \@mkabstract
   \ifx\@translatedabstracts\@empty\else
@@ -2014,12 +2303,14 @@
          \noindent\@concepts\par}\egroup
      \fi
    \fi
-   \ifx\@keywords\@empty\else\bgroup
-      {\@specialsection{\keywordsname}%
-         \noindent\@keywords\par}\egroup
-   \fi
-  \ifx\@translatedkeywords\@empty\else
-     \@translatedkeywords
+   \if@ACM@acmcp\else
+     \ifx\@keywords\@empty\else\bgroup
+        {\@specialsection{\keywordsname}%
+           \noindent\@keywords\par}\egroup
+     \fi
+    \ifx\@translatedkeywords\@empty\else
+       \@translatedkeywords
+    \fi
   \fi
   \let\metadata@authors=\authors
   \nxandlist{, }{, }{, }\metadata@authors
@@ -2046,7 +2337,45 @@
   \@printendtopmatter
   \@afterindentfalse
   \@afterheading
+  \if@ACM@acmcp
+    \set@ACM@acmcpbox
+    \AtEndDocument{\end@ACM@color@frame}%
+    \@ACM@color@frame
+  \fi
 }
+\newbox\@ACM@acmcpbox
+\def\set@ACM@acmcpbox{%
+  \bgroup
+  \hsize=5pc
+  \global\setbox\@ACM@acmcpbox=\vbox{%
+    \setlength{\parindent}{\z@}%
+    {\includegraphics[width=\hsize]{acm-jdslogo}\par}%
+    \scriptsize
+    \ifnum\getrefnumber{TotPages}>1\else
+      \zrefused{@ACM@acmcpbox@y}%
+      \zrefused{@ACM@acmcpframe@y}%
+      \@tempdima=\dimexpr\zposy{@ACM@acmcpbox@y}sp -
+      \zposy{@ACM@acmcpframe@y}sp+0.3\FrameSep+
+      \@ACM@acmcp@delta\relax
+      \ifdim\@tempdima>0pt\relax
+         \vspace*{\@tempdima}%
+         \protected@write\@auxout{}%
+         {\string\global\@ACM@acmcp@delta=\the\@tempdima\relax}%
+      \fi
+    \fi
+    \ifx\@acmCodeDataLink\@empty\else\bigskip
+    Code and data links:\\ \@acmCodeDataLink\par\bigskip
+    \fi
+    \ifx\@keywords\@empty\else\bigskip
+      Keywords: \@keywords\par
+    \fi
+    \ifx\@acmContributions\@empty\else\bigskip
+      \@acmContributions\par
+    \fi
+    \ifx\@empty\@authorsaddresses\else\bigskip\@setauthorsaddresses\fi
+    \zsaveposy{@ACM@acmcpbox@y}%
+  }
+\egroup}
 \def\@specialsection#1{%
   \let\@vspace\@vspace@orig
   \let\@vspacer\@vspacer@orig
@@ -2068,6 +2397,10 @@
   \or % sigchi
     \section*{#1}%
   \or % sigchi-a
+    \section*{#1}%
+  \or % acmengage
+    \section*{#1}%
+  \or % acmcp
     \section*{#1}%
     \fi
   \let\@vspace\@vspace@acm
@@ -2112,18 +2445,10 @@
     \twocolumn[\box\mktitle@bx]%
   \or % sigchi-a
     \par\box\mktitle@bx\par\bigskip
-    \if@ACM@badge
-       \marginpar{\noindent
-         \ifx\@acmBadgeL@image\@empty\else
-           \href{\@acmBadgeL@url}{%
-             \includegraphics[width=\@ACM@badge@width]{\@acmBadgeL@image}}%
-            \hskip\@ACM@badge@skip
-          \fi
-         \ifx\@acmBadgeR@image\@empty\else
-           \href{\@acmBadgeR@url}{%
-             \includegraphics[width=\@ACM@badge@width]{\@acmBadgeR@image}}%
-          \fi}%
-    \fi
+  \or % acmengage
+    \twocolumn[\box\mktitle@bx]%
+  \or % acmcp
+     \box\mktitle@bx\par
   \fi
 }
 \def\@mktitle{%
@@ -2146,6 +2471,10 @@
     \@mktitle@iii
   \or % sigchi-a
     \@mktitle@iv
+  \or % acmengage
+    \@mktitle@iii
+  \or % acmcp
+    \@mktitle@i
   \fi
 }
 \def\@titlefont{%
@@ -2168,6 +2497,10 @@
     \Huge\sffamily\bfseries
   \or % sigchi-a
      \Huge\bfseries
+  \or % acmengage
+    \Huge\sffamily\bfseries
+  \or % acmcp
+    \LARGE\sffamily\bfseries
   \fi}
 \def\@subtitlefont{\normalsize
   \ifcase\ACM@format@nr
@@ -2189,62 +2522,33 @@
      \LARGE\mdseries
   \or % sigchi-a
      \mdseries
+  \or % acmengage
+     \LARGE\mdseries
+  \or % acmcp
+    \mdseries
   \fi}
 \def\@mktitle@i{\hsize=\textwidth
+  \if@ACM@acmcp
+    \advance\hsize by -6pc%
+  \fi
   \@ACM@title@width=\hsize
-  \ifx\@acmBadgeL@image\@empty\else
-    \advance\@ACM@title@width by -\@ACM@badge@width
-    \advance\@ACM@title@width by -\@ACM@badge@skip
-  \fi
-  \ifx\@acmBadgeR@image\@empty\else
-    \advance\@ACM@title@width by -\@ACM@badge@width
-    \advance\@ACM@title@width by -\@ACM@badge@skip
-  \fi
   \setbox\mktitle@bx=\vbox{\noindent\@titlefont
-    \ifx\@acmBadgeL@image\@empty\else
-      \raisebox{-.5\baselineskip}[\z@][\z@]{\href{\@acmBadgeL@url}{%
-          \includegraphics[width=\@ACM@badge@width]{\@acmBadgeL@image}}}%
-      \hskip\@ACM@badge@skip
-    \fi
     \parbox[t]{\@ACM@title@width}{\raggedright
       \@titlefont\noindent
       \@title\@translatedtitle%
   \ifx\@subtitle\@empty\else
     \par\noindent{\@subtitlefont\@subtitle\@translatedsubtitle}%
   \fi}%
-  \ifx\@acmBadgeR@image\@empty\else
-    \hskip\@ACM@badge@skip
-    \raisebox{-.5\baselineskip}[\z@][\z@]{\href{\@acmBadgeR@url}{%
-        \includegraphics[width=\@ACM@badge@width]{\@acmBadgeR@image}}}%
-  \fi
   \par\bigskip}}%
 \def\@mktitle@iii{\hsize=\textwidth
     \setbox\mktitle@bx=\vbox{\@titlefont\centering
       \@ACM@title@width=\hsize
-      \if@ACM@badge
-        \advance\@ACM@title@width by -2\@ACM@badge@width
-        \advance\@ACM@title@width by -2\@ACM@badge@skip
-        \parbox[b]{\@ACM@badge@width}{\strut
-          \ifx\@acmBadgeL@image\@empty\else
-            \raisebox{-.5\baselineskip}[\z@][\z@]{\href{\@acmBadgeL@url}{%
-                \includegraphics[width=\@ACM@badge@width]{\@acmBadgeL@image}}}%
-          \fi}%
-        \hskip\@ACM@badge@skip
-      \fi
       \parbox[t]{\@ACM@title@width}{\centering\@titlefont
         \@title\@translatedtitle%
         \ifx\@subtitle\@empty\else
           \par\noindent{\@subtitlefont\@subtitle\@translatedsubtitle}
         \fi
       }%
-      \if@ACM@badge
-        \hskip\@ACM@badge@skip
-        \parbox[b]{\@ACM@badge@width}{\strut
-          \ifx\@acmBadgeR@image\@empty\else
-            \raisebox{-.5\baselineskip}[\z@][\z@]{\href{\@acmBadgeR@url}{%
-                \includegraphics[width=\@ACM@badge@width]{\@acmBadgeR@image}}}%
-          \fi}%
-      \fi
       \par\bigskip}}%
 \def\@mktitle@iv{\hsize=\textwidth
     \setbox\mktitle@bx=\vbox{\raggedright\leftskip5pc\@titlefont
@@ -2262,8 +2566,12 @@
     \unskip\cleaders\copy\@ACM@commabox\hskip\wd\@ACM@commabox
   \fi\fi
   #1}
-\def\streetaddress#1{\unskip\ignorespaces}
-\def\postcode#1{\unskip\ignorespaces}
+\def\streetaddress#1{\ClassWarning{\@classname}{ACM no longer collects
+  authors' postal addresses.  I am ignoring your street
+  address}\unskip\ignorespaces}
+\def\postcode#1{\ClassWarning{\@classname}{ACM no longer collects
+  authors' postal addresses.  I am ignoring your postal
+  code}\unskip\ignorespaces}
 \if@ACM@journal
   \def\position#1{\unskip\ignorespaces}
   \def\institution#1{\global\@ACM@instpresenttrue
@@ -2271,7 +2579,9 @@
   \def\city#1{\global\@ACM@citypresenttrue\unskip\ignorespaces}
   \def\state#1{\unskip\ignorespaces}
   \newcommand\department[2][0]{\unskip\ignorespaces}
-  \def\country#1{\global\@ACM@countrypresenttrue
+  \def\country#1{\StrDel{#1}{ }[\@tempa]%
+    \ifx\@tempa\@empty\else
+    \global\@ACM@countrypresenttrue\fi
     \if@ACM@affiliation@obeypunctuation\else, \fi#1\ignorespaces}
 \else
   \def\position#1{\if@ACM@affiliation@obeypunctuation#1\else#1\par\fi}%
@@ -2304,6 +2614,10 @@
     \@mkauthors@iii
   \or % sigchi-a
     \@mkauthors@iv
+  \or % acmengage
+    \@mkauthors@iii
+  \or % acmcp
+    \@mkauthors@i
   \fi
   \endgroup
 }
@@ -2333,6 +2647,12 @@
 \or % sigchi-a
   \def\@authorfont{\bfseries}
   \def\@affiliationfont{\mdseries}
+\or % acmengage
+  \def\@authorfont{\LARGE}
+  \def\@affiliationfont{\large}
+\or % acmcp
+  \def\@authorfont{\large\sffamily}
+  \def\@affiliationfont{\small\normalfont}
 \fi
 \def\@typeset@author@line{%
   \andify\@currentauthors\par\noindent
@@ -2393,6 +2713,9 @@
       \fi
     \fi
      \global\let\and\@typeset@author@line}%
+  \if@ACM@acmcp
+    \advance\hsize by -6pc%
+  \fi
   \global\setbox\mktitle@bx=\vbox{\noindent\unvbox\mktitle@bx\par\medskip
     \noindent\addresses\@typeset@author@line
    \par\medskip}%
@@ -2508,11 +2831,14 @@
 \def\@mkauthorsaddresses{%
   \ifnum\num@authors>1\relax
   Authors' \else Author's \fi
-  \ifnum\num@authorgroups>1\relax
-  addresses: \else address: \fi
+  Contact Information:
   \bgroup
-  \def\streetaddress##1{\unskip, ##1}%
-  \def\postcode##1{\unskip, ##1}%
+  \def\streetaddress##1{\ClassWarning{\@classname}{ACM no longer collects
+  authors' postal addresses.  I am ignoring your street
+  address}\unskip\ignorespaces}%
+  \def\postcode##1{\ClassWarning{\@classname}{ACM no longer collects
+  authors' postal addresses.  I am ignoring your postal
+  code}\unskip\ignorespaces}%
   \def\position##1{\unskip\ignorespaces}%
   \gdef\@ACM@institution@separator{, }%
   \def\institution##1{\unskip\@ACM@institution@separator ##1\gdef\@ACM@institution@separator{ and }}%
@@ -2606,6 +2932,9 @@
   }
 \def\@setthanks{\long\def\thanks##1{\par##1\@addpunct.}\thankses}
 \def\@setauthorsaddresses{\@authorsaddresses\unskip\@addpunct.}
+\def\@typesetengagemetadata{%
+  \def\@setengagemetadata##1##2{\par\noindent\textbf{##1} ##2\par}%
+  \@acmengagemetadata}
 \RequirePackage{fancyhdr}
 \let\ACM@ps@plain\ps@plain
 \let\ACM@ps@myheadings\ps@myheadings
@@ -2659,6 +2988,10 @@
           \ACM@mk@linecount
        \or % sigchi-a
           \ACM@mk@linecount
+       \or % acmengage
+          \ACM@mk@linecount
+       \or % acmcp
+         \relax
     \fi
     \begin{picture}(0,0)%
       \put(20,-22){\usebox{\ACM@linecount@bx}}%
@@ -2699,7 +3032,7 @@
       \@acmArticle\if@ACM@printfolios:\thepage\fi%
     \fi%
   }%
-  \if@ACM@journal@bibstrip
+  \if@ACM@journal@bibstrip@or@tog
     \ifcase\ACM@format@nr
     \relax % manuscript
       \fancyhead[LE]{\ACM@linecountL\if@ACM@printfolios\thepage\fi}%
@@ -2735,9 +3068,15 @@
       \fancyhead[RE]{\ACM@linecountR}%
       \fancyhead[RO]{\@headfootfont
         \shorttitle\quad\textbullet\quad\@acmArticlePage\ACM@linecountR}%
-      \if@ACM@nonacm\else%
-        \fancyfoot[RO,LE]{\footnotesize \@journalNameShort, Vol. \@acmVolume, No.
-        \@acmNumber, Article \@acmArticle.  Publication date: \@acmPubDate.}%
+      \if@ACM@nonacm\else
+        \if@ACM@journal@bibstrip
+          \fancyfoot[RO,LE]{\footnotesize \@journalNameShort,
+            Vol. \@acmVolume, No.~\@acmNumber, Article \@acmArticle.
+            Publication date: \@acmPubDate.}%
+        \else
+          \fancyfoot[RO,LE]{\footnotesize \acmConference@shortname,
+            \acmConference@date, \acmConference@venue.}%
+         \fi
       \fi
     \else % Proceedings
       \fancyfoot[C]{\if@ACM@printfolios\footnotesize\thepage\fi}%
@@ -2747,12 +3086,20 @@
         \fancyhead[LE]{\ACM@linecountL}%
         \fancyhead[RO]{\ACM@linecountR}%
       \else%
-        \fancyhead[LE]{\ACM@linecountL\@headfootfont\footnotesize
-          \acmConference@shortname,
-          \acmConference@date, \acmConference@venue}%
-        \fancyhead[RO]{\@headfootfont
-          \acmConference@shortname,
-          \acmConference@date, \acmConference@venue\ACM@linecountR}%
+        \if@ACM@engage
+          \fancyhead[LE]{\ACM@linecountL\@headfootfont\footnotesize
+            EngageCSEdu. \ifx\@acmDOI\@empty\else\@formatdoi{\@acmDOI}\fi}%
+          \fancyhead[RO]{\@headfootfont
+            EngageCSEdu. \ifx\@acmDOI\@empty\else\@formatdoi{\@acmDOI}\fi
+            \ACM@linecountR}%
+        \else
+          \fancyhead[LE]{\ACM@linecountL\@headfootfont\footnotesize
+            \acmConference@shortname,
+            \acmConference@date, \acmConference@venue}%
+          \fancyhead[RO]{\@headfootfont
+            \acmConference@shortname,
+            \acmConference@date, \acmConference@venue\ACM@linecountR}%
+         \fi
       \fi
     \fi
   \else % Proceedings
@@ -2763,12 +3110,20 @@
       \fancyhead[LE]{\ACM@linecountL}%
       \fancyhead[RO]{\ACM@linecountR}%
     \else%
-      \fancyhead[LE]{\ACM@linecountL\@headfootfont
-        \acmConference@shortname,
-        \acmConference@date, \acmConference@venue}%
-      \fancyhead[RO]{\@headfootfont
-        \acmConference@shortname,
-        \acmConference@date, \acmConference@venue\ACM@linecountR}%
+      \if@ACM@engage
+        \fancyhead[LE]{\ACM@linecountL\@headfootfont
+          EngageCSEdu. \ifx\@acmDOI\@empty\else\@formatdoi{\@acmDOI}\fi}%
+        \fancyhead[RO]{\@headfootfont
+          EngageCSEdu. \ifx\@acmDOI\@empty\else\@formatdoi{\@acmDOI}\fi
+          \ACM@linecountR}%
+      \else
+        \fancyhead[LE]{\ACM@linecountL\@headfootfont
+          \acmConference@shortname,
+          \acmConference@date, \acmConference@venue}%
+        \fancyhead[RO]{\@headfootfont
+          \acmConference@shortname,
+          \acmConference@date, \acmConference@venue\ACM@linecountR}%
+       \fi
     \fi
   \fi
   \if@ACM@sigchiamode
@@ -2777,58 +3132,34 @@
   \if@ACM@timestamp
      \fancyfoot[LO,RE]{\ACM@timestamp}
   \fi
+  \if@ACM@acmcp
+  \renewcommand{\footrulewidth}{0.1\p@}%
+  \fancyheadoffset[L]{46pt}%
+  \fancyhead[L]{\makebox[\z@][l]{%
+      \raisebox{-\dimexpr(0.2\textheight*(\ACM@ArticleType@nr-2))}{%
+      \rotatebox{90}{\colorbox{@ACM@Article@color}{\color{white}%
+          \strut\ACM@ArticleType~Article}}}}%
+    \ACM@linecountL}%
+  \fancyhead[R]{\makebox[\z@][r]{\box\@ACM@acmcpbox}}%
+  \fancyfoot[L,C]{}%
+  \fancyfoot[R]{\footnotesize
+    \@journalName, Volume~\@acmVolume, Issue~\@acmNumber,
+    \ifx\@acmArticle\@empty\else Article~\@acmArticle\fi\space
+    (\@acmPubDate)\ifx\@acmDOI\@empty\else\\\@formatdoi{\@acmDOI}\fi}
+  \fi
 }%
 \pagestyle{standardpagestyle}
 }
-\newdimen\@folio@wd
-\@folio@wd=\z@
-\newdimen\@folio@ht
-\@folio@ht=\z@
-\newdimen\@folio@voffset
-\@folio@voffset=\z@
-\def\@folio@max{1}
-\ifcase\ACM@format@nr
-\relax % manuscript
-\or % acmsmall
-  \@folio@wd=45.75pt\relax
-  \@folio@ht=1.25in\relax
-  \@folio@voffset=.2in\relax
-  \def\@folio@max{8}
-\or % acmlarge
-  \@folio@wd=43.25pt\relax
-  \@folio@ht=79pt\relax
-  \@folio@voffset=.55in\relax
-  \def\@folio@max{10}
-\fi
-\def\@folioblob{\@tempcnta=0\@acmArticleSeq\relax
-  \ifnum\@tempcnta=0\relax\else
-  \loop
-     \ifnum\@tempcnta>\@folio@max\relax
-      \advance\@tempcnta by - \@folio@max
-   \repeat
-    \advance\@tempcnta by -1\relax
-    \@tempdima=\@folio@ht\relax
-    \multiply\@tempdima by \the\@tempcnta\relax
-    \advance\@tempdima by -\@folio@voffset\relax
-    \begin{picture}(0,0)
-    \makebox[\z@]{\raisebox{-\@tempdima}{%
-        \rlap{%
-          \raisebox{-0.45\@folio@ht}[\z@][\z@]{%
-            \rule{\@folio@wd}{\@folio@ht}}}%
-        \parbox{\@folio@wd}{%
-          \centering
-          \textcolor{white}{\LARGE\sffamily\bfseries\@acmArticle}}}}
-  \end{picture}\fi}
-
 \AtBeginDocument{%
 \fancypagestyle{firstpagestyle}{%
   \fancyhf{}%
   \renewcommand{\headrulewidth}{\z@}%
   \renewcommand{\footrulewidth}{\z@}%
-  \if@ACM@journal@bibstrip
+  \if@ACM@journal@bibstrip@or@tog
     \ifcase\ACM@format@nr
     \relax % manuscript
-      \fancyhead[L]{\ACM@linecountL}%
+      \fancyhead[L]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[R]{\@acmBadgeR}%
       \fancyfoot[RO,LE]{\if@ACM@printfolios\small\thepage\fi}%
       \if@ACM@nonacm\else%
         \fancyfoot[RE,LO]{\footnotesize Manuscript submitted to ACM}%
@@ -2839,36 +3170,41 @@
         \@acmNumber, Article \@acmArticle.  Publication date:
         \@acmPubDate.}%
       \fi%
-      \fancyhead[LE]{\ACM@linecountL\@folioblob}%
-      \fancyhead[LO]{\ACM@linecountL}%
-      \fancyhead[RO]{\@folioblob}%
-      \fancyheadoffset[RO,LE]{0.6\@folio@wd}%
+      \fancyhead[LE]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[LO]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[RO]{\@acmBadgeR}%
+      \fancyhead[RE]{\@acmBadgeR}%
     \or % acmlarge
       \if@ACM@nonacm\else%
         \fancyfoot[RO,LE]{\footnotesize \@journalNameShort, Vol. \@acmVolume, No.
         \@acmNumber, Article \@acmArticle.  Publication date:
         \@acmPubDate.}%
       \fi%
-      \fancyhead[RO]{\@folioblob}%
-      \fancyhead[LE]{\ACM@linecountL\@folioblob}%
-      \fancyhead[LO]{\ACM@linecountL}%
-      \fancyheadoffset[RO,LE]{1.4\@folio@wd}%
+      \fancyhead[RO]{\@acmBadgeR}%
+      \fancyhead[RE]{\@acmBadgeR}%
+      \fancyhead[LE]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[LO]{\ACM@linecountL\@acmBadgeL}%
     \or % acmtog
       \if@ACM@nonacm\else%
-        \fancyfoot[RO,LE]{\footnotesize \@journalNameShort, Vol. \@acmVolume, No.
-        \@acmNumber, Article \@acmArticle.  Publication date:
-        \@acmPubDate.}%
+        \if@ACM@journal@bibstrip
+          \fancyfoot[RO,LE]{\footnotesize \@journalNameShort,
+            Vol. \@acmVolume, No.~\@acmNumber, Article \@acmArticle.
+            Publication date: \@acmPubDate.}%
+        \else
+          \fancyfoot[RO,LE]{\footnotesize \acmConference@shortname,
+            \acmConference@date, \acmConference@venue.}%
+         \fi
       \fi%
-      \fancyhead[L]{\ACM@linecountL}%
-      \fancyhead[R]{\ACM@linecountR}%
+      \fancyhead[L]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[R]{\@acmBadgeR\ACM@linecountR}%
     \else % Conference proceedings
-      \fancyhead[L]{\ACM@linecountL}%
-      \fancyhead[R]{\ACM@linecountR}%
+      \fancyhead[L]{\ACM@linecountL\@acmBadgeL}%
+      \fancyhead[R]{\@acmBadgeR\ACM@linecountR}%
       \fancyfoot[C]{\if@ACM@printfolios\footnotesize\thepage\fi}%
     \fi
   \else
-    \fancyhead[L]{\ACM@linecountL}%
-    \fancyhead[R]{\ACM@linecountR}%
+    \fancyhead[L]{\ACM@linecountL\@acmBadgeL}%
+    \fancyhead[R]{\@acmBadgeR\ACM@linecountR}%
     \fancyfoot[C]{\if@ACM@printfolios\footnotesize\thepage\fi}%
   \fi
   \if@ACM@timestamp
@@ -2880,6 +3216,21 @@
     \else
     \fancyfoot[LO,RE]{\ACM@timestamp}
     \fi
+  \fi
+  \if@ACM@acmcp
+  \renewcommand{\footrulewidth}{0.1\p@}%
+  \fancyheadoffset[L]{46pt}%
+  \fancyhead[L]{\makebox[\z@][l]{%
+      \raisebox{-\dimexpr(0.2\textheight*(\ACM@ArticleType@nr-2))}{%
+      \rotatebox{90}{\colorbox{@ACM@Article@color}{\color{white}%
+          \strut\ACM@ArticleType~Article}}}}%
+    \ACM@linecountL\@acmBadgeL}%
+  \fancyhead[R]{\@acmBadgeR\makebox[\z@][r]{\box\@ACM@acmcpbox}}%
+  \fancyfoot[L,C]{}%
+  \fancyfoot[R]{\footnotesize
+    \@journalName, Volume~\@acmVolume, Issue~\@acmNumber,
+    \ifx\@acmArticle\@empty\else Article~\@acmArticle\fi\space
+    (\@acmPubDate)\ifx\@acmDOI\@empty\else\\\@formatdoi{\@acmDOI}\fi}
   \fi
 }}
 \def\ACM@NRadjust#1{%
@@ -2941,7 +3292,7 @@
   \rightskip\@rightskip
   \leftskip\z@skip
   \parindent\z@}
-\def\@secfont{\sffamily\bfseries\section@raggedright\MakeTextUppercase}
+\def\@secfont{\sffamily\bfseries\section@raggedright}
 \def\@subsecfont{\sffamily\bfseries\section@raggedright}
 \def\@subsubsecfont{\sffamily\itshape}
 \def\@parfont{\itshape}
@@ -2950,16 +3301,16 @@
 \relax % manuscript
 \or % acmsmall
 \or % acmlarge
- \def\@secfont{\sffamily\large\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\sffamily\large\section@raggedright}
  \def\@subsecfont{\sffamily\large\section@raggedright}
 \or % acmtog
- \def\@secfont{\sffamily\large\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\sffamily\large\section@raggedright}
  \def\@subsecfont{\sffamily\large\section@raggedright}
 \or % sigconf
- \def\@secfont{\bfseries\Large\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\bfseries\Large\section@raggedright}
  \def\@subsecfont{\bfseries\Large\section@raggedright}
 \or % siggraph
- \def\@secfont{\sffamily\bfseries\Large\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\sffamily\bfseries\Large\section@raggedright}
  \def\@subsecfont{\sffamily\bfseries\Large\section@raggedright}
 \or % sigplan
  \def\@secfont{\bfseries\Large\section@raggedright}
@@ -2969,15 +3320,22 @@
  \def\@subparfont{\itshape}
 \or % sigchi
  \setcounter{secnumdepth}{1}
- \def\@secfont{\sffamily\bfseries\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\sffamily\bfseries\section@raggedright}
  \def\@subsecfont{\sffamily\bfseries\section@raggedright}
 \or % sigchi-a
  \setcounter{secnumdepth}{0}
- \def\@secfont{\sffamily\bfseries\section@raggedright\MakeTextUppercase}
+ \def\@secfont{\sffamily\bfseries\section@raggedright}
  \def\@subsecfont{\sffamily\bfseries\section@raggedright}
+\or % acmengage
+ \def\@secfont{\bfseries\Large\section@raggedright}
+ \def\@subsecfont{\bfseries\Large\section@raggedright}
+\or %acmcp
 \fi
 \def\@adddotafter#1{#1\@addpunct{.}}
 \def\@addspaceafter#1{#1\@addpunct{\enspace}}
+\if@ACM@acmcp
+   \setcounter{secnumdepth}{-1}%
+\fi
 \providecommand*\@dotsep{4.5}
 \def\@acmplainbodyfont{\itshape}
 \def\@acmplainindent{\parindent}
@@ -2997,6 +3355,8 @@
   \def\@acmplainnotefont{\normalfont}
 \or % sigchi
 \or % sigchi-a
+\or % acmengage
+\or % acmcp
 \fi
 \newtheoremstyle{acmplain}%
   {.5\baselineskip\@plus.2\baselineskip
@@ -3027,6 +3387,8 @@
   \def\@acmdefinitionnotefont{\normalfont}
 \or % sigchi
 \or % sigchi-a
+\or % acmengage
+\or % acmcp
 \fi
 \newtheoremstyle{acmdefinition}%
   {.5\baselineskip\@plus.2\baselineskip
@@ -3082,6 +3444,8 @@
   \def\@proofindent{\noindent}
 \or % sigchi
 \or % sigchi-a
+\or % acmengage
+\or % acmcp
 \fi
 \renewenvironment{proof}[1][\proofname]{\par
   \pushQED{\qed}%
@@ -3110,6 +3474,9 @@
        \or % sigchi
           \RequirePackage{pbalance}%
        \or % sigchi-a
+       \or % acmengage
+          \RequirePackage{pbalance}%
+       \or % acmcp
     \fi
   \fi
   \if@ACM@balance
@@ -3132,6 +3499,10 @@
           \RequirePackage{balance}%
        \or % sigchi-a
           \global\@ACM@balancefalse
+       \or % acmengage
+          \RequirePackage{balance}%
+       \or % acmcp
+         \global\@ACM@balancefalse
     \fi
   \fi
 }
