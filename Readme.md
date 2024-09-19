@@ -21,6 +21,8 @@ Elsevier, etc. It provides:
   editor)
 - A `.gitignore` file suitable for a single-document LaTeX project
 - A script to clean up a BibTeX file
+- A script to produce the diff between two versions of the same paper
+  highlighting the edits (using `latexdiff` in the background)
 
 Using this template, switching a paper from any stylesheet to any other
 simply amounts to regenerating two files with an included PHP script. You
