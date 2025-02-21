@@ -95,6 +95,12 @@ $config = array_merge($config, array(
      * Used only in the ACM journal, IEEE transactions and LIPICS styles.
      */
     //"keywords" => "science, magic, art",
+
+    /*
+     * If the paper is published in a conference, the booktitle of
+     * the conference. Used only in ACM conference proceedings.
+     */
+    "booktitle" => "42nd Conference on Very Important Topics",
     
     /*
      * If the paper is published in a conference, the acronym of

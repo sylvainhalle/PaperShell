@@ -3,8 +3,8 @@
 %%%  @BibTeX-style-file{
 %%%     author          = "Nelson H. F. Beebe, Boris Veytsman and Gerald Murray",
 %%%     version         = "2.1",
-%%%     acmart-version  = "1.79",
-%%%     date            = "14 June 2017",
+%%%     acmart-version  = "1.90",
+%%%     date            = "Mar 26 2023",
 %%%     filename        = "ACM-Reference-Format.bst",
 %%%     email           = "borisv@lk.net, boris@varphi.com",
 %%%     codetable       = "ISO/ASCII",
@@ -152,7 +152,7 @@ FUNCTION { empty.or.unknown }
 }
 
 FUNCTION { empty.or.zero }
-{ 
+{
   %% Examine the top entry and push 1 if it is empty, or is zero
   duplicate$ empty$
     { pop$ #1 }
@@ -501,10 +501,15 @@ FUNCTION { format.articleno }
 FUNCTION { format.year }
 { % push year string or "[n.\,d.]" onto output stack
   %% Because year is a mandatory field, we always force SOMETHING
-  %% to be output
+  %% to be output.  If we do not know year but know date, we push  date
+  %% as the last resort
   "\bibinfo{year}{"
   year empty.or.unknown
-    { "[n.\,d.]" }
+    { date empty.or.unknown
+        { "[n.\,d.]" }
+	{ date #1 #4 substring$ }
+      if$
+    }
     { year }
   if$
   *  "}" *
@@ -630,11 +635,8 @@ FUNCTION { output.doi } % UTAH
   doi empty.or.unknown
     { }
     {
-      %% Use \urldef here for the same reason it is used in output.url,
-      %% see output.url for further discussion.
-      "\urldef\tempurl%" writeln
-      "\url{https://doi.org/" strip.doi * "}" * writeln
-      "\showDOI{\tempurl}" writeln
+      "\href{https://doi.org/" strip.doi * "}{doi:\nolinkurl{" *
+      strip.doi  * "}}" * writeln
     }
   if$
 }
@@ -785,10 +787,22 @@ FUNCTION { output.year.check }
 { % warn if year empty, output top string and leave " YEAR<label>" on stack in mid-sentence
   year empty.or.unknown
      { "empty year in " cite$ * warning$
-       write$
-       " \bibinfo{year}{[n.\,d.]}"
-       "\natexlab{" extra.label * "}" * *
-       mid.sentence 'output.state :=
+       date empty.or.unknown
+       {
+          "using n.d. in " cite$ * warning$
+          write$
+          " \bibinfo{year}{[n.\,d.]}"
+          "\natexlab{" extra.label * "}" * *
+          mid.sentence 'output.state :=
+       }
+       {
+          "using date in " cite$ * warning$
+          write$
+          " \bibinfo{year}{" date #1 #4 substring$ * "}" *
+          "\natexlab{" extra.label * "}" * *
+          mid.sentence 'output.state :=
+        }
+	if$
      }
      { write$
        " \bibinfo{year}{" year * "}"  *
@@ -2005,7 +2019,11 @@ FUNCTION { calc.basic.label }
   if$
   duplicate$
   year empty.or.unknown
-    { "[n.\,d.]" }
+    { date empty.or.unknown
+        { "{[n.\,d.]}" }
+	{ date field.or.null purify$ #1 #4 substring$}
+      if$
+    }
     { year field.or.null purify$ #-1 #4 substring$}
   if$
   *
@@ -2053,7 +2071,11 @@ FUNCTION { calc.label }
   % save the year for sort processing afterwards (adding a, b, c, etc.)
   %
   year empty.or.unknown
-    { "[n.\,d.]" }
+    { date empty.or.unknown
+        { "{[n.\,d.]}" }
+	{ date field.or.null purify$ #1 #4 substring$}
+      if$
+    }
     { year field.or.null purify$ #-1 #4 substring$}
   if$
   'label.year :=
@@ -2419,7 +2441,6 @@ FUNCTION { misc }
     { }
     { "\bibinfo{howpublished}{" howpublished "}" * * output }
   if$
-  "" output.nonnull.dot.space
   calc.format.page.count output
   fin.block
   output.issue.doi.coden.isxn.lccn.url.eprint.note
@@ -3016,16 +3037,16 @@ FUNCTION { begin.bib }
   "%%% NOTE TO THE USER: you can override these defaults by providing"       writeln
   "%%% customized versions of any of these macros before the \bibliography"  writeln
   "%%% command.  Each of them MUST provide its own final punctuation,"       writeln
-  "%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two"  writeln
+  "%%% except for \shownote{} and \showURL{}.  The latter two"  writeln
   "%%% do not use final punctuation, in order to avoid confusing it with"    writeln
   "%%% the Web address."                                                     writeln
   "%%%"                                                                      writeln
   "%%% To suppress output of a particular field, define its macro to expand" writeln
   "%%% to an empty string, or better, \unskip, like this:"                   writeln
   "%%%"                                                                      writeln
-  "%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax"                   writeln
+  "%%% \newcommand{\showURL}[1]{\unskip}   % LaTeX syntax"                   writeln
   "%%%"                                                                      writeln
-  "%%% \def \showDOI #1{\unskip}           % plain TeX syntax"               writeln
+  "%%% \def \showURL #1{\unskip}           % plain TeX syntax"               writeln
   "%%%"                                                                      writeln
   "%%% ====================================================================" writeln
   ""                                                                         writeln
@@ -3047,7 +3068,6 @@ FUNCTION { begin.bib }
   %%         \newcommand{\showLCCN}[1]{LCCN #1.}
 
   "\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi" writeln
-  "\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi" writeln
   % ACM styles omit ISBNs, but they can be included by suitable definitions of
   % \showISBNx and \showISBNxiii before the .bbl file is read
   "\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi" writeln
