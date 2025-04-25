@@ -20,7 +20,8 @@ Elsevier, etc. It provides:
   stand-alone folder (ideal for exporting the camera-ready sources to an
   editor)
 - A `.gitignore` file suitable for a single-document LaTeX project
-- A script to clean up a BibTeX file
+- Multiple helper scripts to to clean up a BibTeX file, import missing
+  citations, etc.
 - A script to produce the diff between two versions of the same paper
   highlighting the edits (using `latexdiff` in the background)
 
@@ -132,7 +133,7 @@ the `\begin{document}`. Therefore, switching between classes
 requires some amount of braindead, yet frustrating copy-pasting from
 existing files you have, which arguably becomes quite mind-numbing when
 you've been doing that once in a while for the past ten years. And sadly,
-tools like Overleaf do not allow you to easily switch templates once you've
+tools like Overleaf do not allow you to switch templates once you've
 started writing.
 
 In this project, the paper's title, authors and institutions are written in
@@ -210,8 +211,7 @@ in some document classes.
   otherwise prevent the document from compiling
 - The postamble for Elsevier fixes the fact that the bibliography [does not have a section
   title](http://tex.stackexchange.com/questions/188625/no-references-title-using-elsevier-document-class)
-- The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore.
-  PaperShell contains a fixed version.
+- The EPTCS BibTeX file incorrectly handles `doi` fields that contain an underscore. PaperShell contains a fixed version.
 - The LIPIcs style is incompatible with the `subfig` package.
   PaperShell contains a fixed version.
 - The Springer Nature journal style has a [bug causing Tikz to break compilation](https://tex.stackexchange.com/q/615012). PaperShell contains a fixed version.
@@ -271,18 +271,46 @@ If you want to change the document to another article class, simply re-run
 `midamble.inc.tex` and `postamble.inc.tex` to Overleaf. This is even easier if
 you keep Overleaf in sync with a GitHub repository.
 
-Cleaning up a BibTeX file
--------------------------
+PaperShell is also available as a
+[template](https://www.overleaf.com/latex/templates/papershell/vbtfsrsdjrzc) in
+Overleaf. To create a new paper using it, go to the *Templates* section, and
+type "PaperShell" in the search bar.
+
+BibTeX helper scripts
+--------------------
+
+The project comes with a couple of (PHP) scripts that help manage BibTeX bibliographies.
+
+### Cleaning up a BibTeX file
 
 You can uniformize the presentation of BibTeX entries (indentation, etc.) and
 remove duplicate entries by passing it into a script. In the root folder of
-your project, type
+your project, type:
 
     php clean-bibtex.php
 
 This will read and parse `Source/paper.bib` and re-output a cleaned up version
 at `Source/paper-clean.bib`. If everything looks good, you can then overwrite
 the original `paper.bib` with this new file.
+
+### Importing BibTeX entries
+
+From an external bib file, you can automatically import in your current paper
+all bib entries that are cited in `paper.tex`, but are not present in
+`paper.bib`. In the root folder of your project, type:
+
+    php import-citations.php filename
+
+Where `filename` is the path to the bib file to read from. This way, you can,
+for example, extract from a [JabRef](https://jabref.org) bibliography the
+entries you actually use in your text, without the need for manual copy-pasting
+of the BibTeX code.
+
+### `diff`ing two bibliographies
+
+Given two bib files, it is possible to show the list of entries that are present in the first but not in the second. In the root folder of your project, type:
+
+    php bib-diff.php file1.bib file2.bib
 
 Overriding defaults
 -------------------

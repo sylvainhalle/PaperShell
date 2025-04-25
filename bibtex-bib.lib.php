@@ -1,21 +1,21 @@
 <?php
-/*
-    CCCVTK, the Canadian Common CV Toolkit
-    Copyright (C) 2013-2014 Sylvain Hallé
+/**************************************************************************
+  A Flexible LaTeX Article Environment
+  Copyright (C) 2015-2025  Sylvain Hallé
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **************************************************************************/
 
 /**
  * Representation of a set of BibTeX entries. This class can parse a
@@ -31,7 +31,7 @@
 class Bibliography // {{{
 {
   // The array of all entries
-  var $m_entries;
+  var $m_entries = array();
   
   // The name of the database table when exporting to SQL
   static $db_name = "entries";
@@ -40,12 +40,23 @@ class Bibliography // {{{
    * Constructs a Bibliiography object from data in a given filename
    * @param $filename The filename to read from
    */
-  public function Bibliography($filename) // {{{
+  public function __construct($filename = null) // {{{
   {
-    if (!isset($filename))
-      throw new Exception("No filename given");
-    $cont = file_get_contents($filename);
-    $this->parse($cont);
+    if (isset($filename))
+    {
+      $cont = file_get_contents($filename);
+      $this->parse($cont);
+    }
+  } // }}}
+  
+  /**
+   * Adds an entry from another bibliography to the current one.
+   * @param $k The entry's key
+   * @param $e The entry to add
+   */
+  public function addEntry($k, $e) // {{{
+  {
+    $this->m_entries[$k] = $e;
   } // }}}
   
   /**
@@ -56,6 +67,16 @@ class Bibliography // {{{
   public function getEntry($key) // {{{
   {
     return $this->m_entries[$key];
+  } // }}}
+  
+  /**
+   * Determines if the bibliography contains a specific entry.
+   * @param $key The entry's key
+   * @return {@code true} if the entry is present, {@code false} otherwise
+   */
+  public function containsEntry($key) // {{{
+  {
+    return isset($this->m_entries[$key]);
   } // }}}
   
   /**
