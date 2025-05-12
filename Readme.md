@@ -308,12 +308,47 @@ of the BibTeX code.
 
 ### `diff`ing two bibliographies
 
-Given two bib files, it is possible to show the list of entries that are present in the first but not in the second. In the root folder of your project, type:
+Given two bib files, it is possible to show the list of entries that are present
+in the first but not in the second. In the root folder of your project, type:
 
     php bib-diff.php file1.bib file2.bib
 
-Overriding defaults
+Other helper scripts
 -------------------
+
+A few other functionalities are implemented as shell scripts (with the `.sh`
+extension).
+
+### Highlight differences between two versions of a paper
+
+To calculate the difference of two versions of a paper using the PaperShell
+template, type:
+
+    ./diff-versions.sh <old> <new> <target>
+
+where:
+
+- `old` is the root PaperShell folder of the "old" version of the paper
+- `new` is the root PaperShell folder of the "old" version of the paper
+- `target` is the name of the target folder that will contain the diff
+  document (created if does not exist)
+
+The script produces a file called `changes.pdf`, where the differences between
+the versions are highlighted similar to the "track changes" feature in Microsoft
+Word (it uses [latexdiff](https://ctan.org/pkg/latexdiff) in the background).
+
+### Archive the `Source` folder
+
+To archive the content of the `Source` folder, excluding files that are not
+versioned (as specified by `.gitignore`), type:
+
+    ./archive-source.sh
+
+This will produce an archive called `Source.tar.gz` in the project's root
+folder.
+
+Overriding defaults
+------------------
 
 Default settings can be overridden by giving values to parameters found
 in `settings.inc.php`. All these settings are documented in detail in the
