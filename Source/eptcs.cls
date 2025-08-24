@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesClass{eptcs}[2010/11/26 v1.5]
+\ProvidesClass{eptcs}[2022/05/20 v1.7]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%                             options                            %%%%
@@ -84,8 +84,8 @@
     \else
       \providecommand{\publicationstatus}{To appear in EPTCS.}
     \fi\fi\fi
-    \providecommand{\titlerunning}{Please define {\tt $\backslash$titlerunning}}
-    \providecommand{\authorrunning}{Please define {\tt $\backslash$authorrunning}}
+    \providecommand{\titlerunning}{Please define {\ttfamily $\backslash$titlerunning}}
+    \providecommand{\authorrunning}{Please define {\ttfamily $\backslash$authorrunning}}
     \providecommand{\copyrightholders}{\authorrunning}
     \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
     \def\@makefnmark{\rlap{\@textsuperscript{\normalfont\@thefnmark}}}%
@@ -123,7 +123,7 @@
 \makebox[0pt][r]{
 \begin{tabular}{l@{}}
 \ifpublicdomain
-  This work is \href{http://creativecommons.org/publicdomain/zero/1.0/}
+  This work is \href{https://creativecommons.org/publicdomain/zero/1.0/}
   {dedicated to the public domain}.
 \else
   \ifcopyright
@@ -132,29 +132,29 @@
   \ifcreativecommons
     This work is licensed under the
     \ifnoncommercial
-      \href{http://creativecommons.org}{Creative Commons}\\
+      \href{https://creativecommons.org}{Creative Commons}\\
       \ifnoderivs
-	\href{http://creativecommons.org/licenses/by-nc-nd/3.0/}
+	\href{https://creativecommons.org/licenses/by-nc-nd/4.0/}
 	{Attribution-Noncommercial-No Derivative Works} License.
       \else\ifsharealike
-	\href{http://creativecommons.org/licenses/by-nc-sa/3.0/}
+	\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}
 	{Attribution-Noncommercial-Share Alike} License.
       \else
-	\href{http://creativecommons.org/licenses/by-nc/3.0/}
+	\href{https://creativecommons.org/licenses/by-nc/4.0/}
 	{Attribution-Noncommercial} License.
       \fi\fi
     \else
       \ifnoderivs
-        \href{http://creativecommons.org}{Creative Commons}\\
-	\href{http://creativecommons.org/licenses/by-nd/3.0/}
+        \href{https://creativecommons.org}{Creative Commons}\\
+	\href{https://creativecommons.org/licenses/by-nd/4.0/}
 	{Attribution-No Derivative Works} License.
       \else\ifsharealike
-        \href{http://creativecommons.org}{Creative Commons}\\
-	\href{http://creativecommons.org/licenses/by-sa/3.0/}
+        \href{https://creativecommons.org}{Creative Commons}\\
+	\href{https://creativecommons.org/licenses/by-sa/4.0/}
 	{Attribution-Share Alike} License.
       \else
-        \\\href{http://creativecommons.org}{Creative Commons}
-	\href{http://creativecommons.org/licenses/by/3.0/}
+        \\\href{https://creativecommons.org}{Creative Commons}
+	\href{https://creativecommons.org/licenses/by/4.0/}
 	{Attribution} License.
       \fi\fi
     \fi
@@ -165,7 +165,7 @@
   %\vskip 2em%				a bit of space removed (< 2em)
   \begin{center}%
   \let \footnote \thanks
-    {\LARGE\bf \@title \par}%		\bf added
+    {\LARGE\bfseries \@title \par}%		\bf added
     \vskip 2em%				was: 1.5em
     {\large
       \lineskip .5em%
@@ -188,7 +188,7 @@
 \newcommand{\institute}[1]{\IfArrayPackageLoaded
     {\\{\scriptsize\begin{tabular}[t]{@{}>{\footnotesize}c@{}}#1\end{tabular}}}
     {\\{\scriptsize\begin{tabular}[t]{@{\footnotesize}c@{}}#1\end{tabular}}}}
-\newcommand{\email}[1]{\\{\footnotesize\tt #1}}
+\newcommand{\email}[1]{\\{\footnotesize\ttfamily #1}}
 
 \renewenvironment{abstract}{\begin{list}{}%   header removed and noindent
 			{\rightmargin\leftmargin

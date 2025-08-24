@@ -1,7 +1,7 @@
 <?php
 /**************************************************************************
   A Flexible LaTeX Article Environment
-  Copyright (C) 2015-2022  Sylvain Hallé
+  Copyright (C) 2015-2025  Sylvain Hallé
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -1182,16 +1182,23 @@ if ($config["style"] === "eptcs")
 % Usual packages
 \usepackage[utf8]{inputenc}  % UTF-8 input encoding
 \usepackage[T1]{fontenc}     % Type1 fonts
-\usepackage{lmodern}         % Improved Computer Modern font{$microtype_string}
 \usepackage[english]{babel}  % Hyphenation
 \usepackage{graphicx}        % Import graphics
 \usepackage{cite}            % Better handling of citations
-\usepackage[bookmarks=false$hr_draft]{hyperref}            % Better handling of references in PDFs
+\usepackage[$hr_draft]{hyperref}            % Better handling of references in PDFs
 \usepackage{comment}         % To comment out blocks of text
 \usepackage{breakurl}        % Not needed if you use pdflatex only.
 \usepackage[scaled]{helvet} % Scale Helvetica
-
 EOD;
+
+  if ($config["use-times"])
+  {
+    $out .= "\n\\usepackage{newtxtext,newtxmath} % Times font with math support\n";
+  }
+  else
+  {
+    $out .= "\n\\usepackage{lmodern}             % Improved Computer Modern font\n";
+  }
 
   $out .= "\n\n% Title\n";
   $out .= "\\title{".$title."}\n\n";

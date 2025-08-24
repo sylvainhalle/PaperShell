@@ -1,5 +1,5 @@
 %%
-%% This is file `eptcs.bst',
+%% This is file `eptcsini.bst',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
@@ -74,7 +74,7 @@ FUNCTION {init.state.consts}
   #2 'after.sentence :=
   #3 'after.block :=
 }
-STRINGS { s t}
+STRINGS { s t z}
 FUNCTION {output.nonnull}
 { 's :=
   output.state mid.sentence =
@@ -167,20 +167,6 @@ FUNCTION {new.block.checkb}
   and
     'skip$
     'new.block
-  if$
-}
-FUNCTION {new.sentence.checka}
-{ empty$
-    'skip$
-    'new.sentence
-  if$
-}
-FUNCTION {new.sentence.checkb}
-{ empty$
-  swap$ empty$
-  and
-    'skip$
-    'new.sentence
   if$
 }
 FUNCTION {field.or.null}
@@ -402,10 +388,30 @@ FUNCTION {format.url}
     }
   if$
 }
+FUNCTION {remove.spaces}
+{ 'z :=
+  ""
+  { z empty$ not }
+  { z #1 #1 substring$
+    z #2 global.max$ substring$ 'z :=
+    duplicate$ "~" =
+      'pop$
+      { duplicate$ " " =
+          'pop$
+          { * }
+         if$
+      }
+    if$
+  }
+  while$
+}
 
 STRINGS  { bibinfo}
 INTEGERS { nameptr namesleft numnames }
-
+FUNCTION {forname.format.string}
+{ "{f.}" }
+FUNCTION {surname.format.string}
+{ "\surnamestart {vv~}{ll}\surnameend{, jj}" }
 FUNCTION {format.names}
 { 'bibinfo :=
   duplicate$ empty$ 'skip$ {
@@ -415,9 +421,9 @@ FUNCTION {format.names}
   s num.names$ 'numnames :=
   numnames 'namesleft :=
     { namesleft #0 > }
-    { s nameptr
-      "{ff~}\surnamestart {vv~}{ll}\surnameend{, jj}"
-      format.name$
+    { s nameptr forname.format.string format.name$ remove.spaces
+      duplicate$ empty$ 'skip$ { "~" * } if$
+      s nameptr surname.format.string format.name$ *
       bibinfo bibinfo.check
       't :=
       nameptr #1 >
@@ -1441,4 +1447,4 @@ FUNCTION {end.bib}
 EXECUTE {end.bib}
 %% End of customized bst file
 %%
-%% End of file `eptcs.bst'.
+%% End of file `eptcsini.bst'.

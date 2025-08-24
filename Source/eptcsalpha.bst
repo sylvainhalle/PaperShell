@@ -1,14 +1,14 @@
 %%
-%% This is file `eptcs.bst',
+%% This is file `eptcsalpha.bst',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
 %%
-%% merlin.mbs  (with options: `vonx,ed-au,dt-beg,yr-par,xmth,yrp-col,tit-it,atit-u,volp-com,jwdpg,pp-last,num-xser,ser-vol,jnm-x,pre-edn,doi,blknt,pp,xedn,amper,and-xcom,etal-xc,url,url-blk,bibinfo,nfss,')
+%% merlin.mbs  (with options: `alph,vonx,ed-au,dt-beg,yr-par,xmth,yrp-col,tit-it,atit-u,volp-com,jwdpg,pp-last,num-xser,numser,ser-vol,jnm-x,pre-edn,doi,blknt,pp,xedn,amper,and-xcom,etal-xc,url,url-blk,bibinfo,nfss,')
 %% ----------------------------------------
-%% *** Stylefile for EPTCS ***
+%% *** Alphanumeric Stylefile for EPTCS ***
 %%
-%% Copyright 1994-2004 Patrick W Daly
+%% Copyright 1994-2007 Patrick W Daly
  % ===============================================================
  % NOTICE:
  % This bibliographic style (bst) file has been generated from one or
@@ -22,19 +22,19 @@
  % version 1 of the License, or any later version.
  % ===============================================================
  % Name and version information of the main mbs file:
- % \ProvidesFile{merlin.mbs}[2004/02/09 4.13 (PWD, AO, DPC)]
+ % \ProvidesFile{merlin.mbs}[2007/04/24 4.20 (PWD, AO, DPC)]
  %   For use with BibTeX version 0.99a or later
  %-------------------------------------------------------------------
  % This bibliography style file is intended for texts in ENGLISH
- % This is a numerical citation style, and as such is standard LaTeX.
+ % This is a labelled citation style similar to the standard alpha.bst,
+ %   where labels are of the form Dal90 or DBK89.
  % It requires no extra package to interface to the main text.
  % The form of the \bibitem entries is
- %   \bibitem{key}...
+ %   \bibitem[label]{key}...
  % Usage of \cite is as follows:
- %   \cite{key} ==>>          [#]
- %   \cite[chap. 2]{key} ==>> [#, chap. 2]
- % where # is a number determined by the ordering in the reference list.
- % The order in the reference list is alphabetical by authors.
+ %   \cite{key} ==>>          [label]
+ %   \cite[chap. 2]{key} ==>> [label, chap. 2]
+ % The order in the reference list is by label.
  %---------------------------------------------------------------------
 
 ENTRY
@@ -66,7 +66,7 @@ ENTRY
     year
   }
   {}
-  { label }
+  { label extra.label sort.label }
 INTEGERS { output.state before.all mid.sentence after.sentence after.block }
 FUNCTION {init.state.consts}
 { #0 'before.all :=
@@ -167,20 +167,6 @@ FUNCTION {new.block.checkb}
   and
     'skip$
     'new.block
-  if$
-}
-FUNCTION {new.sentence.checka}
-{ empty$
-    'skip$
-    'new.sentence
-  if$
-}
-FUNCTION {new.sentence.checkb}
-{ empty$
-  swap$ empty$
-  and
-    'skip$
-    'new.sentence
   if$
 }
 FUNCTION {field.or.null}
@@ -508,7 +494,7 @@ FUNCTION {format.title}
 FUNCTION {output.bibitem}
 { newline$
   "\bibitemdeclare{" type$ "}{" cite$ "}" * * * * write$ newline$
-  "\bibitem{" write$
+  "\bibitem[" label * "]{" * write$
   cite$ write$
   "}" write$
   newline$
@@ -1259,6 +1245,130 @@ FUNCTION {chop.word}
     's
   if$
 }
+INTEGERS { et.al.char.used }
+FUNCTION {initialize.et.al.char.used}
+{ #0 'et.al.char.used :=
+}
+EXECUTE {initialize.et.al.char.used}
+FUNCTION {format.lab.names}
+{ 's :=
+  s num.names$ 'numnames :=
+  numnames #1 >
+    { numnames #4 >
+        { #3 'namesleft := }
+        { numnames 'namesleft := }
+      if$
+      #1 'nameptr :=
+      ""
+        { namesleft #0 > }
+        { nameptr numnames =
+            { s nameptr "{ff }{vv }{ll}{ jj}" format.name$ "others" =
+                { "{\etalchar{+}}" *
+                  #1 'et.al.char.used :=
+                }
+                { s nameptr "{l{}}" format.name$ * }
+              if$
+            }
+            { s nameptr "{l{}}" format.name$ * }
+          if$
+          nameptr #1 + 'nameptr :=
+          namesleft #1 - 'namesleft :=
+        }
+      while$
+      numnames #4 >
+        { "{\etalchar{+}}" *
+          #1 'et.al.char.used :=
+        }
+        'skip$
+      if$
+    }
+    { s #1 "{l{}}" format.name$
+      duplicate$ text.length$ #2 <
+        { pop$ s #1 "{ll}" format.name$ #3 text.prefix$ }
+        'skip$
+      if$
+    }
+  if$
+}
+FUNCTION {author.key.label}
+{ author empty$
+    { key empty$
+        { cite$ #1 #3 substring$ }
+        { key #3 text.prefix$ }
+      if$
+    }
+    { author format.lab.names }
+  if$
+}
+
+FUNCTION {author.editor.key.label}
+{ author empty$
+    { editor empty$
+        { key empty$
+            { cite$ #1 #3 substring$ }
+            { key #3 text.prefix$ }
+          if$
+        }
+        { editor format.lab.names }
+      if$
+    }
+    { author format.lab.names }
+  if$
+}
+
+FUNCTION {author.key.organization.label}
+{ author empty$
+    { key empty$
+        { organization empty$
+            { cite$ #1 #3 substring$ }
+            { "The " #4 organization chop.word #3 text.prefix$ }
+          if$
+        }
+        { key #3 text.prefix$ }
+      if$
+    }
+    { author format.lab.names }
+  if$
+}
+
+FUNCTION {editor.key.organization.label}
+{ editor empty$
+    { key empty$
+        { organization empty$
+            { cite$ #1 #3 substring$ }
+            { "The " #4 organization chop.word #3 text.prefix$ }
+          if$
+        }
+        { key #3 text.prefix$ }
+      if$
+    }
+    { editor format.lab.names }
+  if$
+}
+
+FUNCTION {calc.label}
+{ type$ "book" =
+  type$ "inbook" =
+  or
+    'author.editor.key.label
+    { type$ "proceedings" =
+        'editor.key.organization.label
+        { type$ "manual" =
+            'author.key.organization.label
+            'author.key.label
+          if$
+        }
+      if$
+    }
+  if$
+  duplicate$
+  year field.or.null purify$ #-1 #2 substring$
+  *
+  'label :=
+  year field.or.null purify$ #-1 #4 substring$
+  *
+  sortify 'sort.label :=
+}
 FUNCTION {sort.format.names}
 { 's :=
   #1 'nameptr :=
@@ -1356,7 +1466,11 @@ FUNCTION {editor.organization.sort}
   if$
 }
 FUNCTION {presort}
-{ type$ "book" =
+{ calc.label
+  sort.label
+  "    "
+  *
+  type$ "book" =
   type$ "inbook" =
   or
     'author.editor.sort
@@ -1370,6 +1484,7 @@ FUNCTION {presort}
       if$
     }
   if$
+  *
   "    "
   *
   year field.or.null sortify
@@ -1384,27 +1499,49 @@ FUNCTION {presort}
 }
 ITERATE {presort}
 SORT
-STRINGS { longest.label }
-INTEGERS { number.label longest.label.width }
+STRINGS { longest.label last.sort.label next.extra }
+INTEGERS { longest.label.width last.extra.num }
 FUNCTION {initialize.longest.label}
 { "" 'longest.label :=
-  #1 'number.label :=
+  #0 int.to.chr$ 'last.sort.label :=
+  "" 'next.extra :=
   #0 'longest.label.width :=
+  #0 'last.extra.num :=
 }
-FUNCTION {longest.label.pass}
-{ number.label int.to.str$ 'label :=
-  number.label #1 + 'number.label :=
+FUNCTION {forward.pass}
+{ last.sort.label sort.label =
+    { last.extra.num #1 + 'last.extra.num :=
+      last.extra.num int.to.chr$ 'extra.label :=
+    }
+    { "a" chr.to.int$ 'last.extra.num :=
+      "" 'extra.label :=
+      sort.label 'last.sort.label :=
+    }
+  if$
+}
+FUNCTION {reverse.pass}
+{ next.extra "b" =
+    { "a" 'extra.label := }
+    'skip$
+  if$
+  label extra.label * 'label :=
   label width$ longest.label.width >
     { label 'longest.label :=
       label width$ 'longest.label.width :=
     }
     'skip$
   if$
+  extra.label 'next.extra :=
 }
 EXECUTE {initialize.longest.label}
-ITERATE {longest.label.pass}
+ITERATE {forward.pass}
+REVERSE {reverse.pass}
 FUNCTION {begin.bib}
-{ preamble$ empty$
+{ et.al.char.used
+    { "\newcommand{\etalchar}[1]{$^{#1}$}" write$ newline$ }
+    'skip$
+  if$
+  preamble$ empty$
     'skip$
     { preamble$ write$ newline$ }
   if$
@@ -1441,4 +1578,4 @@ FUNCTION {end.bib}
 EXECUTE {end.bib}
 %% End of customized bst file
 %%
-%% End of file `eptcs.bst'.
+%% End of file `eptcsalpha.bst'.
