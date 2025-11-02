@@ -402,6 +402,10 @@ for doing so:
 In all honesty, we don't see much benefit in splitting a 10-page paper
 into multiple parts in separate files.
 
+### If not, at least use a single file ending with `.tex`
+
+Many publishers re-compile the LaTeX sources you upload --but their systems are not very smart. They typically take whatever `.tex` file they come across and attempt to compile it. To avoid rounds of back-and-forth uploads, stick to a single file named `paper.tex`, and avoid using that extension for everything else.
+
 About the Author
 ----------------
 
