@@ -5,7 +5,7 @@ PaperShell is a boilerplate environment for writing LaTeX articles using the
 templates of many publishers (Springer, IEEE, ACM, AAAI, Elsevier, etc.) while
 keeping a **single source document independent of the target style**.
 
-<p><a href="https://www.overleaf.com/docs?snip_uri=https://github.com/sylvainhalle/PaperShell/archive/refs/heads/v3.zip&amp;engine=lualatex&amp;main_document=Source/paper.tex"><img src="open-overleaf-16.png?raw=true" alt="Open in Overleaf"/></a></p>
+<p><a href="https://www.overleaf.com/docs?snip_uri=https://github.com/sylvainhalle/PaperShell/archive/refs/heads/v3.zip&amp;engine=lualatex&amp;main_document=Source/paper.tex&amp;snip_name=PaperShell"><img src="open-overleaf-16.png?raw=true" alt="Open in Overleaf"/></a></p>
 
 The project provides:
 
