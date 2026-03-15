@@ -1,6 +1,11 @@
 PaperShell — A Flexible LaTeX Article Environment
 =================================================
 
+*One template to rule them all...*
+
+<p><img src="templates.png?raw=true"/></p>
+
+
 PaperShell is a boilerplate environment for writing LaTeX articles using the
 templates of many publishers (Springer, IEEE, ACM, AAAI, Elsevier, etc.) while
 keeping a **single source document independent of the target style**.
