@@ -1,56 +1,25 @@
+%% ***************************************************************************
+%% My paper
+%% PaperShell v3.0
+%%
+%% Authors: Marty McFly, Clara Clayton, Emmett Brown
+%%
+%% NOTE: this file will not compile until you called the script
+%% generate-preamble.php once. See the file Readme.md to understand what
+%% to do.
+%%
+%% This paper is an instance of the PaperShell template. For more
+%% information, please visit https://github.com/sylvainhalle/PaperShell
+%% ***************************************************************************
+
+%% ---------------------------
+%% Author preamble. The contents of this file change depending on the
+%% paper class you choose.
+%% ---------------------------
 \RequirePackage{iftex}
 \ifLuaTeX\else\errmessage{Run once with LuaLaTeX to generate}\fi
 \input{tex/papershell.tex}
-
-\papershellsetup{
-  publisher ={cas},
-  title     = {Applications of the Flux Capacitor},
-  authors   = {
-    1 = {
-      name          = {Marty McFly},
-      email         = {marty@hvhs.edu},
-      orcid         = {0000-0000-0000-0000},
-      affiliation   = {1},
-    },
-    2 = {
-      name          = {Clara Clayton},
-      email         = {clara@shoashravine.com},
-      orcid         = {0000-0000-0000-0000},
-      affiliation   = {2},
-    },
-    3 = {
-      name          = {Emmett Brown},
-      institution   = {Temporal Industries},
-      city          = {Hill Valley},
-      country       = {USA},
-      email         = {eb@ti.com},
-      orcid         = {0000-0000-0000-0000},
-      affiliation   = {2},
-      corresponding = {true}
-    }
-  },
-  institutions = {
-    1 = {
-      name          = {Hill Valley High School},
-      city          = {Hill Valley},
-      country       = {USA}
-    },
-    2 = {
-      name          = {Temporal Industries},
-      city          = {Hill Valley},
-      country       = {USA}
-    }
-  },
-  year      = {1955},
-  keywords  = {time travel, flux capacitor},
-  options   = {
-     twocolumn = true,
-     times     = true,
-     natbib    = true
-  }
-}
-\papershellapply
-
+\input{settings.tex}
 \input{gen/preamble.inc.tex}
 
 %% ---------------------------

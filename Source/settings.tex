@@ -1,0 +1,150 @@
+%% You can override any defaults by setting values here
+\papershellsetup{
+
+  % The style to generate when compiling with lualatex.
+  publisher ={cas},
+  
+  % The paper's title
+  title     = {Applications of the Flux Capacitor},
+  
+  % The list of authors. The numerical key indicates the order in which
+  % the authors are to be displayed in the paper. The `affiliation` attribute
+  % points to the index of that author's institution in the `institutions`
+  % block below.
+  authors   = {
+    1 = {
+      name          = {Marty McFly},
+      email         = {marty@hvhs.edu},
+      orcid         = {0000-0000-0000-0000},
+      affiliation   = {1},
+    },
+    2 = {
+      name          = {Clara Clayton},
+      email         = {clara@shoashravine.com},
+      orcid         = {0000-0000-0000-0000},
+      affiliation   = {2},
+    },
+    3 = {
+      name          = {Emmett Brown},
+      institution   = {Temporal Industries},
+      city          = {Hill Valley},
+      country       = {USA},
+      email         = {eb@ti.com},
+      orcid         = {0000-0000-0000-0000},
+      affiliation   = {2},
+      corresponding = {true} % Optional
+    }
+  },
+  % The institutions. Note that the order of the institutions is unrelated
+  % to the order in which the authors are listed.
+  institutions = {
+    1 = {
+      name          = {Hill Valley High School},
+      city          = {Hill Valley},
+      country       = {USA}
+    },
+    2 = {
+      name          = {Temporal Industries},
+      city          = {Hill Valley},
+      country       = {USA}
+    }
+  },
+  
+  % A short title for the paper, used for running heads. If unspecified,
+  % the title from authors.txt will be used
+  %shorttitle        = {My Short Title},
+  
+  % The name (without extension) of the bib file, if not the default
+  % bibname  = {paper.bib},
+  
+  % The name of the journal to compile for.
+  % - In the ACM journal style, you must use a journal name found in
+  %   acmart.cls.
+  % - In the Elsevier and IEEE transactions journal style, you can use any
+  %   string you like.
+  % - You can ignore this parameter for all other styles.
+  % journalname = {TISSEC},
+  
+  % The journal volume. Used only in the ACM and IEEE transactions
+  % journal style.
+  % volume = {9},
+  
+  % The journal number. Used only in the ACM and IEEE transactions
+  % journal style.
+  % number = {4},
+  
+  % The journal article number. Used only in the ACM journal style
+  % and IEEE CS magazine style.
+  % articlenumber = {39},
+  
+  % The article's publication year (if not the current year).
+  % Used only in the ACM, IEEE transactions and IEEE CS magazine styles.
+  year      = {1955},
+  
+  % The article's publication month (if not the current month).
+  % Used only in the ACM and IEEE transactions/magazine journal style.
+  % month = {3},
+  
+  % Keywords associated to the article
+  keywords  = {time travel, flux capacitor},
+  
+  % If the paper is published in a conference, the booktitle of
+  % the conference. Used only in ACM conference proceedings.
+  % booktitle = {42nd Conference on Very Important Topics},
+  
+  % If the paper is published in a conference, the acronym of
+  % the conference (e.g. "ICFF '16"). Used only in ACM conference
+  % proceedings.
+  % conference = {OUTATIME '55},
+  
+  % If the paper is published in a conference, the location
+  % of the conference. Used in ACM conference proceedings
+  % and LIPICS.
+  % conferenceloc = {Hill Valley, CA, USA},
+  
+  % If the paper is published in a conference, the date
+  % of the conference. Used in ACM conference proceedings
+  % and LIPICS.
+  % conferencedate = {July 1955},
+  
+  % Copyright information to be overridden. Used only in ACM conference
+  % proceedings.
+  % copyright = {0-89791-88-6/97/05},
+  
+  % The article's DOI
+  % doi = {},
+  
+  % The journal's ISSN
+  % issn = {1234-56789},
+  
+  % The journal's ISBN
+  % isbn = {1234-56789},
+  
+  % Other options related to the compilatino process
+  options   = {
+     % Set whether to use the microtype package. No good reason to
+     % turn it off unless it clashes with some other package.
+     % microtype = false,
+     
+     % Whether to use the Computer Modern font or the Times font. This
+     % only works for Springer LNCS, and is ignored in all other styles.
+     % times     = true,
+     
+     % Set whether the hyperref package will be disabled. IEEE requires
+     % the camera-ready version to have no bookmarks, so in that case set
+     % this to true.
+     % disablehr = true,
+     
+     % The name of the editor. Used only in IEEE CS magazine style.
+     % editorname = {Stanford S.\ Strickland},
+     
+     % The editor e-mail. Used only in IEEE CS magazine style.
+     % editoremail = {strickland@hillvalley.edu}
+     
+     % A dummy parameter, just so you don't bother about removing
+     % the comma from the last uncommented parameter above. Leave this
+     % uncommented at all times.
+     dummy = {dummy}
+  }
+}
+\papershellapply
