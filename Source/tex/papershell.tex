@@ -3,6 +3,7 @@
 \newcommand\papershellsetup[1]{%
   \gdef\ps@kv{#1}% raw key–value string passed to Lua
 }
+\ifLuaTeX
 \newcommand\papershellapply{%
   \directlua{
     local ps = require("tex/papershell")
@@ -10,3 +11,6 @@
     print(e or "OK")
   }%
 }
+\else
+\newcommand\papershellapply{}
+\fi

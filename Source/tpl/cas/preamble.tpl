@@ -66,13 +66,13 @@
 
 % Authors and affiliations
 <% for i,a in util.spairs(authors) do %>
-\author[<<i>>]{%
+\author[<<a.affiliation>>]{%
 << a.name >>%
 }[<% if a.orcid then %> orcid=<<a.orcid>> <% end %>]
 <% if a.corresponding then %>
 \cormark[<<i>>]
 <% end %>
-\fnmark{<<a.affiliation>>}
+%\fnmark{<<a.affiliation>>}
 \ead{<<a.email>>}
 <% end %>
 
