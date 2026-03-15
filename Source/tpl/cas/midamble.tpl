@@ -7,4 +7,4 @@
 \printcredits
 
 %% Loading bibliography style file
-\bibliographystyle{cas-model1-num-names}
+\bibliographystyle{cas-model2-names}
