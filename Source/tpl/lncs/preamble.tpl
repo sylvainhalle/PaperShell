@@ -13,7 +13,11 @@
 \usepackage{cite}                      % Better handling of citations
 \usepackage{comment}                   % To comment out blocks of text
 \usepackage{microtype}                 % Better typesetting
+<% if options.times then %>
+\usepackage{newtxtext,newtxmath}       % Improved Times font
+<% else %>
 \usepackage{lmodern}                   % Improved Computer Modern font
+<% end %>
 
 \input{includes.tex}
 
