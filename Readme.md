@@ -54,39 +54,45 @@ For example, declaring authors looks different in every class.
 
 In `llncs`:
 
-    \author{Emmett Brown\inst{1} \and Marty McFly\inst{1} \and Biff Tannen\inst{2}}
-    \institute{%
-    Temporal Industries \\
-    Hill Valley, CA 90193 \\
-    \and
-    BiffCo inc. \\
-    Hill Valley, CA 90193 \\
-    }
+```latex
+\author{Emmett Brown\inst{1} \and Marty McFly\inst{1} \and Biff Tannen\inst{2}}
+\institute{%
+Temporal Industries \\
+Hill Valley, CA 90193 \\
+\and
+BiffCo inc. \\
+Hill Valley, CA 90193 \\
+}
+```
 
 In `IEEEtran`:
 
-    \author{%
-    \IEEEauthorblockN{Emmett Brown, Marty McFly}
-    \IEEEauthorblockA{%
-    Temporal Industries\\
-    Hill Valley, CA 90193\\
-    }
-    \IEEEauthorblockN{Biff Tannen}
-    \IEEEauthorblockA{%
-    BiffCo inc.\\
-    Hill Valley, CA 90193\\
-    }
-    }
+```latex
+\author{%
+\IEEEauthorblockN{Emmett Brown, Marty McFly}
+\IEEEauthorblockA{%
+Temporal Industries\\
+Hill Valley, CA 90193\\
+}
+\IEEEauthorblockN{Biff Tannen}
+\IEEEauthorblockA{%
+BiffCo inc.\\
+Hill Valley, CA 90193\\
+}
+}
+```
 
 In `acmart`:
 
-    \author{Emmett Brown}
-    \affiliation{
-      \institution{Temporal Industries}
-      \streetaddress{Hill Valley}
-      \state{CA}
-      \postcode{90193}
-    }
+```latex
+\author{Emmett Brown}
+\affiliation{
+  \institution{Temporal Industries}
+  \streetaddress{Hill Valley}
+  \state{CA}
+  \postcode{90193}
+}
+```
 
 In `elsarticle`:
 
@@ -160,20 +166,19 @@ https://github.com/sylvainhalle/PaperShell/releases/latest
 2. Edit `settings.tex` and choose the publisher.
 
 3. Compile once with LuaLaTeX:
-latexmk -lualatex paper.tex
 
+```bash
+latexmk -lualatex paper.tex
+```
 
 4. After that, normal compilation works:
 
-
+```nash
 latexmk -pdf paper.tex
+```
 
-
-5. Write your paper in
-
-
-Source/paper.tex
-
+5. Write your paper in `Source/paper.tex` and your abstract in 
+   `Source/abstract.tex`.
 
 6. To switch publisher, change the setting and compile again with LuaLaTeX.
 
@@ -205,7 +210,7 @@ The export step:
 - resolves generated files
 - produces sources that compile with pdfLaTeX
 
-See MANUAL.md for details.
+See `MANUAL.md` for details.
 
 
 Dependencies
@@ -227,12 +232,12 @@ Optional:
 Full documentation
 ------------------
 
-See MANUAL.md for complete usage instructions,
+See `MANUAL.md` for complete usage instructions,
 helper scripts, export options, and design notes.
 
 
 About
 -----
 
-Maintained by Sylvain Hallé  
-Université du Québec à Chicoutimi, Canada
+Maintained by Sylvain Hallé, Full Professor at Université du Québec à
+Chicoutimi, Canada.

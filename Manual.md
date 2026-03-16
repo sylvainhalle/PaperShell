@@ -3,7 +3,7 @@ PaperShell Manual
 
 This file contains the complete documentation.
 
-For a quick introduction, see README.md.
+For a quick introduction, see `README.md`.
 
 
 Project structure
@@ -29,7 +29,7 @@ automatically during compilation. Your main document contains:
 Switching publisher
 -------------------
 
-Change the publisher in `settings.tex` and compile once with LuaLaTeX.
+Change the publisher in `Source/settings.tex` and compile once with LuaLaTeX.
 
 
 Generated files
@@ -52,7 +52,7 @@ Run
 
 This will
 
-- inline all \input files
+- inline all `\input` files
 - include the bibliography
 - copy required files
 - create a standalone directory
@@ -97,15 +97,15 @@ Dependencies
 
 Required:
 
-- LaTeX distribution
-- latexmk
-- LuaLaTeX
+- LaTeX distribution (such as [TeXLive](https://tug.org/texlive/) or [MikTeX](https://miktex.org)
+- [latexmk](https://www.cantab.net/users/johncollins/latexmk/index.html)
+- LuaLaTeX (generally included in the LaTeX distribution)
 
 Optional:
 
-- PHP
-- latexdiff
-- aspell / textidote
+- [PHP](https://php.net)
+- [latexdiff](https://ctan.org/pkg/latexdiff)
+- [Aspell](https://aspell.net) / [TeXtidote](https://github.com/sylvainhalle/textidote)
 
 
 Notes about publisher styles
