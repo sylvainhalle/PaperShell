@@ -13,9 +13,27 @@ body {
 }
 
 header {
-  background: #2d2d2d;
+  background-color: #2d2d2d;
   color: white;
   padding: 2rem;
+  display: grid;
+  grid-template-columns: 128px 60% auto;
+}
+
+header > #left {
+}
+
+header > #center {
+	align-self: center;
+	text-align: right;
+}
+
+header > #right {
+  background-image: url('icon_small.png');
+  background-repeat: no-repeat;
+  background-position: top left;
+  padding-left: 0;
+  min-height: 150px;
 }
 
 header h1 {
@@ -38,11 +56,23 @@ main {
 .hero {
   text-align: center;
   margin: 2rem 0;
+  background-image: url('carousel.png');
+  height: 256px;
+  overflow: hidden;
+  animation-name: carousel;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
-.hero img {
-  max-width: 100%;
-  border: 1px solid #ccc;
+@keyframes carousel {
+	from {
+		background-position: 0 0;
+	}
+	
+	to {
+		background-position: -2537px 0;
+	}
 }
 
 section {
@@ -64,6 +94,14 @@ footer {
   font-size: 0.9rem;
   color: #666;
 }
+
+img#overleafbtn {
+     opacity: 0.9;
+}
+
+img#overleafbtn:hover {
+     opacity: 1;
+}
 </style>
 
 </head>
@@ -71,6 +109,9 @@ footer {
 <body>
 
 <header>
+<div id="right">
+</div>
+<div id="left">
 <h1>PaperShell</h1>
 <p>
 A collection of ready-to-use LaTeX templates for articles, reports, theses,
@@ -78,12 +119,15 @@ presentations, and other academic documents.
 PaperShell lets you start writing immediately without fighting with layout,
 packages, or publisher formatting rules.
 </p>
+</div>
+<div id="center">
+  <a href="https://www.overleaf.com/docs?snip_uri=https://github.com/sylvainhalle/PaperShell/archive/refs/heads/v3.zip&amp;engine=lualatex&amp;main_document=Source/paper.tex"><img id="overleafbtn" src="open-overleaf-16.png" alt="Open in Overleaf"/></a>
+</div>
 </header>
 
 <main>
 
 <div class="hero">
-<img src="templates.png" alt="PaperShell templates overview">
 </div>
 
 <section>
@@ -111,9 +155,6 @@ your source.
 <li>Conference and journal papers</li>
 <li>Technical reports</li>
 <li>Books and theses</li>
-<li>Slides</li>
-<li>Posters</li>
-<li>Letters and short notes</li>
 </ul>
 
 <p>
@@ -156,6 +197,8 @@ Each template can be copied as a starting point for a new document.
 </p>
 
 </section>
+
+<hr/>
 
 <footer>
 PaperShell — Sylvain Hallé

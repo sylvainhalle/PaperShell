@@ -1,9 +1,11 @@
 PaperShell — Write once, submit anywhere
 ========================================
 
+<p><a href="https://www.overleaf.com/docs?snip_uri=https://github.com/sylvainhalle/PaperShell/archive/refs/heads/v3.zip&amp;engine=lualatex&amp;main_document=Source/paper.tex"><img id="overleafbtn" src="https://sylvainhalle.github.io/PaperShell/open-overleaf-16.png" alt="Open in Overleaf"/></a></p>
+
 *One template to rule them all…*
 
-<p><img src="templates.png?raw=true"/></p>
+<p><img src="https://sylvainhalle.github.io/PaperShell/templates.png"/></p>
 
 PaperShell is a LaTeX workflow for writing research papers that must be submitted
 to different publishers (IEEE, ACM, Springer, Elsevier, AAAI, LIPIcs, etc.)
