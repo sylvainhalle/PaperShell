@@ -1,0 +1,117 @@
+@font-face {
+    font-family: 'MicroFLF-Bold';
+    src:url('MicroFLF-Bold.ttf.woff') format('woff'),
+        url('MicroFLF-Bold.ttf.svg#MicroFLF-Bold') format('svg'),
+        url('MicroFLF-Bold.ttf.eot'),
+        url('MicroFLF-Bold.ttf.eot?#iefix') format('embedded-opentype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f8f8f8;
+  color: #222;
+}
+
+header {
+  background-color: #2d2d2d;
+  color: white;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 128px 60% auto;
+}
+
+.yellow {
+	color: yellow;
+}
+
+.red {
+	color: red;
+}
+
+header > #left {
+}
+
+header > #center {
+	align-self: center;
+	text-align: right;
+}
+
+header > #right {
+  background-image: url('icon_small.png');
+  background-repeat: no-repeat;
+  background-position: top left;
+  padding-left: 0;
+  min-height: 150px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-family: 'MicroFLF-Bold';
+  -webkit-text-stroke: 1px white;
+}
+
+header p {
+  margin-top: 0.5rem;
+  max-width: 800px;
+}
+
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 2rem;
+  background: white;
+}
+
+.hero {
+  text-align: center;
+  margin: 2rem 0;
+  background-image: url('carousel.png');
+  height: 256px;
+  overflow: hidden;
+  animation-name: carousel;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes carousel {
+	from {
+		background-position: 0 0;
+	}
+	
+	to {
+		background-position: -2537px 0;
+	}
+}
+
+section {
+  margin-top: 2rem;
+}
+
+h2 {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3rem;
+}
+
+code {
+  background: #eee;
+  padding: 2px 4px;
+}
+
+footer {
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+img#overleafbtn {
+     opacity: 0.9;
+}
+
+img#overleafbtn:hover {
+     opacity: 1;
+}
