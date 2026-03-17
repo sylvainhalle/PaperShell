@@ -67,26 +67,74 @@ main {
 }
 
 .hero {
-  text-align: center;
+  position: relative;
   margin: 2rem 0;
-  background-image: url('carousel.png');
-  background-size: auto 256px;
-  height: 256px;
+  height: 300wpx;
   overflow: hidden;
-  animation-name: carousel;
-  animation-duration: 30s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+}
+
+.hero-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 256px;
+  animation: carousel 30s linear infinite;
+}
+
+.hero-strip img {
+  display: block;
+  height: 256px;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.hotspot {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  cursor: default;
+}
+
+/* optional debugging */
+.hotspot:hover {
+  outline: 2px solid rgba(255,255,0,0.7);
+}
+
+.hotspot::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hotspot:hover::after {
+  opacity: 1;
+}
+
+.hotspot:hover::after {
+  opacity: 1;
 }
 
 @keyframes carousel {
-	from {
-		background-position: 0 0;
-	}
-	
-	to {
-		background-position: -2537px 0;
-	}
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-1024px);
+  }
 }
 
 section {
