@@ -1,0 +1,1 @@
+\ProvidesClass{foo}
