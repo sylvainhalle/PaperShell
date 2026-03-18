@@ -69,7 +69,7 @@ main {
 .hero {
   position: relative;
   margin: 2rem 0;
-  height: 300wpx;
+  height: 284px;
   overflow: hidden;
 }
 
@@ -87,6 +87,18 @@ main {
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
+}
+
+#instructions {
+	font-style: italic;
+	font-size: 80%;
+	text-align: center;
+	color: #444;
+	margin: -10px;
+}
+
+#instructions::after {
+	content: "Hover the mouse over the templates above...";
 }
 
 .hotspot {
