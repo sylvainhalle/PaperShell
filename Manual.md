@@ -63,6 +63,69 @@ Option:
 
     php export.php --flatten
 
+Theme manager
+-------------
+
+PaperShell comes with a small theme manager called `psmod.lua`.
+
+A *theme* is a small ZIP archive containing additional style files and
+templates, along with a `manifest.lua` file describing the package.
+Themes are downloaded from the PaperShell theme repository and unpacked
+directly into the project.
+This makes it possible to install support for additional publisher styles
+without manually copying files into the PaperShell tree.
+
+### Usage
+
+Run the theme manager with `texlua`:
+
+    texlua psmod.lua <action> [theme]
+
+Available actions are:
+
+- list — list the themes currently installed
+- install <theme> — download and install a theme
+
+You can also display the help message with:
+
+    texlua psmod.lua -h
+
+### Listing installed themes
+
+To list all themes currently installed in the project:
+
+    texlua psmod.lua list
+
+### Installing a theme
+
+To install a theme named `foo`:
+
+    texlua psmod.lua install foo
+
+This downloads the archive `https://sylvainhalle.github.io/PaperShell/themes/foo.zip`
+and extracts its contents into the PaperShell source tree.
+
+### Theme layout
+
+A *theme* is a ZIP archive with a simple structure. It should contain:
+
+- template files under `tpl/<theme>/`
+- style files under `sty/<theme>/`
+- a `manifest.lua` file under` tpl/<theme>/`
+
+The manifest is a Lua file returning a table with metadata such as:
+
+- id
+- name
+- version
+- innerversion
+
+### Notes
+
+- The theme manager currently supports `install` and `list`.
+- Themes are downloaded from the official PaperShell theme repository.
+- Installing a theme copies files into the local PaperShell project.
+
 
 BibTeX helper scripts
 ---------------------

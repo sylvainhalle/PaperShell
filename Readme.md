@@ -214,6 +214,40 @@ The export step:
 
 See `MANUAL.md` for details.
 
+Theme manager
+-------------
+
+PaperShell comes with a small theme manager called `psmod.lua`.
+
+A *theme* is a small ZIP archive containing additional style files and
+templates, along with a `manifest.lua` file describing the package.
+Themes are downloaded from the PaperShell theme repository and unpacked
+directly into the project.
+
+This makes it possible to install support for additional publisher styles
+without manually copying files into the PaperShell tree.
+
+### Usage
+
+Run the theme manager with `texlua`:
+
+```bash
+texlua psmod.lua <action> [theme]
+```
+
+Available actions are:
+
+- list — list the themes currently installed
+- install *theme* — download and install a theme
+
+
+You can also display the help message with:
+
+```bash
+texlua psmod.lua -h
+```
+
+See the Manual for more details.
 
 Dependencies
 ------------
@@ -238,8 +272,11 @@ See `MANUAL.md` for complete usage instructions,
 helper scripts, export options, and design notes.
 
 
-About
------
+About the Author
+----------------
 
-Maintained by Sylvain Hallé, Full Professor at Université du Québec à
-Chicoutimi, Canada.
+This project is maintained by [Sylvain Hallé](http://leduotang.ca/sylvain),
+Full Professor at [Université du Québec à
+Chicoutimi](http://www.uqac.ca), Canada.
+
+<!-- :wrap=soft:maxLineLen=80: -->
