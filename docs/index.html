@@ -15,10 +15,7 @@
 <div id="left">
 <h1><span class="yellow">Paper</span><span class="red">Shell</span></h1>
 <p>
-A collection of ready-to-use LaTeX templates for articles, reports, theses,
-presentations, and other academic documents.
-PaperShell lets you start writing immediately without fighting with layout,
-packages, or publisher formatting rules.
+A collection of ready-to-use LaTeX templates for articles, reports, theses, presentations, and other academic documents. Install once, then create new projects from the command line in seconds. PaperShell lets you focus on writing instead of fighting with layout, packages, or publisher formatting rules.
 </p>
 </div>
 <div id="center">
@@ -66,8 +63,13 @@ packages, or publisher formatting rules.
 <h2>What is PaperShell?</h2>
 
 <p>
-PaperShell is a set of curated LaTeX templates designed to make it easy to
-start a new document with a clean, consistent structure.
+PaperShell is a collection of curated LaTeX templates and tools designed
+to simplify the creation of academic documents.
+Once installed, PaperShell provides a command-line utility that can create
+new projects from a library of templates maintained on your machine.
+</p>
+
+<p>
 Each template is ready to compile and includes the packages, layout,
 and conventions typically required for its target format.
 </p>
@@ -85,8 +87,9 @@ your source.
 
 <ul>
 <li>Conference and journal papers</li>
-<li>Technical reports</li>
-<li>Books and theses</li>
+<li>Technical reports and working papers</li>
+<li>Books, theses, and dissertations</li>
+<li>Publisher-specific formats (ACM, IEEE, Springer, Elsevier, CEUR, and others)</li>
 </ul>
 
 <p>
@@ -100,13 +103,15 @@ so once you know one, you know them all.
 <h2>Why another template collection?</h2>
 
 <p>
-Most LaTeX templates are designed for a single publisher or document type.
-PaperShell focuses instead on providing a consistent workflow across many
-formats, while keeping the source readable and easy to modify.
+Most LaTeX templates are distributed as isolated archives, each with its
+own structure, build process, and conventions.
+PaperShell provides a unified workflow across many document formats while
+keeping the source readable and easy to modify.
 </p>
 
 <p>
-The goal is not to hide LaTeX, but to remove repetitive setup work.
+The goal is not to hide LaTeX, but to eliminate repetitive setup work and
+let authors concentrate on content.
 </p>
 
 </section>
@@ -115,17 +120,27 @@ The goal is not to hide LaTeX, but to remove repetitive setup work.
 <h2>Get started</h2>
 
 <p>
-The project is hosted on GitHub:
+Install PaperShell with a single command:
+</p>
+
+<pre>
+curl -fsSL https://sylvainhalle.github.io/PaperShell/install.sh | bash
+</pre>
+
+<p>
+Then create a new project from one of the available templates:
+</p>
+
+<pre>
+papershell init mypaper
+</pre>
+
+<p>
+The project source code and templates are hosted on GitHub:
 </p>
 
 <p>
-<a href="https://github.com/sylvainhalle/PaperShell">
-https://github.com/sylvainhalle/PaperShell
-</a>
-</p>
-
-<p>
-Each template can be copied as a starting point for a new document.
+<a href="https://github.com/sylvainhalle/PaperShell">https://github.com/sylvainhalle/PaperShell</a>
 </p>
 
 </section>
