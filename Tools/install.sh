@@ -23,6 +23,35 @@ fail() {
   exit 1
 }
 
+# Default action is install
+PS_ACTION="install"
+
+case "${1:-}" in
+  install|"")
+    PS_ACTION="install"
+    ;;
+  uninstall|--uninstall|-u)
+    PS_ACTION="uninstall"
+    ;;
+  *)
+    fail "Unknown option: $1"
+    ;;
+esac
+
+uninstall() {
+  say "Removing PaperShell"
+
+  rm -rf "$PS_INSTALL_DIR"
+  rm -f "$PS_WRAPPER"
+
+  say "Uninstalled PaperShell"
+}
+
+if [ "$PS_ACTION" = "uninstall" ]; then
+  uninstall
+  exit 0
+fi
+
 # Sanity checks
 command -v texlua >/dev/null 2>&1 || say "Warning: texlua was not found in PATH; PaperShell may not run until it is installed"
 
@@ -37,8 +66,7 @@ fi
 
 if command -v git >/dev/null 2>&1; then
   say "Cloning PaperShell with git"
-  git clone --depth 1 -q "$PS_REMOTE_URL" "$PS_INSTALL_DIR" \
-    || fail "Could not clone repository"
+  git clone --depth 1 -q "$PS_REMOTE_URL" "$PS_INSTALL_DIR" || fail "Could not clone repository"
   rm -rf "$PS_INSTALL_DIR/.git"
 else
   say "git not found; falling back to ZIP download"
@@ -79,7 +107,6 @@ EOF
 chmod u+x "$PS_WRAPPER"
 
 say "Installed PaperShell successfully"
-say "To create an empty project, type `papershell init <folder>`"
 
 case ":$PATH:" in
   *":$PS_LOCAL_BIN:"*)
@@ -90,6 +117,8 @@ case ":$PATH:" in
     say "  export PATH=\"\$HOME/.local/bin:\$PATH\""
     ;;
 esac
+
+say "To create an empty project, type papershell init <folder>"
 
 say "Done"
 exit 0

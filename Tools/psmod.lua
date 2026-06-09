@@ -97,14 +97,36 @@ function copyFolder(source, destination, ignore)
             end
         else
             -- Copy files
-            local success, err = os.rename(sourcePath, destinationPath)
+            local success = CopyFile(sourcePath, destinationPath)
             if not success then
-                return false, "Failed to copy file: " .. err
+                return false, "Failed to copy file: " .. sourcePath
             end
         end
     end
   end
   return true
+end
+
+-- https://forum.cockos.com/showpost.php?s=93b9db499b6d6c497bbde2216978a951&p=2360581&postcount=3
+function CopyFile(old_path, new_path)
+  local old_file = io.open(old_path, "rb")
+  local new_file = io.open(new_path, "wb")
+  local old_file_sz, new_file_sz = 0, 0
+  if not old_file or not new_file then
+    return false
+  end
+  while true do
+    local block = old_file:read(2^13)
+    if not block then 
+      old_file_sz = old_file:seek( "end" )
+      break
+    end
+    new_file:write(block)
+  end
+  old_file:close()
+  new_file_sz = new_file:seek( "end" )
+  new_file:close()
+  return new_file_sz == old_file_sz
 end
 
 local function utf8sub(s, i, j)
