@@ -16,11 +16,12 @@
 %% paper class you choose.
 %% ---------------------------
 \RequirePackage{iftex}
-\ifLuaTeX\else
+\ifLuaTeX
+\input{tex/papershell.tex}
+\else
 \IfFileExists{gen/preamble.inc.tex}{}
 {\errmessage{Run once with LuaLaTeX to generate}}
 \fi
-\input{tex/papershell.tex}
 \input{settings.tex}
 \input{gen/preamble.inc.tex}
 
