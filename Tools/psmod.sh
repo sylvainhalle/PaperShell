@@ -1,2 +1,6 @@
 #! /bin/bash
-texlua $HOME/.local/share/papershell/Tools/psmod.lua "$@"
+from=$(pwd)
+(
+  cd $HOME/.local/share/papershell/Tools
+  texlua psmod.lua --from "$from" "$@"
+)
