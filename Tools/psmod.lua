@@ -1,3 +1,6 @@
+-- Theme manager for PaperShell 3
+-- (C) 2026  Sylvain Hallé
+
 local theme_repo = "https://sylvainhalle.github.io/PaperShell/themes/"
 local outdir = "../Source"
 local http = require("socket.http")
@@ -90,7 +93,7 @@ if action == "install" then
     io.stderr:write("ERROR: a theme must be specified\n")
     os.exit(2)
   end
-  local url = theme_repo .. arg[2] .. ".zip"
+  local url = theme_repo .. arg[2] .. ".tpl.zip"
   print(url)
   lfs.mkdir(outdir .. "/sty/" .. arg[2])
   lfs.mkdir(outdir .. "/tpl/" .. arg[2])
