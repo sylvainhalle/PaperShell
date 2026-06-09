@@ -1,2 +1,2 @@
 #! /bin/bash
-texlua $USER/.local/share/papershell/Tools/psmod.lua "$@"
+texlua $HOME/.local/share/papershell/Tools/psmod.lua "$@"
