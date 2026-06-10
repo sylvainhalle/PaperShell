@@ -15,6 +15,80 @@ local zip = require("zip")
 -- Dynamic settings
 local pwd = os.getenv("PWD") or io.popen("cd"):read()
 
+local function basename(path)
+  return path:match("([^/\\]+)$") or path
+end
+
+local function join(a, b)
+  return a .. "/" .. b
+end
+
+local function should_export(path)
+  local b = basename(path)
+
+  if b == "paper.pdf" then return false end
+  if b:match("~$") then return false end
+  if b:match("%.log$") then return false end
+  if b:match("%.out$") then return false end
+
+  return true
+end
+
+local function collect_files(root, rel, files)
+  rel = rel or ""
+  files = files or {}
+
+  local dir = rel == "" and root or join(root, rel)
+
+  for entry in lfs.dir(dir) do
+    if entry ~= "." and entry ~= ".." then
+      local relpath = rel == "" and entry or join(rel, entry)
+      local fullpath = join(root, relpath)
+      local attr = lfs.attributes(fullpath)
+
+      if attr and attr.mode == "directory" then
+        collect_files(root, relpath, files)
+      elseif attr and attr.mode == "file" and should_export(relpath) then
+        table.insert(files, relpath)
+      end
+    end
+  end
+
+  return files
+end
+
+local function read_file(path)
+  local f = assert(io.open(path, "rb"))
+  local data = f:read("*a")
+  f:close()
+  return data
+end
+
+local function export_project(export_dir)
+  local archive = "paper.zip"
+
+  print("Exporting submission sources")
+
+  create_export_folder(export_dir)
+
+  if command_exists("zip") then
+    print("Creating " .. archive)
+    run('cd Export && zip -9 -r ../paper.zip .')
+    print("Archive written to " .. archive)
+  elseif command_exists("7z") then
+    print("Creating " .. archive)
+    run('7z a -tzip paper.zip Export/*')
+    print("Archive written to " .. archive)
+  else
+    print()
+    print("No ZIP utility was found.")
+    print("Submission sources have been exported to:")
+    print("  " .. export_dir)
+    print()
+    print("Please create the archive manually.")
+  end
+end
+
 function download_and_unzip(url, out_dir)
 
     -- Download the file
@@ -173,12 +247,13 @@ function printpad(str, length, pad_char)
 end
 
 function printusage(stream)
-  stream:write("Usage: psmod [-h] [action]\n\n")
+  stream:write("Usage: papershell [-h] [action]\n\n")
   stream:write("Possible actions:\n")
   stream:write("  init <folder>        Creates an empty project in folder\n")
   stream:write("  list                 Lists available themes\n")
   stream:write("  install <theme>      Downloads and installs theme\n")
   stream:write("  uninstall <theme>    Uninstalls theme\n")
+  stream:write("  export               Exports sources to archive\n")
 end
 
 print("PaperShell theme manager v3.0")
@@ -234,6 +309,9 @@ elseif action == "init" then
   end
   print("Creating empty project in " .. fromdir .. "/" .. arg[offset + 2] .. "\n")
   instantiate(fromdir .. "/" .. arg[offset + 2])
+elseif action == "export" then
+    export_project(fromdir .. "/" .. "Export")
+    os.exit(0)
 else
   io.stderr:write("ERROR: unknown action " .. arg[offset + 1] .."\n")
   os.exit(2)
