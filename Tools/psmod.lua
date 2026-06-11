@@ -19,8 +19,15 @@
 -- Dependencies
 local http = require("socket.http")
 local utf8 = require("utf8")
-local lfs = require("lfs")
-local zip = require("zip")
+local lfs  = require("lfs")
+local zip  = require("zip")
+
+-- Return codes
+local RET_OK             = 0
+local RET_MISSING_ACTION = 1
+local RET_ARGS           = 2
+local RET_NO_ROOT        = 3
+local RET_ALREADY_EXISTS = 4
 
 -- Default settings
 local theme_repo = "https://sylvainhalle.github.io/PaperShell/themes/"
@@ -28,7 +35,7 @@ local outdir     = "../Source"
 local localdir   = "~/.local/share/papershell"
 
 -- Dynamic settings
-local pwd = os.getenv("PWD") or io.popen("cd"):read()
+local pwd = os.getenv("PAPERSHELL_HOME") or ".."
 
 --[[ ***** File utilities ***** {{{ ]]--
 
@@ -114,7 +121,6 @@ local function unzip(file_path, out_dir)
   if archive then
 	for file in archive:files() do
 	  local filename = file.filename
-	  print(filename)
 	  if filename:sub(-1, -1) ~= "/" then
 		-- File
 		local in_f = archive:open(filename)
@@ -322,14 +328,6 @@ local function find_root_rec(dir)
   return find_root_rec(up(dir))
 end
 
---[[ Finds the root folder of the current project. The root is defined by
-     the folder that contains the file .papershell.
-     @return The path of the root folder, or false if no root is found
-  ]]
-local function find_root()
-  return find_root_rec(pwd)
-end
-
 --[[ }}} ]]
 
 local function collect_files(root, rel, files)
@@ -396,7 +394,7 @@ end
       @param folder The folder where to create the project
   ]]
 function instantiate(folder)
-  local success, err = copy_folder(pwd .. "/..", folder or ".", {"docs", ".git"})
+  local success, err = copy_folder(pwd, folder, {"docs", ".git", "Test"})
   if success then
     stdoutln("Folder and its contents copied successfully.")
   else
@@ -423,33 +421,38 @@ stdoutln("(C) 2026 Sylvain Hallé")
 stdoutln()
 
 local offset = 0
+
 -- Init is handled separately, as it does not need to look for a project root
 if arg[offset + 1] == "init" then
   local fld = arg[offset + 2] or "."
-  if not arg[offset + 2] then
-    stderrln("ERROR: a folder name must be specified")
-    os.exit(2)
+  local target = lfs.currentdir() .. "/" .. fld
+  if file_exists(target .. "/.papershell") then
+    stderrln("ERROR: a PaperShell project is already instantiated")
+    os.exit(RET_ALREADY_EXISTS)
   end
-  print("Creating empty project in " .. project_root .. "/" .. fld .. "\n")
-  instantiate(project_root .. "/" .. fld)
+  stdoutln("Creating empty project in " .. target .. "\n")
+  instantiate(lfs.currentdir() .. "/" .. fld)
+  os.exit(0)
+end
+
+-- Help
+if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
+  printusage(io.stdout)
+  os.exit(RET_OK)
 end
 
 -- Find a project root
 local project_root = find_root_rec(lfs.currentdir())
 if not project_root then
   stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
-  os.exit(3)
+  os.exit(RET_NO_ROOT)
 end
 
 -- Other arguments
 if not arg[offset + 1] then
   stderrln("ERROR: an action must be specified")
   printusage(io.stderr)
-  os.exit(1)
-end
-if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
-  printusage(io.stdout)
-  os.exit(0)
+  os.exit(RET_MISSING_ACTION)
 end
 local action = arg[offset + 1]
 
@@ -457,14 +460,13 @@ local action = arg[offset + 1]
 if action == "install" then
   if not arg[offset + 2] then
     stderrln("ERROR: a theme must be specified")
-    os.exit(2)
+    os.exit(RET_ARGS)
   end
   local url = theme_repo .. arg[offset + 2] .. ".tpl.zip"
-  print(url)
   lfs.mkdir(outdir .. "/sty/" .. arg[offset + 2])
   lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
   download_and_unzip(url, outdir)
-  os.exit(0)
+  os.exit(RET_OK)
 end
 
 -- List of themes
@@ -478,7 +480,7 @@ if action == "list" then
       print("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
     end
   end
-  os.exit(0)
+  os.exit(RET_OK)
 end
 
 -- Export sources
@@ -488,12 +490,12 @@ if action == "export" then
   else
     export_project(project_root .. "/" .. "Export")
   end
-  os.exit(0)
+  os.exit(RET_OK)
 end
 
 -- ?!?
 stderrln("ERROR: unknown action " .. arg[offset + 1])
-os.exit(2)
+os.exit(RET_MISSING_ACTION)
 
 --[[ }}} ]]
 
