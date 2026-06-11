@@ -22,17 +22,28 @@ local utf8 = require("utf8")
 local lfs  = require("lfs")
 local zip  = require("zip")
 
+-- Version string
+local VERSION_STRING     = "3.0"
+
 -- Return codes
 local RET_OK             = 0
 local RET_MISSING_ACTION = 1
 local RET_ARGS           = 2
 local RET_NO_ROOT        = 3
 local RET_ALREADY_EXISTS = 4
+local RET_NO_TEXTIDOTE   = 5
+local RET_WTF            = 255
 
 -- Default settings
-local theme_repo = "https://sylvainhalle.github.io/PaperShell/themes/"
+local CONFIG = {
+	themerepo = "https://sylvainhalle.github.io/PaperShell/themes/",
+	textidote = "textidote",
+	report    = "textidote.html",
+	outdir    = "Source",
+	mainfile  = "paper.tex",
+	language  = "en"
+}
 local outdir     = "../Source"
-local localdir   = "~/.local/share/papershell"
 
 -- Dynamic settings
 local pwd = os.getenv("PAPERSHELL_HOME") or ".."
@@ -330,6 +341,27 @@ end
 
 --[[ }}} ]]
 
+--[[ ***** OS utilities ***** {{{ ]] --
+
+--[[ Opens a website in the default web browser.
+     @param url: The URL of the website to be opened.
+     @return true if the browser could be opened, false otherwise
+     @from https://codepal.ai/code-generator/query/ErowAxhU/lua-function-open-website
+  ]]
+function open_browser(url)
+  local separator = package.config:sub(1,1)
+  
+    -- Check the operating system and open the website accordingly.
+    if separator == "/" then
+        os.execute("xdg-open " .. url)
+    else
+        os.execute("open " .. url)
+    end
+    return true
+end
+
+--[[ }}} ]]
+
 local function collect_files(root, rel, files)
   rel = rel or ""
   files = files or {}
@@ -357,7 +389,10 @@ local function command_exists(cmd)
 end
 
 local function run(cmd)
-  os.execute(cmd)
+  local f = assert(io.popen(cmd))
+  local s = assert(f:read('*a'))
+  f:close()
+  return s
 end
 
 local function create_export_folder(export_dir)
@@ -374,28 +409,28 @@ local function create_export_folder(export_dir)
     copy_file(relpath, export_dir .. "/" .. relpath)
   end
 
-  print(string.format("Exported %d file(s) to %s", #files, export_dir))
+  stdoutln(string.format("Exported %d file(s) to %s", #files, export_dir))
 end
 
 local function export_project(export_dir)
   local archive = "paper.zip"
-  print("Exporting submission sources")
+  stdoutln("Exporting submission sources")
   create_export_folder(export_dir)
   if command_exists("zip") then
-    print("Creating " .. archive)
+    stdoutln("Creating " .. archive)
     run("zip -q -9 -r paper.zip .")
-    print("Archive written to " .. archive)
+    stdoutln("Archive written to " .. archive)
   elseif command_exists("7z") then
-    print("Creating " .. archive)
+    stdoutln("Creating " .. archive)
     run('7z a -mx9 -tzip paper.zip .')
-    print("Archive written to " .. archive)
+    stdoutln("Archive written to " .. archive)
   else
-    print()
-    print("No ZIP utility was found.")
-    print("Submission sources have been exported to:")
-    print("  " .. export_dir)
-    print()
-    print("Please create the archive manually.")
+    stdoutln()
+    stdoutln("No ZIP utility was found.")
+    stdoutln("Submission sources have been exported to:")
+    stdoutln("  " .. export_dir)
+    stdoutln()
+    stdoutln("Please create the archive manually.")
   end
 end
 
@@ -437,12 +472,17 @@ function printusage(stream)
   stream:write("  install <theme>      Downloads and installs theme\n")
   stream:write("  uninstall <theme>    Uninstalls theme\n")
   stream:write("  export               Exports sources to archive\n")
+  stream:write("  check [-b]           Checks spelling and grammar (*)\n")
+  stream:write("  wc                   Counts the words in the paper (*)\n")
+  stream:write("  diff <f> <g>         Difference between two versions (#)\n")
+  stream:write("\n")
+  stream:write("  (*) Requires TeXtidote  (#) Requires latexdiff\n")
 end
 
 --[[ ***** Main loop ***** {{{ ]]--
 
-stdoutln("PaperShell theme manager v3.0")
-stdoutln("(C) 2026 Sylvain Hallé")
+stdoutln("PaperShell theme manager v" .. VERSION_STRING)
+stdoutln("(C) 2015-2026 Sylvain Hallé")
 stdoutln()
 
 local offset = 0
@@ -473,6 +513,22 @@ if not project_root then
   os.exit(RET_NO_ROOT)
 end
 
+-- Extract a few settings
+local override = dofile(project_root .. "/.papershell")
+for k,v in pairs(override) do
+  CONFIG[k] = v
+end
+
+-- Check version
+if CONFIG.version < VERSION_STRING then
+  stdoutln("WARNING: the project was instantiated with an earlier version of")
+  stdoutln("         PaperShell. You may consider updating it.")
+end
+if CONFIG.version > VERSION_STRING then
+  stdoutln("WARNING: the current installed version of PaperShell is older than the one")
+  stdoutln("         used to instantiate this project. You may consider updating it.")
+end
+
 -- Other arguments
 if not arg[offset + 1] then
   stderrln("ERROR: an action must be specified")
@@ -487,8 +543,8 @@ if action == "install" then
     stderrln("ERROR: a theme must be specified")
     os.exit(RET_ARGS)
   end
-  local url = theme_repo .. arg[offset + 2] .. ".tpl.zip"
-  lfs.mkdir(outdir .. "/sty/" .. arg[offset + 2])
+  local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
+  lfs.mkdir(project_root .. "/" .. outdir .. "/sty/" .. arg[offset + 2])
   lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
   download_and_unzip(url, outdir)
   os.exit(RET_OK)
@@ -496,13 +552,13 @@ end
 
 -- List of themes
 if action == "list" then
-  print("Themes currently installed:\n")
+  stdoutln("Themes currently installed:")
   for file in lfs.dir(outdir .. "/tpl") do
     local filename = outdir .. "/tpl/" .. file
     local att, err = lfs.attributes(filename)
     if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
       local props = dofile(filename .. "/manifest.lua")
-      print("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
+      stdoutln("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
     end
   end
   os.exit(RET_OK)
@@ -511,6 +567,38 @@ end
 -- Export sources
 if action == "export" then
   export_project(project_root .. "/" .. (arg[offset + 3] or "Export"))
+  os.exit(RET_OK)
+end
+
+-- The next actions require TeXtidote, so we first check it is installed
+if not command_exists(CONFIG.textidote) then
+  stderrln("This action requires TeXtidote to be performed.")
+  stderrln("You can download TeXtidote at https://github.com/sylvainhalle/textidote")
+  os.exit(RET_NO_TEXTIDOTE)
+end
+
+-- Count words with textidote
+if action == "wc" then
+  local command = string.format("cd %s && %s --read-all --clean %s/%s 2> /dev/null", project_root, CONFIG.textidote, CONFIG.outdir, CONFIG.mainfile)
+  local result = run(command)
+  local words = 0
+  for word in result:gmatch("[^%s]+") do words=words+1 end
+  stdoutln(words .. " word(s)")
+  os.exit(RET_OK)
+end
+
+-- Check grammar with textidote
+if action == "check" then
+  local command = string.format("cd %s && %s --check %s --read-all --output html %s/%s 2> /dev/null",
+    project_root, CONFIG.textidote, CONFIG.language, CONFIG.outdir, CONFIG.mainfile)
+  local report = run(command)
+  local report_filename = project_root .. "/" .. CONFIG.report
+  write_file(report_filename, report)
+  if arg[offset + 2] == "-b" then
+    if not open_browser("file://" .. project_root .. "/" .. CONFIG.report) then
+      stderrln("Could not open browser")
+    end
+  end
   os.exit(RET_OK)
 end
 

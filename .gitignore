@@ -15,6 +15,7 @@ Source/gen
 git-history.txt
 Export/
 *.out
+textidote.html
 
 # Themes
 *.tpl.zip
