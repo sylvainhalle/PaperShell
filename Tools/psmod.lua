@@ -352,17 +352,42 @@ local function collect_files(root, rel, files)
   return files
 end
 
+local function command_exists(cmd)
+  return (os.execute("which " .. cmd) == 0)
+end
+
+local function run(cmd)
+  os.execute(cmd)
+end
+
+local function create_export_folder(export_dir)
+  export_dir = export_dir or "Export"
+
+  -- Remove previous export directory
+  os.execute(string.format('rm -rf "%s"', export_dir))
+
+  assert(lfs.mkdir(export_dir))
+
+  local files = collect_files(".")
+
+  for _, relpath in ipairs(files) do
+    copy_file(relpath, export_dir .. "/" .. relpath)
+  end
+
+  print(string.format("Exported %d file(s) to %s", #files, export_dir))
+end
+
 local function export_project(export_dir)
   local archive = "paper.zip"
   print("Exporting submission sources")
   create_export_folder(export_dir)
   if command_exists("zip") then
     print("Creating " .. archive)
-    run('cd Export && zip -9 -r ../paper.zip .')
+    run("zip -q -9 -r paper.zip .")
     print("Archive written to " .. archive)
   elseif command_exists("7z") then
     print("Creating " .. archive)
-    run('7z a -tzip paper.zip Export/*')
+    run('7z a -mx9 -tzip paper.zip .')
     print("Archive written to " .. archive)
   else
     print()
@@ -485,11 +510,7 @@ end
 
 -- Export sources
 if action == "export" then
-  if arg[offset + 3] then
-    fld = ""
-  else
-    export_project(project_root .. "/" .. "Export")
-  end
+  export_project(project_root .. "/" .. (arg[offset + 3] or "Export"))
   os.exit(RET_OK)
 end
 

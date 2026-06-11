@@ -96,13 +96,8 @@ say "Creating wrapper: $PS_WRAPPER"
 cat > "$PS_WRAPPER" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-
-wd=\$(pwd)
-
-(
-  cd "$PS_INSTALL_DIR/Tools"
-  texlua psmod.lua --from "\$wd" "\$@"
-)
+export PAPERSHELL_HOME="$(realpath $(pwd)/../)
+exec texlua "$PAPERSHELL_HOME/Tools/psmod.lua" "$@"
 EOF
 chmod u+x "$PS_WRAPPER"
 

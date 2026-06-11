@@ -33,6 +33,10 @@ testExport() {
 	  $PS init #1> /dev/null 2> /dev/null
 	  $PS export #1> /dev/null 2> /dev/null
 	  assertEquals 0 $?
+	  assertTrue  "[ -e paper.zip ]"
+	  contents=$(unzip -l paper.zip)
+	  assertTrue  '[[ "$contents" == *"paper.tex"* ]]'
+	  assertFalse '[[ "$contents" == *"paper.pdf"* ]]'
 }
 
 tearDown() {
