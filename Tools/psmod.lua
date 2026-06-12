@@ -465,9 +465,11 @@ end
 
 
 function printusage(stream)
-  stream:write("Usage: papershell [-h] [action]\n\n")
-  stream:write("Possible actions:\n")
+  stream:write("Usage: papershell [-h | verb [noun...]]\n\n")
+  stream:write("Possible verbs:\n")
   stream:write("  init <folder>        Creates an empty project in folder\n")
+  stream:write("  mk [-c]              Runs latexmk on main document\n")
+  stream:write("                       (-c cleans the project)\n")
   stream:write("  list                 Lists available themes\n")
   stream:write("  install <theme>      Downloads and installs theme\n")
   stream:write("  uninstall <theme>    Uninstalls theme\n")
@@ -536,6 +538,13 @@ if not arg[offset + 1] then
   os.exit(RET_MISSING_ACTION)
 end
 local action = arg[offset + 1]
+
+-- Run latexmk
+if action == "mk" then
+  if arg[offset + 2] == "-c" then
+    return os.execute(string.format("cd %s && latexmk -c", project_root))
+  return os.execute(string.format("cd %s && latexmk", project_root))
+end
 
 -- Installation of a theme
 if action == "install" then

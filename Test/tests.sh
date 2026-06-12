@@ -73,6 +73,7 @@ testExport() {
 }
 
 testWC() {
+	[ -z $(which textidote) ] && startSkipping # Requires textidote
 	$PS init 1> $tostdout 2> $tostderr
 	result=$($PS wc)
 	assertEquals "The operation should exit without error" 0 $?
@@ -80,9 +81,9 @@ testWC() {
 }
 
 testCheck() {
+	[ -z $(which textidote) ] && startSkipping # Requires textidote
 	$PS init 1> $tostdout 2> $tostderr
 	$PS check
-	#result=$($PS check)
 	assertEquals "The operation should exit without error" 0 $?
 	assertTrue "A report should be produced" "[ -e textidote.html ]"
 	assertTrue "The report is not empty"     "[ -s textidote.html ]"

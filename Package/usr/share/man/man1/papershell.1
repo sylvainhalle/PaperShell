@@ -1,0 +1,134 @@
+.TH PAPERSHELL 1 "2026-06-15" "GNU" "PaperShell Abbreviated User's Manual"
+.SH NAME
+PaperShell \- Swiss-Army knife for writing scientific papers in LaTeX
+.SH SYNOPSIS
+.B papershell
+.I "[-h] [verb [noun ...]]"
+.br
+.SH DESCRIPTION
+\fBPaperShell\fR is a LaTeX workflow for writing research papers that must be
+submitted to different publishers (IEEE, ACM, Springer, Elsevier, AAAI, LIPIcs,
+etc.) while keeping a single source document independent of the journal or
+conference template. It allows you to switch between LaTeX document classes
+(IEEEtran, acmart, llncs, elsarticle, lipics, …) without rewriting the paper,
+and to export clean sources suitable for journal or conference submission.
+.PP
+PaperShell works locally and in Overleaf, uses LuaLaTeX to generate the correct
+preamble automatically, and produces final sources that compile with pdfLaTeX,
+so editors do not need any special tools.
+
+.SS GENERAL VERBS
+Most of PaperShell's operations start with a \fIverb\fR, optionally followed by
+one or more \fInouns\fR.
+.TP
+\fBinit\fR [\fIfolder\fR]
+Creates an empty document project in the current folder. If \fIfolder\fR is
+speecified, initializes the project in this particular folder. Produces a
+warning (and does nothing else) if a project is already initialized.
+.TP
+\fBexport\fB [\fI-f\fR] [\fI-i\fR] [\fI-z\fR] [\fIfolder\fR]
+Exports the sources of the project to a folder called \fIExport\fR. The default
+destination can be overridden by specifiying a \fIfolder\fR.
+.RS
+.TP
+\fB-f\fR
+Puts all files in a single (flat) folder without any subfolder. Adjusts the
+relative paths in the main document accordingly.
+.TP
+\fB-i\fR
+Resolves all calls to \fIinput\fR in the main document, and includes them
+directly, thus creating a single compilable file.
+.TP
+\fB-z\fR
+Zips the resulting bundle. Either 7zip or zip must be present in the path.
+.RE
+
+.SS LATEXMK VERBS
+A few verbs in PaperShell are just calls to \fIlatexmk\fR. The main interest of
+these verbs is that they can be run from any location inside the project
+directory. Verbs for actions using latexmk are prefixed with \fImk\fR.
+.TP
+\fBmk\fR
+Runs \fIlatexmk\fR on the main document.
+.TP
+\fBmk c\fR
+Runs \fIlatexmk -c\fR on the main document, which has for effect of cleaning
+all generated and temporary files.
+
+.SS THEME VERBS
+Verbs for actions pertaining to themes are prefixed with \fItx\fR.
+.TP
+\fBth list\fR
+Lists available themes.
+.TP
+\fBth install\fR [<\fItheme\fR> | -f <\fIfile\fR>]
+Installs a pre-packaged \fItheme\fR. If the -f option is not specified, defaults
+to downloading the theme with given name from PaperShell's theme repository.
+With the -f option, installs the theme from the local \fIfile\fR.
+.TP
+\fBth uninstall\fR <\fItheme\fR>
+Deletes the files corresponding to \fItheme\fR.
+
+.SS TEXTIDOTE VERBS
+If TeXtidote is installed on the user's system, PaperShell can serve as a
+front-end to call some of its common functions. Verbs for actions using
+TeXtidote are prefixed with \fItx\fR.
+.TP
+\fBtx check\fR [\fI-b\fR]
+Asks TeXtidote to analyze the document for grammar and spelling, using the
+default language. The report is exported as an HTML file (default location:
+\fItextidote.html\fR at the root of the project). The \fI-b\fR option opens the
+resulting report in the system's default browser.
+.TP
+\fBtx wc\fR
+Calculates an approximate word count on the main document. The text is first
+stripped of all its LaTeX markup, and words are counted on that cleaned-up
+version.
+
+.SS LATEXDIFF VERBS
+If \fIlatexdiff\fR is installed on the user's system, PaperShell can use it
+to generate a version of the document that highlights the changes between the
+current version of the paper and another version.
+.TP
+\fBld\fR <\fIold\fR> [\fItarget\fR]
+Compares the document in \fIold\fR with the contents of the current project.
+Folder \fIold\fR must point to the root of another PaperShell project, or any
+subfolder thereof. The differences between the two projects are sent by default
+to a folder called \fIDiff\fR in the current project. This can be overridden by
+specifying \fItarget\fR.
+
+.SH OVERRIDING DEFAULTS
+Default values for parameters can be overridden by setting them in a file called
+\fI.papershell\fR, located at the root of the project. For a new project, the
+file simply reads like this:
+.RS
+.nf
+return {
+  version  = "3.x",
+  initdate = "1955-11-12 22:04:00"
+}
+.fi
+.RE
+.P
+The user can add other parameters to this file. Accepted keys are:
+.RS
+.TP
+\fBmainfile\fB
+The name of the file corresponding to the main document (default:
+\fIpaper.tex\fR). 
+.TP
+\fBlanguage\fB
+A two-letter language code, used by TeXtidote to check spelling and grammar
+(default: \fIen\fR).
+.RE
+
+.SH SUPPORT
+Support for PaperShell can be found on the GitHub repository at
+<https://github.com/sylvainhalle/papershell>.
+Bug reports and suggestions should be submitted via the issue tracker.
+
+.SH AUTHOR
+This manual page was written by Sylvain Hallé
+.MT shalle@acm.org
+.ME
+.
