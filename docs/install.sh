@@ -9,6 +9,7 @@ PS_REMOTE_URL="https://github.com/sylvainhalle/PaperShell.git"
 PS_BRANCH="v3"
 PS_LOCAL_BIN="${HOME}/.local/bin"
 PS_LOCAL_SHARE="${HOME}/.local/share"
+PS_LOCAL_MAN="${PS_LOCAL_SHARE}/man"
 PS_INSTALL_DIR="${PS_LOCAL_SHARE}/papershell"
 PS_WRAPPER="${PS_LOCAL_BIN}/papershell"
 
@@ -40,10 +41,8 @@ esac
 
 uninstall() {
   say "Removing PaperShell"
-
   rm -rf "$PS_INSTALL_DIR"
   rm -f "$PS_WRAPPER"
-
   say "Uninstalled PaperShell"
 }
 
@@ -57,7 +56,7 @@ command -v texlua >/dev/null 2>&1 || say "Warning: texlua was not found in PATH;
 
 # Directories
 say "Creating install directories"
-mkdir -p "$PS_LOCAL_BIN" "$PS_LOCAL_SHARE"
+mkdir -p "$PS_LOCAL_BIN" "$PS_LOCAL_SHARE" "$PS_LOCAL_MAN"
 
 if [ -d "$PS_INSTALL_DIR" ]; then
   say "Removing previous installation at $PS_INSTALL_DIR"
@@ -100,6 +99,23 @@ export PAPERSHELL_HOME="$(realpath $(pwd)/../)
 exec texlua "$PAPERSHELL_HOME/Tools/psmod.lua" "$@"
 EOF
 chmod u+x "$PS_WRAPPER"
+
+# Man page
+say "Linking to manpage"
+mkdir -p "$PS_LOCAL_MAN/man1"
+ln -s "$PAPERSHELL_HOME/Package/usr/local/share/man/man1/papershell.1" "$PS_LOCAL_MAN/man1/"
+
+# Completions
+say "Installing completions"
+# -- bash
+mkdir -p "$PS_LOCAL_SHARE/bash-completion/completions"
+ln -s "$PAPERSHELL_HOME/Package/completions/bash" "$PS_LOCAL_SHARE/bash-completion/completions/papershell.bash"
+# -- zsh
+mkdir -p "$PS_LOCAL_SHARE/zsh/site-functions"
+ln -s "$PAPERSHELL_HOME/Package/completions/zsh" "$PS_LOCAL_SHARE/zsh/site-functions/_papershell"
+# -- fish
+mkdir -p "~/.config/fish/completions"
+ln -s "$PAPERSHELL_HOME/Package/completions/fish" "~/.config/fish/completions/papershell.fish"
 
 say "Installed PaperShell successfully"
 

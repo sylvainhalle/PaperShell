@@ -1,0 +1,29 @@
+complete -c papershell -f
+
+complete -c papershell -s h -l help -d "Show help"
+
+complete -c papershell -n "__fish_use_subcommand" -a init -d "Initialize a new project"
+complete -c papershell -n "__fish_use_subcommand" -a export -d "Export sources for submission"
+complete -c papershell -n "__fish_use_subcommand" -a mk -d "Run latexmk"
+complete -c papershell -n "__fish_use_subcommand" -a th -d "Manage themes"
+complete -c papershell -n "__fish_use_subcommand" -a tx -d "Run TeXtidote helpers"
+complete -c papershell -n "__fish_use_subcommand" -a ld -d "Run latexdiff"
+
+complete -c papershell -n "__fish_seen_subcommand_from export" -s f -d "Export to a flat folder"
+complete -c papershell -n "__fish_seen_subcommand_from export" -s i -d "Inline input files"
+complete -c papershell -n "__fish_seen_subcommand_from export" -s z -d "Create a zip archive"
+
+complete -c papershell -n "__fish_seen_subcommand_from mk" -a c -d "Clean generated files"
+
+complete -c papershell -n "__fish_seen_subcommand_from th; and not __fish_seen_subcommand_from list install uninstall" -a list -d "List available themes"
+complete -c papershell -n "__fish_seen_subcommand_from th; and not __fish_seen_subcommand_from list install uninstall" -a install -d "Install a theme"
+complete -c papershell -n "__fish_seen_subcommand_from th; and not __fish_seen_subcommand_from list install uninstall" -a uninstall -d "Uninstall a theme"
+
+complete -c papershell -n "__fish_seen_subcommand_from th; and __fish_seen_subcommand_from install" -s f -d "Install theme from local file"
+
+complete -c papershell -n "__fish_seen_subcommand_from tx; and not __fish_seen_subcommand_from check wc" -a check -d "Check spelling and grammar"
+complete -c papershell -n "__fish_seen_subcommand_from tx; and not __fish_seen_subcommand_from check wc" -a wc -d "Count words"
+
+complete -c papershell -n "__fish_seen_subcommand_from tx; and __fish_seen_subcommand_from check" -s b -d "Open report in browser"
+
+# :mode=fish:

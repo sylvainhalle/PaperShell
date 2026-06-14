@@ -1,0 +1,95 @@
+#compdef papershell
+
+_papershell() {
+  local -a verbs th_cmds tx_cmds export_opts check_opts
+
+  verbs=(
+    'init:initialize a new PaperShell project'
+    'export:export sources for submission'
+    'mk:run latexmk'
+    'th:manage themes'
+    'tx:run TeXtidote helpers'
+    'ld:run latexdiff against another project'
+  )
+
+  th_cmds=(
+    'list:list available themes'
+    'install:install a theme'
+    'uninstall:uninstall a theme'
+  )
+
+  tx_cmds=(
+    'check:check spelling and grammar'
+    'wc:count words'
+  )
+
+  export_opts=(
+    '-f[export to a flat folder]'
+    '-i[inline input files]'
+    '-z[create a zip archive]'
+  )
+
+  check_opts=(
+    '-b[open TeXtidote report in browser]'
+  )
+
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:verb:->verb' \
+    '*::arg:->args'
+
+  case $state in
+    verb)
+      _describe -t verbs 'PaperShell command' verbs
+      ;;
+    args)
+      case $words[2] in
+        init)
+          _files -/
+          ;;
+        export)
+          _arguments \
+            $export_opts \
+            '*:destination folder:_files -/'
+          ;;
+        mk)
+          _describe -t mk-actions 'latexmk action' 'c:clean generated files'
+          ;;
+        th)
+          if (( CURRENT == 3 )); then
+            _describe -t theme-actions 'theme action' th_cmds
+          else
+            case $words[3] in
+              install)
+                _arguments \
+                  '-f[install theme from local file]:theme file:_files' \
+                  '*:theme name:'
+                ;;
+              uninstall)
+                _message 'theme name'
+                ;;
+            esac
+          fi
+          ;;
+        tx)
+          if (( CURRENT == 3 )); then
+            _describe -t textidote-actions 'TeXtidote action' tx_cmds
+          else
+            case $words[3] in
+              check)
+                _arguments $check_opts
+                ;;
+            esac
+          fi
+          ;;
+        ld)
+          _arguments \
+            '1:old project folder:_files -/' \
+            '2:target folder:_files -/'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_papershell "$@"
