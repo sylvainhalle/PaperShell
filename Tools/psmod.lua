@@ -16,11 +16,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
+-- Dynamic settings
+local pwd = os.getenv("PAPERSHELL_HOME") or ".."
+
 -- Dependencies
-local http = require("socket.http")
-local utf8 = require("utf8")
-local lfs  = require("lfs")
-local zip  = require("zip")
+local http   = require("socket.http")
+local utf8   = require("utf8")
+local lfs    = require("lfs")
+local zip    = require("zip")
+local bibtex = dofile("lua-bibtex-parser.lua")
+local butils = dofile("lua-bibtex-utils.lua")
 
 -- Version string
 local VERSION_STRING     = "3.0"
@@ -32,6 +37,9 @@ local RET_ARGS           = 2
 local RET_NO_ROOT        = 3
 local RET_ALREADY_EXISTS = 4
 local RET_NO_TEXTIDOTE   = 5
+local RET_NO_BIB         = 6
+local RET_BIB_DUPLICATES = 10
+local RET_BIB_INCOMPLETE = 11
 local RET_WTF            = 255
 
 -- Default settings
@@ -41,12 +49,10 @@ local CONFIG = {
 	report    = "textidote.html",
 	outdir    = "Source",
 	mainfile  = "paper.tex",
+	mainbib   = "paper.bib",
 	language  = "en"
 }
 local outdir     = "../Source"
-
--- Dynamic settings
-local pwd = os.getenv("PAPERSHELL_HOME") or ".."
 
 --[[ ***** File utilities ***** {{{ ]]--
 
@@ -341,7 +347,7 @@ end
 
 --[[ }}} ]]
 
---[[ ***** OS utilities ***** {{{ ]] --
+--[[ ***** OS utilities ***** {{{ ]]--
 
 --[[ Opens a website in the default web browser.
      @param url: The URL of the website to be opened.
@@ -361,6 +367,59 @@ function open_browser(url)
 end
 
 --[[ }}} ]]
+
+--[[ ***** BibTeX utilities ***** {{{ ]]--
+
+--[[ Displays the duplicate keys or titles found in the paper's
+     bib file.
+--]]
+function show_duplicates(kdups, tdups)
+	if #kdups == 0 and #tdups == 0 then
+		stdoutln("No duplicates found")
+		return RET_OK
+	end
+	if #kdups > 0 then
+		stdoutln(#kdups .. "duplicate key(s) found:")
+		for _,v in ipairs(kdups) do
+			stdoutln("  " .. v)
+		end
+	end
+	if #kdups > 0 then
+		stdoutln(#kdups .. "duplicate title(s) found:")
+		for _,v in ipairs(tdups) do
+			stdoutln("  " .. v)
+		end
+	end
+	return RET_BIB_DUPLICATES
+end
+
+function show_missing_fields(inc)
+	local keys = {"author", "title", "year", "pages"}
+	local missing = false
+	stdout(printpad("", 16))
+	for _,k in ipairs(keys) do
+		stdout(printpad(k, 8))
+	end
+	stdoutln()
+	for _,e in ipairs(inc) do
+		stdout(printpad(e.key, 16))
+		for _,k in ipairs(keys) do
+			if e[k] then
+				missing = true
+				stdout(printpad("X", 8))
+			else 
+				stdout(printpad(" ", 8))
+			end
+		end
+		stdoutln()
+	end
+	if missing then
+		return RET_BIB_INCOMPLETE
+	end
+	return RET_OK
+end
+
+--[[ }}} ]]--
 
 local function collect_files(root, rel, files)
   rel = rel or ""
@@ -462,23 +521,23 @@ function instantiate(folder)
   end
 end
 
-
-
 function printusage(stream)
   stream:write("Usage: papershell [-h | verb [noun...]]\n\n")
   stream:write("Possible verbs:\n")
-  stream:write("  init <folder>        Creates an empty project in folder\n")
-  stream:write("  mk [-c]              Runs latexmk on main document\n")
-  stream:write("                       (-c cleans the project)\n")
-  stream:write("  th list              Lists available themes\n")
-  stream:write("  th install <theme>   Downloads and installs theme\n")
-  stream:write("  th uninstall <theme> Uninstalls theme\n")
-  stream:write("  export               Exports sources to archive\n")
-  stream:write("  tx check [-b]        Checks spelling and grammar (*)\n")
-  stream:write("  tx wc                Counts the words in the paper (*)\n")
-  stream:write("  ld <f> [g]           Difference between two versions (#)\n")
+  stream:write("  init [folder]           Creates an empty project in folder\n")
+  stream:write("  export                  Exports sources to archive\n")
+  stream:write("  mk [-c]                 Runs latexmk on main document\n")
+  stream:write("                          (-c cleans the project)\n")
+  stream:write("  th list                 Lists available themes\n")
+  stream:write("  th install <theme>      Downloads and installs theme\n")
+  stream:write("  th uninstall <theme>    Uninstalls theme\n")
+  stream:write("  tx check [-b]           Checks spelling and grammar (*)\n")
+  stream:write("  tx wc                   Counts the words in the paper (*)\n")
+  stream:write("  ld <f> [g]              Difference between two versions (#)\n")
+  stream:write("  bb dupes [show|delete]  Finds duplicates in bib file and shows/deletes them\n")
   stream:write("\n")
   stream:write("  (*) Requires TeXtidote  (#) Requires latexdiff\n")
+  stream:write("  Type `man papershell` for more details.\n")
 end
 
 --[[ ***** Main loop ***** {{{ ]]--
@@ -543,34 +602,9 @@ local action = arg[offset + 1]
 if action == "mk" then
   if arg[offset + 2] == "-c" then
     return os.execute(string.format("cd %s && latexmk -c", project_root))
-  return os.execute(string.format("cd %s && latexmk", project_root))
-end
-
--- Installation of a theme
-if action == "install" then
-  if not arg[offset + 2] then
-    stderrln("ERROR: a theme must be specified")
-    os.exit(RET_ARGS)
+  else
+    return os.execute(string.format("cd %s && latexmk", project_root))
   end
-  local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
-  lfs.mkdir(project_root .. "/" .. outdir .. "/sty/" .. arg[offset + 2])
-  lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
-  download_and_unzip(url, outdir)
-  os.exit(RET_OK)
-end
-
--- List of themes
-if action == "list" then
-  stdoutln("Themes currently installed:")
-  for file in lfs.dir(outdir .. "/tpl") do
-    local filename = outdir .. "/tpl/" .. file
-    local att, err = lfs.attributes(filename)
-    if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
-      local props = dofile(filename .. "/manifest.lua")
-      stdoutln("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
-    end
-  end
-  os.exit(RET_OK)
 end
 
 -- Export sources
@@ -579,36 +613,115 @@ if action == "export" then
   os.exit(RET_OK)
 end
 
--- The next actions require TeXtidote, so we first check it is installed
-if not command_exists(CONFIG.textidote) then
-  stderrln("This action requires TeXtidote to be performed.")
-  stderrln("You can download TeXtidote at https://github.com/sylvainhalle/textidote")
-  os.exit(RET_NO_TEXTIDOTE)
-end
-
--- Count words with textidote
-if action == "wc" then
-  local command = string.format("cd %s && %s --read-all --clean %s/%s 2> /dev/null", project_root, CONFIG.textidote, CONFIG.outdir, CONFIG.mainfile)
-  local result = run(command)
-  local words = 0
-  for word in result:gmatch("[^%s]+") do words=words+1 end
-  stdoutln(words .. " word(s)")
-  os.exit(RET_OK)
-end
-
--- Check grammar with textidote
-if action == "check" then
-  local command = string.format("cd %s && %s --check %s --read-all --output html %s/%s 2> /dev/null",
-    project_root, CONFIG.textidote, CONFIG.language, CONFIG.outdir, CONFIG.mainfile)
-  local report = run(command)
-  local report_filename = project_root .. "/" .. CONFIG.report
-  write_file(report_filename, report)
-  if arg[offset + 2] == "-b" then
-    if not open_browser("file://" .. project_root .. "/" .. CONFIG.report) then
-      stderrln("Could not open browser")
+-- Theme verbs
+if action == "th" or action == "theme" then
+  offset = offset + 1
+  action = arg[offset + 1]
+  -- Installation of a theme
+  if action == "install" then
+    if not arg[offset + 2] then
+      stderrln("ERROR: a theme must be specified")
+      os.exit(RET_ARGS)
     end
+    local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
+    lfs.mkdir(project_root .. "/" .. outdir .. "/sty/" .. arg[offset + 2])
+    lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
+    download_and_unzip(url, outdir)
+    os.exit(RET_OK)
   end
-  os.exit(RET_OK)
+    
+  -- List of themes
+  if action == "list" then
+    stdoutln("Themes currently installed:")
+    for file in lfs.dir(outdir .. "/tpl") do
+      local filename = outdir .. "/tpl/" .. file
+      local att, err = lfs.attributes(filename)
+      if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
+        local props = dofile(filename .. "/manifest.lua")
+        stdoutln("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
+      end
+    end
+    os.exit(RET_OK)
+  end
+  stderrln("ERROR: unknown action " .. action)
+  os.exit(RET_ARGS)
+end
+
+-- TeXtidote verbs
+if action == "tx" or action == "textidote" then
+  offset = offset + 1
+  action = arg[offset + 1]
+  -- The next actions require TeXtidote, so we first check it is installed
+  if not command_exists(CONFIG.textidote) then
+    stderrln("This action requires TeXtidote to be performed.")
+    stderrln("You can download TeXtidote at https://github.com/sylvainhalle/textidote")
+    os.exit(RET_NO_TEXTIDOTE)
+  end
+
+  -- Count words with textidote
+  if action == "wc" then
+    local command = string.format("cd %s && %s --read-all --clean %s/%s 2> /dev/null", project_root, CONFIG.textidote, CONFIG.outdir, CONFIG.mainfile)
+    local result = run(command)
+    local words = 0
+    for word in result:gmatch("[^%s]+") do words=words+1 end
+    stdoutln(words .. " word(s)")
+    os.exit(RET_OK)
+  end
+
+  -- Check grammar with textidote
+  if action == "check" then
+    local command = string.format("cd %s && %s --check %s --read-all --output html %s/%s 2> /dev/null",
+      project_root, CONFIG.textidote, CONFIG.language, CONFIG.outdir, CONFIG.mainfile)
+    local report = run(command)
+    local report_filename = project_root .. "/" .. CONFIG.report
+    write_file(report_filename, report)
+    if arg[offset + 2] == "-b" then
+      if not open_browser("file://" .. project_root .. "/" .. CONFIG.report) then
+        stderrln("Could not open browser")
+      end
+    end
+    os.exit(RET_OK)
+  end
+  stderrln("ERROR: unknown action " .. action)
+  os.exit(RET_ARGS)
+end
+
+-- BibTeX verbs
+if action == "bb" or action == "bibtex" then
+  offset = offset + 1
+  action = arg[offset + 1]
+  -- All actions require an existing bib file
+  local path = pwd.."/Source/"..CONFIG.mainbib
+  if not file_exists(path) then
+  	stderrln("ERROR: bib file does not exist")
+  	os.exit(RET_NO_BIB)
+  end
+  local lib = bibtex.parse(butils.readfile(path))
+  if action == "dupes" then
+  	local sub_action = arg[offset + 2]
+  	if sub_action == "s" or sub_action == "show" then
+  		local kdups, tdups = butils.find_duplicates(lib)
+  		os.exit(show_duplicates(kdups, tdups))
+  	elseif sub_action == "d" or sub_action == "delete" then
+  		os.exit(RET_OK)
+  	else
+  		stderrln("ERROR: unknown sub-action " .. sub_action)
+  		os.exit(RET_ARGS)
+  	end
+  elseif action == "missing" then
+  	local sub_action = arg[offset + 2]
+  	if sub_action == "f" or sub_action == "fields" then
+  		local incomplete = butils.find_incomplete(lib)
+  		os.exit(show_missing_fields(incomplete))
+  	else
+  		stderrln("ERROR: unknown sub-action " .. sub_action)
+  		os.exit(RET_ARGS)
+  	end
+  elseif action == "clean" then
+  	os.exit(pretty_print(lib))
+  end
+  stderrln("ERROR: unknown action " .. action)
+  os.exit(RET_ARGS)
 end
 
 -- ?!?

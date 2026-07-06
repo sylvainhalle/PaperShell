@@ -2,6 +2,6 @@
 
 test:
 	mkdir -p results
-	shunit2 tests.sh --output-junit-xml=results/test-script.xml 
+	texlua tests.lua
 
 .PHONY: test
