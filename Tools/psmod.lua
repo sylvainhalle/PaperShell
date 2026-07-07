@@ -24,8 +24,6 @@ local http   = require("socket.http")
 local utf8   = require("utf8")
 local lfs    = require("lfs")
 local zip    = require("zip")
-local bibtex = dofile("lua-bibtex-parser.lua")
-local butils = dofile("lua-bibtex-utils.lua")
 
 -- Version string
 local VERSION_STRING     = "3.0"
@@ -36,10 +34,6 @@ local RET_MISSING_ACTION = 1
 local RET_ARGS           = 2
 local RET_NO_ROOT        = 3
 local RET_ALREADY_EXISTS = 4
-local RET_NO_TEXTIDOTE   = 5
-local RET_NO_BIB         = 6
-local RET_BIB_DUPLICATES = 10
-local RET_BIB_INCOMPLETE = 11
 local RET_WTF            = 255
 
 -- Default settings
@@ -368,56 +362,31 @@ end
 
 --[[ }}} ]]
 
+--[[ ***** Plugins ***** {{{ ]]--
+
+local PLUGINS = {}
+local root = pwd.."/Tools/plugins/"
+for v in lfs.dir(root) do
+	if file_exists(root .. v .. "/manifest.lua") then
+		local man = dofile(root .. v .. "/manifest.lua") or {}
+		if man.id and file_exists(root .. v .. "/plugin.lua") then
+			local plg = dofile(root .. v .. "/plugin.lua")
+			PLUGINS[man.id] = {
+				manifest = man,
+				plugin   = plg
+			}
+		end
+	end
+end
+
+
+-- }}} ]]
+
 --[[ ***** BibTeX utilities ***** {{{ ]]--
 
---[[ Displays the duplicate keys or titles found in the paper's
-     bib file.
---]]
-function show_duplicates(kdups, tdups)
-	if #kdups == 0 and #tdups == 0 then
-		stdoutln("No duplicates found")
-		return RET_OK
-	end
-	if #kdups > 0 then
-		stdoutln(#kdups .. "duplicate key(s) found:")
-		for _,v in ipairs(kdups) do
-			stdoutln("  " .. v)
-		end
-	end
-	if #kdups > 0 then
-		stdoutln(#kdups .. "duplicate title(s) found:")
-		for _,v in ipairs(tdups) do
-			stdoutln("  " .. v)
-		end
-	end
-	return RET_BIB_DUPLICATES
-end
 
-function show_missing_fields(inc)
-	local keys = {"author", "title", "year", "pages"}
-	local missing = false
-	stdout(printpad("", 16))
-	for _,k in ipairs(keys) do
-		stdout(printpad(k, 8))
-	end
-	stdoutln()
-	for _,e in ipairs(inc) do
-		stdout(printpad(e.key, 16))
-		for _,k in ipairs(keys) do
-			if e[k] then
-				missing = true
-				stdout(printpad("X", 8))
-			else 
-				stdout(printpad(" ", 8))
-			end
-		end
-		stdoutln()
-	end
-	if missing then
-		return RET_BIB_INCOMPLETE
-	end
-	return RET_OK
-end
+
+
 
 --[[ }}} ]]--
 
@@ -521,6 +490,17 @@ function instantiate(folder)
   end
 end
 
+function printusage_rec(e, stream)
+	if e.help then
+		stream:write(printpad(e.help[1], 20))
+		stream:write(e.help[2].."\n")
+	elseif e.actions then
+		for _,v in ipairs(e.actions) do
+			printusage_rec(v, stream)
+		end
+	end
+end
+
 function printusage(stream)
   stream:write("Usage: papershell [-h | verb [noun...]]\n\n")
   stream:write("Possible verbs:\n")
@@ -531,8 +511,15 @@ function printusage(stream)
   stream:write("  th list                 Lists available themes\n")
   stream:write("  th install <theme>      Downloads and installs theme\n")
   stream:write("  th uninstall <theme>    Uninstalls theme\n")
-  stream:write("  tx check [-b]           Checks spelling and grammar (*)\n")
-  stream:write("  tx wc                   Counts the words in the paper (*)\n")
+  for id, p in pairs(PLUGINS) do
+  stream:write("  " .. p.manifest.name .. "\n")
+  for _, m in ipairs(p.manifest.menu) do
+    printusage_rec(m, stream)
+  end
+end
+  
+  --stream:write("  tx check [-b]           Checks spelling and grammar (*)\n")
+  --stream:write("  tx wc                   Counts the words in the paper (*)\n")
   stream:write("  ld <f> [g]              Difference between two versions (#)\n")
   stream:write("  bb dupes [show|delete]  Finds duplicates in bib file and shows/deletes them\n")
   stream:write("\n")
@@ -541,6 +528,63 @@ function printusage(stream)
 end
 
 --[[ ***** Main loop ***** {{{ ]]--
+
+local function verb_matches(verbs, word)
+  if type(verbs) == "string" then
+    return verbs == word
+  end
+  for _, v in ipairs(verbs or {}) do
+    if v == word then return true end
+  end
+  return false
+end
+
+local function dispatch_plugin_rec(plugin, entry, arg_index, env)
+  -- Leaf: call the designated function
+  if entry.call then
+    local f = plugin.plugin[entry.call]
+    if type(f) ~= "function" then
+      stderrln("ERROR: plugin function not found: " .. entry.call)
+      return RET_ARGS
+    end
+    local ret = {}
+    f(env, ret)
+    return ret
+  end
+
+  -- Internal node: consume next command word
+  if entry.actions then
+    local word = arg[arg_index]
+    if not word then
+      stderrln("ERROR: missing plugin action")
+      return RET_ARGS
+    end
+
+    for _, child in ipairs(entry.actions) do
+      if verb_matches(child.verb, word) then
+        return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
+      end
+    end
+
+    stderrln("ERROR: unknown plugin action " .. word)
+    return RET_ARGS
+  end
+
+  stderrln("ERROR: malformed plugin menu entry")
+  return RET_ARGS
+end
+
+local function dispatch_plugin(action, env)
+  for _, plugin in pairs(PLUGINS) do
+    for _, entry in ipairs(plugin.manifest.menu or {}) do
+      if verb_matches(entry.verb, action) then
+        return dispatch_plugin_rec(plugin, entry, env.offset + 2, env)
+      end
+    end
+  end
+
+  return nil
+end
 
 stdoutln("PaperShell theme manager v" .. VERSION_STRING)
 stdoutln("(C) 2015-2026 Sylvain Hallé")
@@ -598,22 +642,21 @@ if not arg[offset + 1] then
 end
 local action = arg[offset + 1]
 
--- Run latexmk
+-- Core verbs first
 if action == "mk" then
   if arg[offset + 2] == "-c" then
-    return os.execute(string.format("cd %s && latexmk -c", project_root))
+    os.exit(os.execute(string.format("cd %s && latexmk -c", project_root)))
   else
-    return os.execute(string.format("cd %s && latexmk", project_root))
+    os.exit(os.execute(string.format("cd %s && latexmk", project_root)))
   end
 end
 
--- Export sources
 if action == "export" then
-  export_project(project_root .. "/" .. (arg[offset + 3] or "Export"))
+  export_project(project_root .. "/" .. (arg[offset + 2] or "Export"))
   os.exit(RET_OK)
 end
 
--- Theme verbs
+-- Theme verbs remain hard-coded for now
 if action == "th" or action == "theme" then
   offset = offset + 1
   action = arg[offset + 1]
@@ -647,81 +690,36 @@ if action == "th" or action == "theme" then
   os.exit(RET_ARGS)
 end
 
--- TeXtidote verbs
-if action == "tx" or action == "textidote" then
-  offset = offset + 1
-  action = arg[offset + 1]
-  -- The next actions require TeXtidote, so we first check it is installed
-  if not command_exists(CONFIG.textidote) then
-    stderrln("This action requires TeXtidote to be performed.")
-    stderrln("You can download TeXtidote at https://github.com/sylvainhalle/textidote")
-    os.exit(RET_NO_TEXTIDOTE)
-  end
+-- Plugin verbs
+local env = {
+  arg = arg,
+  offset = offset,
+  project_root = project_root,
+  settings = CONFIG,
+  pwd = pwd,
+  outdir = CONFIG.outdir,
+  mainfile = CONFIG.mainfile,
+  command_exists = command_exists,
+  run = run,
+  write_file = write_file,
+  open_browser = open_browser,
+  stdout = stdout,
+  stdoutln = stdoutln,
+  stderrln = stderrln,
+  stderr = stderr,
+  printpad = printpad
+}
 
-  -- Count words with textidote
-  if action == "wc" then
-    local command = string.format("cd %s && %s --read-all --clean %s/%s 2> /dev/null", project_root, CONFIG.textidote, CONFIG.outdir, CONFIG.mainfile)
-    local result = run(command)
-    local words = 0
-    for word in result:gmatch("[^%s]+") do words=words+1 end
-    stdoutln(words .. " word(s)")
-    os.exit(RET_OK)
-  end
-
-  -- Check grammar with textidote
-  if action == "check" then
-    local command = string.format("cd %s && %s --check %s --read-all --output html %s/%s 2> /dev/null",
-      project_root, CONFIG.textidote, CONFIG.language, CONFIG.outdir, CONFIG.mainfile)
-    local report = run(command)
-    local report_filename = project_root .. "/" .. CONFIG.report
-    write_file(report_filename, report)
-    if arg[offset + 2] == "-b" then
-      if not open_browser("file://" .. project_root .. "/" .. CONFIG.report) then
-        stderrln("Could not open browser")
-      end
+local ret = dispatch_plugin(action, env)
+if ret ~= nil then
+  if ret.success then
+  	local msg = ret.success.message or {}
+    for _,l in ipairs(msg) do
+      stdoutln(l)
     end
     os.exit(RET_OK)
   end
-  stderrln("ERROR: unknown action " .. action)
-  os.exit(RET_ARGS)
-end
-
--- BibTeX verbs
-if action == "bb" or action == "bibtex" then
-  offset = offset + 1
-  action = arg[offset + 1]
-  -- All actions require an existing bib file
-  local path = pwd.."/Source/"..CONFIG.mainbib
-  if not file_exists(path) then
-  	stderrln("ERROR: bib file does not exist")
-  	os.exit(RET_NO_BIB)
-  end
-  local lib = bibtex.parse(butils.readfile(path))
-  if action == "dupes" then
-  	local sub_action = arg[offset + 2]
-  	if sub_action == "s" or sub_action == "show" then
-  		local kdups, tdups = butils.find_duplicates(lib)
-  		os.exit(show_duplicates(kdups, tdups))
-  	elseif sub_action == "d" or sub_action == "delete" then
-  		os.exit(RET_OK)
-  	else
-  		stderrln("ERROR: unknown sub-action " .. sub_action)
-  		os.exit(RET_ARGS)
-  	end
-  elseif action == "missing" then
-  	local sub_action = arg[offset + 2]
-  	if sub_action == "f" or sub_action == "fields" then
-  		local incomplete = butils.find_incomplete(lib)
-  		os.exit(show_missing_fields(incomplete))
-  	else
-  		stderrln("ERROR: unknown sub-action " .. sub_action)
-  		os.exit(RET_ARGS)
-  	end
-  elseif action == "clean" then
-  	os.exit(pretty_print(lib))
-  end
-  stderrln("ERROR: unknown action " .. action)
-  os.exit(RET_ARGS)
+  os.exit(ret.code or RET_OK)
 end
 
 -- ?!?
