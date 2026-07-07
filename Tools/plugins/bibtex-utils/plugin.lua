@@ -26,49 +26,54 @@ end
      bib file.
 --]]
 local function print_duplicates(env, kdups, tdups)
+	local p = env.tui.Printer:new()
 	if #kdups == 0 and #tdups == 0 then
-		env.stdoutln("No duplicates found")
-		return RET_OK
+		p:println("No duplicates found")
+		return p, RET_OK
 	end
 	if #kdups > 0 then
-		env.stdoutln(#kdups .. " duplicate key(s) found:")
+		p:print(#kdups .. " duplicate key(s) found:"):indent():println()
 		for _,v in ipairs(kdups) do
-			env.stdoutln("  " .. v)
+			p:println(v)
 		end
+		p:outdent()
 	end
 	if #kdups > 0 then
-		env.stdoutln(#kdups .. " duplicate title(s) found:")
+		p:print(#kdups .. " duplicate title(s) found:"):indent():println()
 		for _,v in ipairs(tdups) do
-			env.stdoutln("  " .. v)
+			p:println(v)
 		end
+		p:outdent()
 	end
-	return RET_BIB_DUPLICATES
+	return p, RET_BIB_DUPLICATES
 end
 
 local function print_missing_fields(env, inc)
+	local p = env.tui.Printer:new()
 	local keys = {"author", "title", "year", "pages"}
 	local missing = false
-	env.stdout(env.printpad("", 16))
+	p:print("", 16)
 	for _,k in ipairs(keys) do
-		env.stdout(env.printpad(k, 8))
+		p:bd():print(p:sul() .. k .. p:srs(), 8)
 	end
-	env.stdoutln()
+	p:println()
 	for _,e in ipairs(inc) do
-		env.stdout(env.printpad(e.key, 16))
+		p:print(e.key, 16)
 		for _,k in ipairs(keys) do
 			if e[k] then
 				missing = true
-				env.stdout(env.printpad("X", 8))
-			else 
-				env.stdout(env.printpad(" ", 8))
+				p:bg().red():fg().black()
+				p:print("X" .. p:srs(), 8)
+			else
+				p:print(" ", 8)
 			end
 		end
-		env.stdoutln()
+		p:println()
 	end
 	if missing then
-		return RET_BIB_INCOMPLETE
+		return p, RET_BIB_INCOMPLETE
 	end
-	return RET_OK
+	return p, RET_OK
 end
 
 local function get_bib_path(env)
@@ -78,17 +83,20 @@ end
 local function show_duplicates(env, ret)
 	local lib = bibtex.parse(butils.readfile(get_bib_path(env)))
 	local kdups, tdups = butils.find_duplicates(lib)
-	local c = print_duplicates(env, kdups, tdups)
+	local p, c = print_duplicates(env, kdups, tdups)
 	ret.success = {
-		code = c
+		code = c,
+		message = p:lines()
 	}
 end
 
 local function show_missing_fields(env, ret)
 	local lib = bibtex.parse(butils.readfile(get_bib_path(env)))
 	local incomplete = butils.find_incomplete(lib)
+	local p, c = print_missing_fields(env, incomplete)
 	ret.success = {
-		code = print_missing_fields(env, incomplete)
+		code = c,
+		message = p:lines()
 	}
 end
 

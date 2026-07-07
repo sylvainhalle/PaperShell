@@ -20,10 +20,10 @@
 local pwd = os.getenv("PAPERSHELL_HOME") or ".."
 
 -- Dependencies
-local http   = require("socket.http")
-local utf8   = require("utf8")
-local lfs    = require("lfs")
-local zip    = require("zip")
+local http   = require "socket.http"
+local lfs    = require "lfs"
+local zip    = require "zip"
+local tui    = require "tui"
 
 -- Version string
 local VERSION_STRING     = "3.0"
@@ -218,27 +218,6 @@ function copy_file(old_path, new_path)
   return new_file_sz == old_file_sz
 end
 
---[[ Extracts a substring from a UTF-8 string.
-     @param s The string
-     @param i The start index in the string
-     @param j The end index in the string
-     @return The substring
-  ]]
-local function utf8sub(s, i, j)
-  i = i or 1
-  j = j or -1
-  local start = utf8.offset(s, i)
-  if not start then return "" end
-  local stop
-  if j < 0 then
-    stop = #s
-  else
-    stop = utf8.offset(s, j + 1)
-    stop = stop and (stop - 1) or #s
-  end
-  return string.sub(s, start, stop)
-end
-
 --[[ }}} ]]
 
 --[[ ***** Network utilities ***** {{{ ]]--
@@ -267,47 +246,6 @@ local function should_export(path)
   if b:match("%.idx$") then return false end
   if b:match("%.fls$") then return false end
   return true
-end
-
---[[ }}} ]]
-
---[[ ***** TUI utilities ***** {{{ ]]--
-
-local function stdout(content)
-  io.stdout:write(content or "")
-end
-
-local function stdoutln(content)
-  stdout((content or "") .. "\n")
-end
-
-local function stderr(content)
-  io.stderr:write(content or "")
-end
-
-local function stderrln(content)
-  stderr((content or "") .. "\n")
-end
-
---[[ Truncates or pads a string to a fixed length.
-     @param str The string
-     @param length The length
-     @param pad_char (Optional) the character used to pad if the string
-       is too short
-  ]]
-function printpad(str, length, pad_char)
-    pad_char = pad_char or " "
-    local len = utf8.len(str)
-    if len > length then
-        -- Truncate if longer
-        return utf8sub(str, 1, length)
-    elseif len < length then
-        -- Pad if shorter
-        return str .. string.rep(pad_char, length - len)
-    else
-        -- Return as-is if exactly the right length
-        return str
-    end
 end
 
 --[[ }}} ]]
@@ -382,14 +320,6 @@ end
 
 -- }}} ]]
 
---[[ ***** BibTeX utilities ***** {{{ ]]--
-
-
-
-
-
---[[ }}} ]]--
-
 local function collect_files(root, rel, files)
   rel = rel or ""
   files = files or {}
@@ -437,28 +367,28 @@ local function create_export_folder(export_dir)
     copy_file(relpath, export_dir .. "/" .. relpath)
   end
 
-  stdoutln(string.format("Exported %d file(s) to %s", #files, export_dir))
+  tui.stdoutln(string.format("Exported %d file(s) to %s", #files, export_dir))
 end
 
 local function export_project(export_dir)
   local archive = "paper.zip"
-  stdoutln("Exporting submission sources")
+  tui.stdoutln("Exporting submission sources")
   create_export_folder(export_dir)
   if command_exists("zip") then
-    stdoutln("Creating " .. archive)
+    tui.stdoutln("Creating " .. archive)
     run("zip -q -9 -r paper.zip .")
-    stdoutln("Archive written to " .. archive)
+    tui.stdoutln("Archive written to " .. archive)
   elseif command_exists("7z") then
-    stdoutln("Creating " .. archive)
+    tui.stdoutln("Creating " .. archive)
     run('7z a -mx9 -tzip paper.zip .')
-    stdoutln("Archive written to " .. archive)
+    tui.stdoutln("Archive written to " .. archive)
   else
-    stdoutln()
-    stdoutln("No ZIP utility was found.")
-    stdoutln("Submission sources have been exported to:")
-    stdoutln("  " .. export_dir)
-    stdoutln()
-    stdoutln("Please create the archive manually.")
+    tui.stdoutln()
+    tui.stdoutln("No ZIP utility was found.")
+    tui.stdoutln("Submission sources have been exported to:")
+    tui.stdoutln("  " .. export_dir)
+    tui.stdoutln()
+    tui.stdoutln("Please create the archive manually.")
   end
 end
 
@@ -484,15 +414,15 @@ end
 function instantiate(folder)
   local success, err = copy_folder(pwd, folder, {"docs", ".git", "Test"})
   if success then
-    stdoutln("Folder and its contents copied successfully.")
+    tui.stdoutln("Folder and its contents copied successfully.")
   else
-    stderrln("Failed to copy folder and its contents:", err)
+    tui.stderrln("Failed to copy folder and its contents:", err)
   end
 end
 
 function printusage_rec(e, stream)
 	if e.help then
-		stream:write(printpad(e.help[1], 20))
+		stream:write(tui.printpad(e.help[1], 20))
 		stream:write(e.help[2].."\n")
 	elseif e.actions then
 		for _,v in ipairs(e.actions) do
@@ -544,7 +474,7 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
   if entry.call then
     local f = plugin.plugin[entry.call]
     if type(f) ~= "function" then
-      stderrln("ERROR: plugin function not found: " .. entry.call)
+      tui.stderrln("ERROR: plugin function not found: " .. entry.call)
       return RET_ARGS
     end
     local ret = {}
@@ -556,7 +486,7 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
   if entry.actions then
     local word = arg[arg_index]
     if not word then
-      stderrln("ERROR: missing plugin action")
+      tui.stderrln("ERROR: missing plugin action")
       return RET_ARGS
     end
 
@@ -566,11 +496,11 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
       end
     end
 
-    stderrln("ERROR: unknown plugin action " .. word)
+    tui.stderrln("ERROR: unknown plugin action " .. word)
     return RET_ARGS
   end
 
-  stderrln("ERROR: malformed plugin menu entry")
+  tui.stderrln("ERROR: malformed plugin menu entry")
   return RET_ARGS
 end
 
@@ -586,9 +516,9 @@ local function dispatch_plugin(action, env)
   return nil
 end
 
-stdoutln("PaperShell theme manager v" .. VERSION_STRING)
-stdoutln("(C) 2015-2026 Sylvain Hallé")
-stdoutln()
+tui.stdoutln("PaperShell theme manager v" .. VERSION_STRING)
+tui.stdoutln("(C) 2015-2026 Sylvain Hallé")
+tui.stdoutln()
 
 local offset = 0
 
@@ -597,24 +527,24 @@ if arg[offset + 1] == "init" then
   local fld = arg[offset + 2] or "."
   local target = lfs.currentdir() .. "/" .. fld
   if file_exists(target .. "/.papershell") then
-    stderrln("ERROR: a PaperShell project is already instantiated")
+    tui.stderrln("ERROR: a PaperShell project is already instantiated")
     os.exit(RET_ALREADY_EXISTS)
   end
-  stdoutln("Creating empty project in " .. target .. "\n")
+  tui.stdoutln("Creating empty project in " .. target .. "\n")
   instantiate(lfs.currentdir() .. "/" .. fld)
   os.exit(0)
 end
 
 -- Help
 if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
-  printusage(io.stdout)
+  printusage(io.tui.stdout)
   os.exit(RET_OK)
 end
 
 -- Find a project root
 local project_root = find_root_rec(lfs.currentdir())
 if not project_root then
-  stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
+  tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
   os.exit(RET_NO_ROOT)
 end
 
@@ -626,18 +556,18 @@ end
 
 -- Check version
 if CONFIG.version < VERSION_STRING then
-  stdoutln("WARNING: the project was instantiated with an earlier version of")
-  stdoutln("         PaperShell. You may consider updating it.")
+  tui.stdoutln("WARNING: the project was instantiated with an earlier version of")
+  tui.stdoutln("         PaperShell. You may consider updating it.")
 end
 if CONFIG.version > VERSION_STRING then
-  stdoutln("WARNING: the current installed version of PaperShell is older than the one")
-  stdoutln("         used to instantiate this project. You may consider updating it.")
+  tui.stdoutln("WARNING: the current installed version of PaperShell is older than the one")
+  tui.stdoutln("         used to instantiate this project. You may consider updating it.")
 end
 
 -- Other arguments
 if not arg[offset + 1] then
-  stderrln("ERROR: an action must be specified")
-  printusage(io.stderr)
+  tui.stderrln("ERROR: an action must be specified")
+  printusage(io.tui.stderr)
   os.exit(RET_MISSING_ACTION)
 end
 local action = arg[offset + 1]
@@ -663,7 +593,7 @@ if action == "th" or action == "theme" then
   -- Installation of a theme
   if action == "install" then
     if not arg[offset + 2] then
-      stderrln("ERROR: a theme must be specified")
+      tui.stderrln("ERROR: a theme must be specified")
       os.exit(RET_ARGS)
     end
     local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
@@ -675,18 +605,18 @@ if action == "th" or action == "theme" then
     
   -- List of themes
   if action == "list" then
-    stdoutln("Themes currently installed:")
+    tui.stdoutln("Themes currently installed:")
     for file in lfs.dir(outdir .. "/tpl") do
       local filename = outdir .. "/tpl/" .. file
       local att, err = lfs.attributes(filename)
       if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
         local props = dofile(filename .. "/manifest.lua")
-        stdoutln("- " .. printpad(props.id, 10) .. printpad(props.version, 6) .. printpad(props.innerversion, 6) .. printpad(props.name, 44))
+        tui.stdoutln("- " .. tui.printpad(props.id, 10) .. tui.printpad(props.version, 6) .. tui.printpad(props.innerversion, 6) .. tui.printpad(props.name, 44))
       end
     end
     os.exit(RET_OK)
   end
-  stderrln("ERROR: unknown action " .. action)
+  tui.stderrln("ERROR: unknown action " .. action)
   os.exit(RET_ARGS)
 end
 
@@ -703,11 +633,7 @@ local env = {
   run = run,
   write_file = write_file,
   open_browser = open_browser,
-  stdout = stdout,
-  stdoutln = stdoutln,
-  stderrln = stderrln,
-  stderr = stderr,
-  printpad = printpad
+  tui = tui
 }
 
 local ret = dispatch_plugin(action, env)
@@ -715,7 +641,7 @@ if ret ~= nil then
   if ret.success then
   	local msg = ret.success.message or {}
     for _,l in ipairs(msg) do
-      stdoutln(l)
+      tui.stdoutln(l)
     end
     os.exit(RET_OK)
   end
@@ -723,7 +649,7 @@ if ret ~= nil then
 end
 
 -- ?!?
-stderrln("ERROR: unknown action " .. arg[offset + 1])
+tui.stderrln("ERROR: unknown action " .. arg[offset + 1])
 os.exit(RET_MISSING_ACTION)
 
 --[[ }}} ]]
