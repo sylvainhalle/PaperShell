@@ -24,6 +24,9 @@ local http   = require "socket.http"
 local lfs    = require "lfs"
 local zip    = require "zip"
 local tui    = require "tui"
+local files  = require "files"
+local net    = require "net"
+local utils  = require "utils"
 
 -- Version string
 local VERSION_STRING     = "3.0"
@@ -48,194 +51,8 @@ local CONFIG = {
 }
 local outdir     = "../Source"
 
---[[ ***** File utilities ***** {{{ ]]--
-
---[[ Gets the base name of a path.
-     @param path The path
-     @return The base name
-  ]]
-local function basename(path)
-  return path:match("([^/\\]+)$") or path
-end
-
---[[ Joins multiple segments to form a path.
-     @return The joined path ]]
-local function join(...)
-  local parts = {...}
-  return table.concat(parts, "/")
-end
-
---[[ Goes up one folder from the current folder
-     @param path The current folder
-     @return The path of the parent folder
-  ]]
-local function up(path)
-  return path:match("^(.*)/[^/]+$")
-end
-
---[[ Reads data from a file.
-     @param path The file to read from
-     @return The data in the file
-  ]]
-local function read_file(path)
-  local f = assert(io.open(path, "rb"))
-  local data = f:read("*a")
-  f:close()
-  return data
-end
-
---[[ Writes data to a file.
-     @param path The path of the file to write to
-     @param data The data to write
-  ]]
-local function write_file(path, data)
-  local output = assert(io.open(path, "wb"))
-  output:write(data)
-  output:close()
-end
-
---[[ Determines if a file exists.
-     @param path The path to look for
-     @return true if the file exists, false otherwise
-  ]]
-local function file_exists(path)
-  return lfs.attributes(path, "mode") == "file"
-end
-
---[[ Determines if a directory exists.
-     @param path The path to look for
-     @return true if the directory exists, false otherwise
-  ]]
-local function dir_exists(path)
-  return lfs.attributes(path, "mode") == "directory"
-end
-
---[[ Function equivalent to `mkdir -p` in POSIX shells.
-     @param path The path to create ]]
-local function mkdir_p(path)
-  local current = ""
-  for part in path:gmatch("[^/]+") do
-    current = current == "" and part or current .. "/" .. part
-    if not dir_exists(current) then
-      assert(lfs.mkdir(current))
-    end
-  end
-end
-
---[[ Unzips an archive to a folder.
-     @param file_path The path pointing to the zip file
-     @param out_dir The directory where to write its contents
-     @return true if the operation was successful, false otherwise
-  ]]
-local function unzip(file_path, out_dir)
-  local archive = zip.open(file_path)
-  if archive then
-	for file in archive:files() do
-	  local filename = file.filename
-	  if filename:sub(-1, -1) ~= "/" then
-		-- File
-		local in_f = archive:open(filename)
-		local content = in_f:read("*a")
-		in_f:close()
-		file_write(out_dir .. "/" .. filename, content)
-	  end
-	end
-	archive:close()
-	return true
-  end
-  return false
-end
-
---[[ Copies a folder and its contents from one directory to another, overwriting existing files.
-     @param source: The source directory path.
-     @param destination: The destination directory path.
-     @return: Returns true if the folder and its contents are successfully copied, false otherwise.
-     @see https://codepal.ai/code-generator/query/IAANWQA2/lua-function-copy-folder-contents
-  ]]
-function copy_folder(source, destination, ignore)
-  toignore = ignore or { }
-  -- Check if the source directory exists
-  local sourceExists = lfs.attributes(source, "mode") == "directory"
-  if not sourceExists then
-    return false, "Source directory does not exist."
-  end
-  if (inlist(source, toignore)) then
-    return true
-  end
-  
-  -- Check if the destination directory exists, create it if it doesn't
-  local destinationExists = lfs.attributes(destination, "mode") == "directory"
-  if not destinationExists then
-    local success, err = lfs.mkdir(destination)
-    if not success then
-      return false, "Failed to create destination directory: " .. err
-    end
-  end
-
-  -- Iterate over the files and subdirectories in the source directory
-  for file in lfs.dir(source) do
-    if file ~= "." and file ~= ".." then
-        local sourcePath = source .. "/" .. file
-        local destinationPath = destination .. "/" .. file
-        local attributes = lfs.attributes(sourcePath)
-        if attributes.mode == "directory" then
-            -- Recursively copy subdirectories
-            local success, err = copy_folder(sourcePath, destinationPath, toignore)
-            if not success then
-                return false, "Failed to copy subdirectory: " .. err
-            end
-        else
-            -- Copy files
-            local success = copy_file(sourcePath, destinationPath)
-            if not success then
-                return false, "Failed to copy file: " .. sourcePath
-            end
-        end
-    end
-  end
-  return true
-end
-
--- https://forum.cockos.com/showpost.php?s=93b9db499b6d6c497bbde2216978a951&p=2360581&postcount=3
-function copy_file(old_path, new_path)
-  local old_file = io.open(old_path, "rb")
-  local new_file = io.open(new_path, "wb")
-  local old_file_sz, new_file_sz = 0, 0
-  if not old_file or not new_file then
-    return false
-  end
-  while true do
-    local block = old_file:read(2^13)
-    if not block then 
-      old_file_sz = old_file:seek( "end" )
-      break
-    end
-    new_file:write(block)
-  end
-  old_file:close()
-  new_file_sz = new_file:seek( "end" )
-  new_file:close()
-  return new_file_sz == old_file_sz
-end
-
---[[ }}} ]]
-
---[[ ***** Network utilities ***** {{{ ]]--
-
---[[ Downloads a file from an HTTP URL.
-     @param url The URL
-     @return The contents of the file, or null otherwise
-  ]]
-local function download(url)
-  local response_body, status_code = http.request(url)
-    if status_code == 200 then
-      return response_body
-    end
-  return null
-end
-
 local function should_export(path)
-  local b = basename(path)
+  local b = files.basename(path)
   if b == "paper.pdf" then return false end
   if b:match("~$") then return false end
   if b:match("%.log$") then return false end
@@ -252,16 +69,6 @@ end
 
 --[[ ***** Miscellaneous utilities ***** {{{ ]]--
 
---[[ Determines if an element is in a table
-  ]]
-function inlist(e, table)
-  local basename = e:match("([^/]*)$") or e
-  for _, x in ipairs(table) do
-    if basename == x then return true end
-  end
-  return false
-end
-
 --[[ Recursively finds the root folder of the project, starting from a given
      folder.
      @param dir The current folder
@@ -271,15 +78,11 @@ local function find_root_rec(dir)
   if not dir then
     return false
   end
-  if file_exists(dir .. "/.papershell") then
+  if files.file_exists(dir .. "/.papershell") then
     return dir
   end
-  return find_root_rec(up(dir))
+  return find_root_rec(files.up(dir))
 end
-
---[[ }}} ]]
-
---[[ ***** OS utilities ***** {{{ ]]--
 
 --[[ Opens a website in the default web browser.
      @param url: The URL of the website to be opened.
@@ -305,9 +108,9 @@ end
 local PLUGINS = {}
 local root = pwd.."/Tools/plugins/"
 for v in lfs.dir(root) do
-	if file_exists(root .. v .. "/manifest.lua") then
+	if files.file_exists(root .. v .. "/manifest.lua") then
 		local man = dofile(root .. v .. "/manifest.lua") or {}
-		if man.id and file_exists(root .. v .. "/plugin.lua") then
+		if man.id and files.file_exists(root .. v .. "/plugin.lua") then
 			local plg = dofile(root .. v .. "/plugin.lua")
 			PLUGINS[man.id] = {
 				manifest = man,
@@ -324,12 +127,12 @@ local function collect_files(root, rel, files)
   rel = rel or ""
   files = files or {}
 
-  local dir = rel == "" and root or join(root, rel)
+  local dir = rel == "" and root or files.join(root, rel)
 
   for entry in lfs.dir(dir) do
     if entry ~= "." and entry ~= ".." then
-      local relpath = rel == "" and entry or join(rel, entry)
-      local fullpath = join(root, relpath)
+      local relpath = rel == "" and entry or files.join(rel, entry)
+      local fullpath = files.join(root, relpath)
       local attr = lfs.attributes(fullpath)
 
       if attr and attr.mode == "directory" then
@@ -340,17 +143,6 @@ local function collect_files(root, rel, files)
     end
   end
   return files
-end
-
-local function command_exists(cmd)
-  return (os.execute("which " .. cmd) == 0)
-end
-
-local function run(cmd)
-  local f = assert(io.popen(cmd))
-  local s = assert(f:read('*a'))
-  f:close()
-  return s
 end
 
 local function create_export_folder(export_dir)
@@ -364,7 +156,7 @@ local function create_export_folder(export_dir)
   local files = collect_files(".")
 
   for _, relpath in ipairs(files) do
-    copy_file(relpath, export_dir .. "/" .. relpath)
+    files.copy_file(relpath, export_dir .. "/" .. relpath)
   end
 
   tui.stdoutln(string.format("Exported %d file(s) to %s", #files, export_dir))
@@ -374,11 +166,11 @@ local function export_project(export_dir)
   local archive = "paper.zip"
   tui.stdoutln("Exporting submission sources")
   create_export_folder(export_dir)
-  if command_exists("zip") then
+  if files.command_exists("zip") then
     tui.stdoutln("Creating " .. archive)
     run("zip -q -9 -r paper.zip .")
     tui.stdoutln("Archive written to " .. archive)
-  elseif command_exists("7z") then
+  elseif file.command_exists("7z") then
     tui.stdoutln("Creating " .. archive)
     run('7z a -mx9 -tzip paper.zip .')
     tui.stdoutln("Archive written to " .. archive)
@@ -392,17 +184,17 @@ local function export_project(export_dir)
   end
 end
 
---[[ Downloads a theme as a ZIP, and unzips it in the appropriate folders
+--[[ Downloads a theme as a ZIP, and files.unzips it in the appropriate folders
      @param url The URL to download from
-     @param out_dir The folder where to unzip the theme
+     @param out_dir The folder where to files.unzip the theme
      @return true on success, false otherwise
   ]]
 function download_and_unzip(url, out_dir)
-  local response_body = download(url)
+  local response_body = net.download(url)
   if response_body then
 	local file_path = out_dir .. "/downloaded_file.zip"
-	write_file(file_path, response_body)
-	return unzip(file_path, out_dir)
+	files.write_file(file_path, response_body)
+	return files.unzip(file_path, out_dir)
   end
   return false
 end
@@ -412,7 +204,7 @@ end
       @param folder The folder where to create the project
   ]]
 function instantiate(folder)
-  local success, err = copy_folder(pwd, folder, {"docs", ".git", "Test"})
+  local success, err = files.copy_folder(pwd, folder, {"docs", ".git", "Test"})
   if success then
     tui.stdoutln("Folder and its contents copied successfully.")
   else
@@ -475,7 +267,7 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
     local f = plugin.plugin[entry.call]
     if type(f) ~= "function" then
       tui.stderrln("ERROR: plugin function not found: " .. entry.call)
-      return RET_ARGS
+      return nil
     end
     local ret = {}
     f(env, ret)
@@ -497,11 +289,11 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
     end
 
     tui.stderrln("ERROR: unknown plugin action " .. word)
-    return RET_ARGS
+    return nil
   end
 
   tui.stderrln("ERROR: malformed plugin menu entry")
-  return RET_ARGS
+  return nil
 end
 
 local function dispatch_plugin(action, env)
@@ -526,7 +318,7 @@ local offset = 0
 if arg[offset + 1] == "init" then
   local fld = arg[offset + 2] or "."
   local target = lfs.currentdir() .. "/" .. fld
-  if file_exists(target .. "/.papershell") then
+  if files.file_exists(target .. "/.papershell") then
     tui.stderrln("ERROR: a PaperShell project is already instantiated")
     os.exit(RET_ALREADY_EXISTS)
   end
@@ -629,11 +421,12 @@ local env = {
   pwd = pwd,
   outdir = CONFIG.outdir,
   mainfile = CONFIG.mainfile,
-  command_exists = command_exists,
   run = run,
-  write_file = write_file,
   open_browser = open_browser,
-  tui = tui
+  tui      = tui,
+  files    = files,
+  net      = net,
+  utils    = utils
 }
 
 local ret = dispatch_plugin(action, env)
@@ -649,7 +442,6 @@ if ret ~= nil then
 end
 
 -- ?!?
-tui.stderrln("ERROR: unknown action " .. arg[offset + 1])
 os.exit(RET_MISSING_ACTION)
 
 --[[ }}} ]]

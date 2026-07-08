@@ -149,47 +149,47 @@ function printpad(str, length, pad_char)
 end
 
 local Printer = {}
+Printer.__index = Printer
 
 function Printer:new()
     local obj = {
-    	l_lines   = {},
-    	curline = "",
-    	ind = ""
+    	_lines   = {},
+    	_curline = "",
+    	_indent  = "",
+    	_wrap    = 0
     }
-    setmetatable(obj, self)
-    self.__index = self
-    return obj
+    return setmetatable(obj, Printer)
 end
 
 function Printer:print(st, ln, pd)
-	self.curline = self.curline or self.ind
+	self._curline = self._curline or self._indent
 	local s = st or ""
 	local len = ln or -1
 	local pad = pd or " "
 	if len > 0 then
-		self.curline = self.curline .. printpad(s, len, pad)
+		self._curline = self._curline .. printpad(s, len, pad)
 	else
-		self.curline = self.curline .. s
+		self._curline = self._curline .. s
 	end
 	return self
 end
 
 function Printer:indent()
-	self.ind = self.ind .. "  "
+	self._indent = self._indent .. "  "
 	return self
 end
 
 function Printer:outdent()
-	if string.len(self.ind) >= 2 then
-		self.ind = string.sub(self.ind, 1, string.len(self.ind) - 2)
+	if string.len(self._indent) >= 2 then
+		self._indent = string.sub(self._indent, 1, string.len(self._indent) - 2)
 	end
 	return self
 end
 
 function Printer:println(s, ln, pd)
 	self:print(s)
-	table.insert(self.l_lines, self.curline)
-	self.curline = nil
+	table.insert(self._lines, self._curline)
+	self._curline = nil
 	return self
 end
 
@@ -366,7 +366,7 @@ function Printer:srs()
 end
 
 function Printer:lines()
-	return self.l_lines
+	return self._lines
 end
 
 return {
