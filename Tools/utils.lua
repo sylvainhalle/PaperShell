@@ -25,7 +25,11 @@ function str_split(inputstr, sep)
     sep = "%s"
   end
   local t = {}
+<<<<<<< HEAD
   for str, spaces in string.gmatch(inputstr, "([^"..sep.."]+)") do
+=======
+  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+>>>>>>> a7faba5bb1b7ef18bc9834cdcbfa7ae0945d8ddb
     table.insert(t, str)
   end
   return t
@@ -52,7 +56,7 @@ end
 
 --[[ Determines if an element is in a table
   ]]
-function inlist(e, table)
+function in_list(e, table)
   local b = e:match("([^/]*)$") or e
   for _, x in ipairs(table) do
     if b == x then return true end
