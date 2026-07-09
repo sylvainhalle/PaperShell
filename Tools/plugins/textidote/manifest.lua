@@ -16,14 +16,17 @@ return {
 	menu         = {
 		{
 			verb    = {"tx", "textidote"},
+			name    = "TeXtidote",
 			actions = {
 				{
 					verb = {"c", "check"},
+					name = "Check",
 					help = {"tx check [-b]", "Checks spelling and grammar"},
 					call = "textidote_check"
 				},
 				{
 					verb = {"wc", "word-count"},
+					name = "Word count",
 					help = {"tx wc", "Counts the words in the paper"},
 					call = "textidote_count"
 				}

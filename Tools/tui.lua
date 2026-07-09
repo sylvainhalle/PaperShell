@@ -21,6 +21,7 @@
   ]]
 
 local utf8   = require "utf8"
+local utils  = require "utils"
 
 local color = {
 	reset         = "\u{001B}[0m",
@@ -367,6 +368,60 @@ end
 
 function Printer:lines()
 	return self._lines
+end
+
+function domenu(items)
+	for i,e in ipairs(items) do
+		io.stdout:write(color.bold .. color.foreground.yellow .. i .. color.reset .. " " .. e.name .. "\n")
+	end
+	local s = io.read("*n")
+	return s
+end
+
+function tui_topmenu(plugins)
+	local ordered_items = {}
+	local ordered_plugins = {}
+	for _,m in pairs(plugins) do
+		for _,e in ipairs(m.manifest.menu) do
+			table.insert(ordered_items, e)
+			table.insert(ordered_plugins, m)
+		end
+	end
+	while true do
+		local choice = domenu(ordered_items)
+		if ordered_items[choice].call then
+			return ordered_items[choice].call
+		end
+		if ordered_items[choice].actions then
+			local v = tui_menu(ordered_plugins[choice].plugin, ordered_items[choice].actions)
+			if v ~= nil then
+				return v
+			end
+		end
+	end
+end
+
+function tui_menu(plugin, m)
+	local ordered_items = {}
+	for _,e in pairs(m) do
+		table.insert(ordered_items, e)
+	end
+	while true do
+		local choice = domenu(ordered_items)
+		if choice > 0 then
+			if ordered_items[choice].call then
+				return plugin[ordered_items[choice].call]
+			end
+			if ordered_items[choice].actions then
+				local v = tui_menu(ordered_items[choice].actions)
+				if v ~= nil then
+					return v
+				end
+			end
+		else
+			return nil
+		end
+	end
 end
 
 return {

@@ -25,18 +25,13 @@ function str_split(inputstr, sep)
     sep = "%s"
   end
   local t = {}
-<<<<<<< HEAD
-  for str, spaces in string.gmatch(inputstr, "([^"..sep.."]+)") do
-=======
   for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
->>>>>>> a7faba5bb1b7ef18bc9834cdcbfa7ae0945d8ddb
     table.insert(t, str)
   end
   return t
 end
 
 function explode(div,str) -- credit: http://richard.warburton.it
-
   if (div=='') then return false end
   local pos,arr = 0,{}
   -- for each divider found
@@ -64,12 +59,42 @@ function in_list(e, table)
   return false
 end
 
+---Recursively print the table, if not table value is just printed.
+---@param t any
+---@param level? number
+local function print_table(t, level)
+    level = level or 0
+    if type(t) == "table" then
+        -- do not print new line on the level 0
+        if level ~= 0 then
+            io.write("\n")
+        end
+        io.write(string.rep("  ", level), "{\n")
+        level = level + 1
+
+        for key, value in pairs(t) do
+            io.write(string.rep("  ", level) .. string.format("[%s] = ", key))
+            print_table(value, level)
+            io.write(",\n")
+        end
+
+        level = level - 1
+        io.write(string.rep("  ", level), "}")
+    else
+        io.write(tostring(t))
+    end
+    -- print new line on the level 0
+    if level == 0 then
+        io.write("\n")
+    end
+end
 
 return {
-	str_split = str_split,
-	str_trim  = str_trim,
-	in_list   = in_list,
-	explode   = explode
+	str_split   = str_split,
+	str_trim    = str_trim,
+	in_list     = in_list,
+	explode     = explode,
+	print_table = print_table
 }
 
 -- :folding=explicit:wrap=none:mode=lua:

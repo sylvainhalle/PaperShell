@@ -16,21 +16,21 @@ return {
 	menu         = {
 		{
 			verb    = {"bb", "bibtex"},
+			name    = "BibTeX",
 			actions = {
 				{
 					verb = {"d", "duplicates"},
+					name = "Duplicates",
 					actions = {
 						{
 							verb = {"s", "show"},
+							name = "Show",
 							help = {"bb duplicates show", "Shows duplicate entries"},
 							call = "show_duplicates"
-						}
-					}
-				},
-				{
-					actions = {
+						},
 						{
 							verb = {"d", "delete"},
+							name = "Delete",
 							help = {"bb duplicates delete", "Deletes duplicate entries"},
 							call = "delete_duplicates"
 						}
@@ -38,9 +38,11 @@ return {
 				},
 				{
 					verb = {"m", "missing"},
+					name = "Missing",
 					actions = {
 						{
 							verb = {"f", "fields"},
+							name = "Fields",
 							help = {"bb missing fields", "Shows entries with missing fields"},
 							call = "show_missing_fields"
 						}
@@ -48,6 +50,7 @@ return {
 				},
 				{
 					verb = {"c", "clean"},
+					name = "Clean",
 					help = {"bb clean", "Cleans the bib file"},
 					call = "clean_bib"
 				}

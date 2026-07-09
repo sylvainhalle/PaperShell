@@ -356,62 +356,6 @@ if CONFIG.version > VERSION_STRING then
   tui.stdoutln("         used to instantiate this project. You may consider updating it.")
 end
 
--- Other arguments
-if not arg[offset + 1] then
-  tui.stderrln("ERROR: an action must be specified")
-  printusage(io.tui.stderr)
-  os.exit(RET_MISSING_ACTION)
-end
-local action = arg[offset + 1]
-
--- Core verbs first
-if action == "mk" then
-  if arg[offset + 2] == "-c" then
-    os.exit(os.execute(string.format("cd %s && latexmk -c", project_root)))
-  else
-    os.exit(os.execute(string.format("cd %s && latexmk", project_root)))
-  end
-end
-
-if action == "export" then
-  export_project(project_root .. "/" .. (arg[offset + 2] or "Export"))
-  os.exit(RET_OK)
-end
-
--- Theme verbs remain hard-coded for now
-if action == "th" or action == "theme" then
-  offset = offset + 1
-  action = arg[offset + 1]
-  -- Installation of a theme
-  if action == "install" then
-    if not arg[offset + 2] then
-      tui.stderrln("ERROR: a theme must be specified")
-      os.exit(RET_ARGS)
-    end
-    local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
-    lfs.mkdir(project_root .. "/" .. outdir .. "/sty/" .. arg[offset + 2])
-    lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
-    download_and_unzip(url, outdir)
-    os.exit(RET_OK)
-  end
-    
-  -- List of themes
-  if action == "list" then
-    tui.stdoutln("Themes currently installed:")
-    for file in lfs.dir(outdir .. "/tpl") do
-      local filename = outdir .. "/tpl/" .. file
-      local att, err = lfs.attributes(filename)
-      if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
-        local props = dofile(filename .. "/manifest.lua")
-        tui.stdoutln("- " .. tui.printpad(props.id, 10) .. tui.printpad(props.version, 6) .. tui.printpad(props.innerversion, 6) .. tui.printpad(props.name, 44))
-      end
-    end
-    os.exit(RET_OK)
-  end
-  tui.stderrln("ERROR: unknown action " .. action)
-  os.exit(RET_ARGS)
-end
-
 -- Plugin verbs
 local env = {
   arg = arg,
@@ -429,7 +373,67 @@ local env = {
   utils    = utils
 }
 
-local ret = dispatch_plugin(action, env)
+-- Other arguments
+local action = nil
+local ret = nil
+if not arg[offset + 1] then
+	-- Interactive mode
+	action = tui_topmenu(PLUGINS)
+	ret = {}
+    action(env, ret)
+else
+	action = arg[offset + 1]
+	
+	-- Core verbs first
+	if action == "mk" then
+	  if arg[offset + 2] == "-c" then
+		os.exit(os.execute(string.format("cd %s && latexmk -c", project_root)))
+	  else
+		os.exit(os.execute(string.format("cd %s && latexmk", project_root)))
+	  end
+	end
+	
+	if action == "export" then
+	  export_project(project_root .. "/" .. (arg[offset + 2] or "Export"))
+	  os.exit(RET_OK)
+	end
+	
+	-- Theme verbs remain hard-coded for now
+	if action == "th" or action == "theme" then
+	  offset = offset + 1
+	  action = arg[offset + 1]
+	  -- Installation of a theme
+	  if action == "install" then
+		if not arg[offset + 2] then
+		  tui.stderrln("ERROR: a theme must be specified")
+		  os.exit(RET_ARGS)
+		end
+		local url = CONFIG.themerepo .. arg[offset + 2] .. ".tpl.zip"
+		lfs.mkdir(project_root .. "/" .. outdir .. "/sty/" .. arg[offset + 2])
+		lfs.mkdir(outdir .. "/tpl/" .. arg[offset + 2])
+		download_and_unzip(url, outdir)
+		os.exit(RET_OK)
+	  end
+		
+	  -- List of themes
+	  if action == "list" then
+		tui.stdoutln("Themes currently installed:")
+		for file in lfs.dir(outdir .. "/tpl") do
+		  local filename = outdir .. "/tpl/" .. file
+		  local att, err = lfs.attributes(filename)
+		  if (att and att.mode == "directory" and file ~= "." and file ~= "..") then
+			local props = dofile(filename .. "/manifest.lua")
+			tui.stdoutln("- " .. tui.printpad(props.id, 10) .. tui.printpad(props.version, 6) .. tui.printpad(props.innerversion, 6) .. tui.printpad(props.name, 44))
+		  end
+		end
+		os.exit(RET_OK)
+	  end
+	  tui.stderrln("ERROR: unknown action " .. action)
+	  os.exit(RET_ARGS)
+	end
+	ret = dispatch_plugin(action, env)
+end
+
 if ret ~= nil then
   if ret.success then
   	local msg = ret.success.message or {}
