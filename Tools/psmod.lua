@@ -223,6 +223,85 @@ function printusage_rec(e, stream)
 	end
 end
 
+function domenu(items, top)
+	for i,e in ipairs(items) do
+		io.stdout:write(tui.color.bold .. tui.color.foreground.yellow .. "(" .. i .. ")" .. tui.color.reset .. " ")
+		io.stdout:write(tui.printpad(e.name, 16))
+		if e.icon then
+			if e.icon.nerd then
+				io.stdout:write(e.icon.nerd .. " ")
+			elseif e.icon.normal then
+				io.stdout:write(e.icon.normal .. " ")
+			end
+		else
+			io.stdout:write("  ")
+		end
+		if e.tooltip then
+			io.stdout:write(tui.color.italic .. e.tooltip .. tui.color.reset	)
+		end
+		io.stdout:write("\n")
+	end
+	io.stdout:write("\n")
+	io.stdout:write(tui.color.reverse .. "Enter a choice (0 to ")
+	if top then
+		io.stdout:write("quit) >>" .. tui.color.reset .." ")
+	else
+		io.stdout:write("go back) >>" .. tui.color.reset .. " ")
+	end
+	local s = io.read("*n")
+	return s
+end
+
+function tui_topmenu(plugins)
+	local ordered_items = {}
+	local ordered_plugins = {}
+	for _,m in pairs(plugins) do
+		for _,e in ipairs(m.manifest.menu) do
+			table.insert(ordered_items, e)
+			table.insert(ordered_plugins, m)
+		end
+	end
+	while true do
+		io.stdout:write("\n")
+		io.stdout:write("\u{f015} Home\n")
+		local choice = domenu(ordered_items, true)
+		if ordered_items[choice].call then
+			return ordered_items[choice].call
+		end
+		if ordered_items[choice].actions then
+			local v = tui_menu(ordered_plugins[choice].plugin, "\u{f015} Home \u{f460} " .. ordered_items[choice].name, ordered_items[choice].actions)
+			if v ~= nil then
+				return v
+			end
+		end
+	end
+end
+
+function tui_menu(plugin, crumbs, m)
+	local ordered_items = {}
+	for _,e in pairs(m) do
+		table.insert(ordered_items, e)
+	end
+	io.stdout:write("\n")
+	io.stdout:write(crumbs .. "\n")
+	while true do
+		local choice = domenu(ordered_items)
+		if choice > 0 then
+			if ordered_items[choice].call then
+				return plugin.plugin[ordered_items[choice].call]
+			end
+			if ordered_items[choice].actions then
+				local v = tui_menu(plugin, crumbs .. " \u{f460} " .. ordered_items[choice].name, ordered_items[choice].actions)
+				if v ~= nil then
+					return v
+				end
+			end
+		else
+			return nil
+		end
+	end
+end
+
 function printusage(stream)
   stream:write("Usage: papershell [-h | verb [noun...]]\n\n")
   stream:write("Possible verbs:\n")
@@ -262,38 +341,45 @@ local function verb_matches(verbs, word)
 end
 
 local function dispatch_plugin_rec(plugin, entry, arg_index, env)
-  -- Leaf: call the designated function
-  if entry.call then
-    local f = plugin.plugin[entry.call]
-    if type(f) ~= "function" then
-      tui.stderrln("ERROR: plugin function not found: " .. entry.call)
-      return nil
-    end
-    local ret = {}
-    f(env, ret)
-    return ret
-  end
-
-  -- Internal node: consume next command word
-  if entry.actions then
-    local word = arg[arg_index]
-    if not word then
-      tui.stderrln("ERROR: missing plugin action")
-      return RET_ARGS
+	-- Leaf: call the designated function
+	if entry.call then
+    	local f = plugin.plugin[entry.call]
+    	if type(f) ~= "function" then
+    		tui.stderrln("ERROR: plugin function not found: " .. entry.call)
+    		return nil
+    	end
+    	local ret = {}
+    	f(env, ret)
+    	return ret
     end
 
-    for _, child in ipairs(entry.actions) do
-      if verb_matches(child.verb, word) then
-        return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
-      end
-    end
+    -- Internal node: consume next command word
+	if entry.actions then
+    	local word = arg[arg_index]
+    	if not word then
+    		if entry.actions then
+	    		local f = tui_menu(plugin, "", entry.actions)
+	    		if f ~= nil then
+	    			local ret = {}
+	    			f(env, ret)
+	    			return ret
+	    		end
+	    	end
+	    else
+	    	for _, child in ipairs(entry.actions) do
+	    	   	if verb_matches(child.verb, word) then
+	    	   		return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
+	    	   	end
+	    	end
+	    end
+	else
+	    tui.stderrln("ERROR: missing plugin action")
+	    return RET_ARGS
+   	end
+   	
 
-    tui.stderrln("ERROR: unknown plugin action " .. word)
+    tui.stderrln("ERROR: malformed plugin menu entry")
     return nil
-  end
-
-  tui.stderrln("ERROR: malformed plugin menu entry")
-  return nil
 end
 
 local function dispatch_plugin(action, env)

@@ -17,16 +17,20 @@ return {
 		{
 			verb    = {"tx", "textidote"},
 			name    = "TeXtidote",
+			icon    = { nerd = "\u{f04c6}" },
+			tooltip = "Check grammar and spelling with TeXtidote",
 			actions = {
 				{
 					verb = {"c", "check"},
 					name = "Check",
 					help = {"tx check [-b]", "Checks spelling and grammar"},
+					tooltip = "Check spelling and grammar",
 					call = "textidote_check"
 				},
 				{
 					verb = {"wc", "word-count"},
 					name = "Word count",
+					tooltip = "Count the words in the paper",
 					help = {"tx wc", "Counts the words in the paper"},
 					call = "textidote_count"
 				}

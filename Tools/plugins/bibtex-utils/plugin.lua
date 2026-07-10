@@ -335,7 +335,7 @@ local function print_missing_fields(env, inc)
 	local missing = false
 	p:print("", 16)
 	for _,k in ipairs(keys) do
-		p:bd():print(p:sul() .. k .. p:srs(), 8)
+		p:bd():ul():print(p:sul() .. k .. p:srs(), #k + 1)
 	end
 	p:println()
 	for _,e in ipairs(inc) do
@@ -343,10 +343,9 @@ local function print_missing_fields(env, inc)
 		for _,k in ipairs(keys) do
 			if e[k] then
 				missing = true
-				p:bg().red():fg().black()
-				p:print("X" .. p:srs(), 8)
+				p:print(p:sbg().yellow()..p:sfg().white() .."X" .. p:srs(), #k + 1, " ", "center")
 			else
-				p:print(" ", 8)
+				p:print(" ", #k + 1)
 			end
 		end
 		p:println()

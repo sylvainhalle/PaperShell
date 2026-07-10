@@ -15,23 +15,28 @@ return {
 	-- Menu entries.
 	menu         = {
 		{
-			verb    = {"bb", "bibtex"},
-			name    = "BibTeX",
+			verb         = {"bb", "bibtex"},
+			name         = "BibTeX",
+			icon         = { nerd = "\u{f125f}" },
+			tooltip      = "Clean, merge and validate BibTeX files",
 			actions = {
 				{
 					verb = {"d", "duplicates"},
 					name = "Duplicates",
+					tooltip = "Handle duplicate bib entries",
 					actions = {
 						{
 							verb = {"s", "show"},
 							name = "Show",
 							help = {"bb duplicates show", "Shows duplicate entries"},
+							tooltip = "Show duplicate entries",
 							call = "show_duplicates"
 						},
 						{
 							verb = {"d", "delete"},
 							name = "Delete",
 							help = {"bb duplicates delete", "Deletes duplicate entries"},
+							tooltip = "Delete duplicate entries",
 							call = "delete_duplicates"
 						}
 					}
@@ -39,11 +44,13 @@ return {
 				{
 					verb = {"m", "missing"},
 					name = "Missing",
+					tooltip = "Handle missing fields and entries",
 					actions = {
 						{
 							verb = {"f", "fields"},
 							name = "Fields",
 							help = {"bb missing fields", "Shows entries with missing fields"},
+							tooltip = "Show entries with missing fields",
 							call = "show_missing_fields"
 						}
 					}
@@ -52,6 +59,7 @@ return {
 					verb = {"c", "clean"},
 					name = "Clean",
 					help = {"bb clean", "Cleans the bib file"},
+					tooltip = "Clean the bib file",
 					call = "clean_bib"
 				}
 			}

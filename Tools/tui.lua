@@ -28,6 +28,7 @@ local color = {
 	bold          = "\u{001B}[1m",
 	italic        = "\u{001B}[3m",
 	underline     = "\u{001B}[4m",
+	reverse       = "\u{001B}[7m",
 	strikethrough = "\u{001B}[9m",
 	foreground = {
 		black   = "\u{001B}[30m",
@@ -109,15 +110,22 @@ local function stderrln(content)
   stderr((content or "") .. "\n")
 end
 
---[[ Truncates or pads a string to a fixed length.
+--[[ Strips a string of all ANSI escape sequences. The function assumes a
+     simplified version of the codes, of the form ^[...m.
+     @param s The string
+     @return The string without the escape sequences
+--]]
+local function ansi_strip(s)
+	return s:gsub("\u{001B}%[%w+m", "")
+end
+
+--[[ Truncates a string to a number of *visible* characters.
      @param str The string
-     @param length The length
-     @param pad_char (Optional) the character used to pad if the string
-       is too short
-  ]]
-function printpad(str, length, pad_char)
-    pad_char = pad_char or " "
-    local len = utf8.len(str)
+     @param len The number of visible characters to retain
+     @return The truncated string
+--]]
+local function ansi_substring(str, length)
+	local len = utf8.len(str)
     local in_ansi = false
     local visible_len = 0
     local out = ""
@@ -140,12 +148,35 @@ function printpad(str, length, pad_char)
     		--break
     	end
     end
-    if visible_len < length then
+    return out
+end
+
+--[[ Truncates or pads a string to a fixed length.
+     @param str The string
+     @param length The length
+     @param pad_char (Optional) the character used to pad if the string
+       is too short
+  ]]
+local function printpad(str, length, pad_char, a)
+    pad_char = pad_char or " "
+    local align = a or "left"
+    local strip = ansi_strip(str)
+    local sv_len = utf8.len(strip)
+    if sv_len < length then
         -- Pad if shorter
-        return out .. string.rep(pad_char, length - visible_len)
+        local to_fill = length - sv_len
+        if align == "left" then
+        	return str .. string.rep(pad_char, to_fill)
+        elseif align == "right" then
+        	return string.rep(pad_char, to_fill) .. str
+        elseif align == "center" then
+        	local fill_left = math.floor(to_fill / 2)
+        	local fill_right = to_fill - fill_left
+        	return string.rep(pad_char, fill_left) .. str .. string.rep(pad_char, fill_right)
+        end
     else
         -- Return as-is if exactly the right length
-        return out
+        return ansi_substring(str, length)
     end
 end
 
@@ -162,13 +193,14 @@ function Printer:new()
     return setmetatable(obj, Printer)
 end
 
-function Printer:print(st, ln, pd)
+function Printer:print(st, ln, pd, a)
 	self._curline = self._curline or self._indent
 	local s = st or ""
 	local len = ln or -1
 	local pad = pd or " "
+	local align = a or "left"
 	if len > 0 then
-		self._curline = self._curline .. printpad(s, len, pad)
+		self._curline = self._curline .. printpad(s, len, pad, a)
 	else
 		self._curline = self._curline .. s
 	end
@@ -187,8 +219,8 @@ function Printer:outdent()
 	return self
 end
 
-function Printer:println(s, ln, pd)
-	self:print(s)
+function Printer:println(s, ln, pd, a)
+	self:print(s, a)
 	table.insert(self._lines, self._curline)
 	self._curline = nil
 	return self
@@ -368,60 +400,6 @@ end
 
 function Printer:lines()
 	return self._lines
-end
-
-function domenu(items)
-	for i,e in ipairs(items) do
-		io.stdout:write(color.bold .. color.foreground.yellow .. i .. color.reset .. " " .. e.name .. "\n")
-	end
-	local s = io.read("*n")
-	return s
-end
-
-function tui_topmenu(plugins)
-	local ordered_items = {}
-	local ordered_plugins = {}
-	for _,m in pairs(plugins) do
-		for _,e in ipairs(m.manifest.menu) do
-			table.insert(ordered_items, e)
-			table.insert(ordered_plugins, m)
-		end
-	end
-	while true do
-		local choice = domenu(ordered_items)
-		if ordered_items[choice].call then
-			return ordered_items[choice].call
-		end
-		if ordered_items[choice].actions then
-			local v = tui_menu(ordered_plugins[choice].plugin, ordered_items[choice].actions)
-			if v ~= nil then
-				return v
-			end
-		end
-	end
-end
-
-function tui_menu(plugin, m)
-	local ordered_items = {}
-	for _,e in pairs(m) do
-		table.insert(ordered_items, e)
-	end
-	while true do
-		local choice = domenu(ordered_items)
-		if choice > 0 then
-			if ordered_items[choice].call then
-				return plugin[ordered_items[choice].call]
-			end
-			if ordered_items[choice].actions then
-				local v = tui_menu(ordered_items[choice].actions)
-				if v ~= nil then
-					return v
-				end
-			end
-		else
-			return nil
-		end
-	end
 end
 
 return {
