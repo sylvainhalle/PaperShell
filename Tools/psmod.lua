@@ -269,7 +269,7 @@ function tui_topmenu(plugins)
 			return ordered_items[choice].call
 		end
 		if ordered_items[choice].actions then
-			local v = tui_menu(ordered_plugins[choice].plugin, "\u{f015} Home \u{f460} " .. ordered_items[choice].name, ordered_items[choice].actions)
+			local v = tui_menu(ordered_plugins[choice], "\u{f015} Home " .. tui.color.foreground.bright.red .. ">".. tui.color.reset .. " " .. ordered_items[choice].name, ordered_items[choice].actions)
 			if v ~= nil then
 				return v
 			end
@@ -291,7 +291,7 @@ function tui_menu(plugin, crumbs, m)
 				return plugin.plugin[ordered_items[choice].call]
 			end
 			if ordered_items[choice].actions then
-				local v = tui_menu(plugin, crumbs .. " \u{f460} " .. ordered_items[choice].name, ordered_items[choice].actions)
+				local v = tui_menu(plugin, crumbs .. tui.color.foreground.bright.red .. " > " .. tui.color.reset .. ordered_items[choice].name, ordered_items[choice].actions)
 				if v ~= nil then
 					return v
 				end
