@@ -31,6 +31,38 @@ function str_split(inputstr, sep)
   return t
 end
 
+-- Source - https://stackoverflow.com/a/641993
+-- Posted by Doub, modified by community. See post 'Timeline' for change history
+-- Retrieved 2026-07-10, License - CC BY-SA 3.0
+
+function shallow_copy(t)
+  local t2 = {}
+  for k,v in pairs(t) do
+    t2[k] = v
+  end
+  return t2
+end
+
+local function deep_copy(obj, copies)
+  if type(obj) ~= "table" then
+    return obj
+  end
+
+  copies = copies or {}
+  if copies[obj] then
+    return copies[obj]
+  end
+
+  local copy = {}
+  copies[obj] = copy
+
+  for k, v in pairs(obj) do
+    copy[deep_copy(k, copies)] = deep_copy(v, copies)
+  end
+
+  return setmetatable(copy, getmetatable(obj))
+end
+
 function explode(div,str) -- credit: http://richard.warburton.it
   if (div=='') then return false end
   local pos,arr = 0,{}
@@ -49,12 +81,37 @@ function str_trim(s)
 	return s
 end
 
+local function split(s, sep_pattern)
+  local t = {}
+  if not s or s == "" then return t end
+  local start = 1
+  while true do
+    local i, j = s:find(sep_pattern, start)
+    if not i then
+      table.insert(t, trim(s:sub(start)))
+      break
+    end
+    table.insert(t, trim(s:sub(start, i - 1)))
+    start = j + 1
+  end
+  return t
+end
+
 --[[ Determines if an element is in a table
   ]]
 function in_list(e, table)
   local b = e:match("([^/]*)$") or e
   for _, x in ipairs(table) do
     if b == x then return true end
+  end
+  return false
+end
+
+--[[ Determines if an element is in a table
+  ]]
+function in_table(e, table)
+  for _, x in ipairs(table) do
+    if e == x then return true end
   end
   return false
 end
@@ -90,11 +147,15 @@ local function print_table(t, level)
 end
 
 return {
-	str_split   = str_split,
-	str_trim    = str_trim,
-	in_list     = in_list,
-	explode     = explode,
-	print_table = print_table
+	str_split    = str_split,
+	split        = split,
+	str_trim     = str_trim,
+	in_list      = in_list,
+	in_table     = in_table,
+	explode      = explode,
+	print_table  = print_table,
+	shallow_copy = shallow_copy,
+	deep_copy    = deep_copy
 }
 
 -- :folding=explicit:wrap=none:mode=lua:

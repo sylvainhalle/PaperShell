@@ -17,6 +17,7 @@
 ]]
 
 local bibtex = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/lua-bibtex-parser.lua")
+local config = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/config.lua")
 
 -- Return codes
 local RET_NO_BIB         = 6
@@ -33,9 +34,6 @@ local function prerequisites(env, ret)
 	end
 end
 
-local function trim(s)
-  return (s and s:gsub("^%s+", ""):gsub("%s+$", "")) or ""
-end
 
 local function in_array(array, elem)
 	for _,v in pairs(array) do
@@ -44,22 +42,6 @@ local function in_array(array, elem)
 		end
 	end
 	return false
-end
-
-local function split(s, sep_pattern)
-  local t = {}
-  if not s or s == "" then return t end
-  local start = 1
-  while true do
-    local i, j = s:find(sep_pattern, start)
-    if not i then
-      table.insert(t, trim(s:sub(start)))
-      break
-    end
-    table.insert(t, trim(s:sub(start, i - 1)))
-    start = j + 1
-  end
-  return t
 end
 
 local function get_field_case_insensitive(fields_dict, wanted)
@@ -148,7 +130,7 @@ end
 
 local function unbrace(s)
   if type(s) ~= "string" then return s end
-  s = trim(s)
+  s = s:gsub("^%s+", ""):gsub("%s+$", "")
   if s and #s >= 2 then
     local a,b = s:sub(1,1), s:sub(-1,-1)
     if (a == "{" and b == "}") or (a == '"' and b == '"') then
@@ -173,14 +155,14 @@ local function set_field_value(library, entry_key, field_name, field_value)
   end
 end
 
-local function set_field_name(library, entry_key, current_field_name, new_field_name)
+local function set_field_name(library, entry_key, current_field_name, new_vield_name)
   local entry = library.entry_dict[entry_key]
   if not entry then return end
   for _, f in ipairs(entry.fields) do
     if (f.name == current_field_name) then
-      f:set_name(new_field_name)
+      f:set_name(new_vield_name)
       entry.fields_dict[current_field_name] = nil
-      entry.fields_dict[new_field_name] = f
+      entry.fields_dict[new_vield_name] = f
       break
     end
   end
@@ -390,14 +372,184 @@ local function clean_bib(env, ret)
 	}
 end
 
+local function shorten_from_table(env, reps, s)
+	local out = s
+	for from, to in pairs(reps or {}) do
+		out = out:gsub(from, to)
+	end
+	return out
+end
+
+local function shorten_ee(env, s)
+	return nil
+	--return s
+end
+
+local function shorten_booktitle(env, s)
+	local out = shorten_from_table(env, config.shorten.booktitle, s)
+	local x1, x2 = out:find("[^A-Z][A-Z]+%s+[12]%d%d%d[^%d]")
+	if x1 then
+		out = out:sub(x1 + 1, x2 - 1)
+	end
+	return out
+end
+
+local function shorten_journal(env, s)
+	return shorten_from_table(env, config.shorten.journal, s)
+end
+
+local function shorten_item(env, item)
+	local backup = env.utils.deep_copy(item)
+	local original_value = item.value
+	local new_value = item.value
+	if item.name == "journal" then
+		new_value = shorten_journal(env, item.value)
+	end
+	if item.name == "booktitle" then
+		new_value = shorten_booktitle(env, item.value)
+	end
+	if item.name == "ee" then
+		new_value = shorten_ee(env, item.value)
+	end
+	if item.value == new_value then
+		backup = nil
+	else
+		backup.name = "_" .. item.name
+		if new_value == nil then
+			item = nil
+		else
+			item.value = new_value
+		end
+	end
+	return item, backup
+end
+
+local function shorten(env, ret)
+	local library = bibtex.parse(readfile(get_bib_path(env)))
+	for i = 1, #library.entries do
+		local e = library.entries[i]
+		local toadd = {}
+		local todel = {}
+		for j = 1, #e.fields do
+		  local new_item, backup = shorten_item(env, e.fields[j])
+		
+		  if new_item then
+			e.fields[j] = new_item
+		  else
+			table.insert(todel, j)
+		  end
+		
+		  if backup then
+			table.insert(toadd, {
+			  name  = backup.name,
+			  value = backup.value
+			})
+		  end
+		end
+		
+		table.sort(todel, function(a, b)
+		  return a > b
+		end)
+		
+		for _, j in ipairs(todel) do
+		  table.remove(e.fields, j)
+		end
+		for _, b in ipairs(toadd) do
+		  table.insert(e.fields, {
+			name  = b.name,
+			value = b.value,
+			_tokens = {
+			  {
+				value = b.value,
+				_raw  = b.value
+			  }
+			}
+		  })
+		end
+	end
+	local cleaned = pretty_print(env, library)
+	local lines = env.utils.explode("\n", cleaned)
+	ret.success = {
+		code = 0,
+		message = lines
+	}
+end
+
+--[[ Performs a basic cleanup of a LaTeX source file.
+--]]
+local function coarse_clean(env, s)
+	local lines = env.utils.explode("\n", s)
+	for i, line in ipairs(lines) do
+		lines[i] = line:gsub("^%%.*$", ""):gsub(" %.*$", "")
+	end
+	return table.concat(lines, "\n")
+end
+
+--[[ Finds all entries that have a given key as a cross-reference.
+--]]
+function find_crossrefs(env, key, library)
+	local refs = {}
+	for i = 1, #library.entries do
+		local e = library.entries[i]
+		for _, f in ipairs(e.fields) do
+			if f.name == "crossref" and f.value == key then
+				table.insert(refs, e.key)
+				break
+			end
+		end
+	end
+	return refs
+end
+
+--[[ Finds all entries that are neither cited nor cross-referenced in the
+     main paper.
+--]]
+local function find_uncited(env, ret)
+	local library = bibtex.parse(readfile(get_bib_path(env)))
+	local paper = coarse_clean(env, readfile(env.project_root .. "/Source/" .. env.mainfile))
+	local found = {}
+	for i = 1, #library.entries do
+		local e = library.entries[i]
+		if not paper:find(e.key) then
+			table.insert(found, e.key)
+		end
+	end
+	local uncited = {}
+	for _, e in ipairs(found) do
+		local xr = find_crossrefs(env, e, library)
+		local has_one = false
+		for _, r in ipairs(xr) do
+			if not env.utils.in_table(xr, found) then
+				has_one = true
+				break
+			end
+		end
+		if not has_one then
+			table.insert(uncited, e)
+		end
+	end
+	local message = {}
+	if #uncited == 0 then
+		table.insert(message, "All entries are cited")
+	else
+		table.insert(uncited, 1, #uncited .. " entries are uncited")
+		message = uncited
+	end
+	ret.success = {
+		code = 0,
+		message = message
+	}
+end
 
 local function postrequisites(env, ret)
 end
 
 return {
-  prerequisites  = prerequisites,
-  postrequisites = postrequisites,
-  show_duplicates = show_duplicates,
+  prerequisites       = prerequisites,
+  postrequisites      = postrequisites,
+  show_duplicates     = show_duplicates,
   show_missing_fields = show_missing_fields,
-  clean_bib = clean_bib
+  clean_bib           = clean_bib,
+  shorten             = shorten,
+  find_uncited        = find_uncited
 }

@@ -229,15 +229,15 @@ function domenu(items, top)
 		io.stdout:write(tui.printpad(e.name, 16))
 		if e.icon then
 			if e.icon.nerd then
-				io.stdout:write(e.icon.nerd .. " ")
+				io.stdout:write(e.icon.nerd .. "  ")
 			elseif e.icon.normal then
-				io.stdout:write(e.icon.normal .. " ")
+				io.stdout:write(e.icon.normal .. "  ")
 			end
 		else
-			io.stdout:write("  ")
+			io.stdout:write("   ")
 		end
 		if e.tooltip then
-			io.stdout:write(tui.color.italic .. e.tooltip .. tui.color.reset	)
+			io.stdout:write(tui.color.italic .. tui.color.foreground.bright.black .. e.tooltip .. tui.color.reset	)
 		end
 		io.stdout:write("\n")
 	end
@@ -265,6 +265,9 @@ function tui_topmenu(plugins)
 		io.stdout:write("\n")
 		io.stdout:write("\u{f015} Home\n")
 		local choice = domenu(ordered_items, true)
+		if choice == 0 then
+			return nil
+		end
 		if ordered_items[choice].call then
 			return ordered_items[choice].call
 		end
@@ -465,8 +468,10 @@ local ret = nil
 if not arg[offset + 1] then
 	-- Interactive mode
 	action = tui_topmenu(PLUGINS)
-	ret = {}
-    action(env, ret)
+	if action then
+		ret = {}
+		action(env, ret)
+	end
 else
 	action = arg[offset + 1]
 	

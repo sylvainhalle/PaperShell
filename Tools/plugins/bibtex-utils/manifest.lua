@@ -17,7 +17,7 @@ return {
 		{
 			verb         = {"bb", "bibtex"},
 			name         = "BibTeX",
-			icon         = { nerd = "\u{f125f}" },
+			icon         = { nerd = "\u{1f56e}" },
 			tooltip      = "Clean, merge and validate BibTeX files",
 			actions = {
 				{
@@ -61,6 +61,20 @@ return {
 					help = {"bb clean", "Cleans the bib file"},
 					tooltip = "Clean the bib file",
 					call = "clean_bib"
+				},
+				{
+					verb = {"s", "shorten"},
+					name = "Shorten",
+					help = {"bb shorten", "Shortens the values"},
+					tooltip = "Shorten the entries",
+					call = "shorten"
+				},
+				{
+					verb = {"u", "uncited"},
+					name = "Uncited",
+					help = {"bb uncited", "Finds uncited entries"},
+					tooltip = "Find uncited entries",
+					call = "find_uncited"
 				}
 			}
 		}

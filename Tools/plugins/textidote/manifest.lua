@@ -17,7 +17,7 @@ return {
 		{
 			verb    = {"tx", "textidote"},
 			name    = "TeXtidote",
-			icon    = { nerd = "\u{f04c6}" },
+			icon    = { nerd = "\u{2714}" },
 			tooltip = "Check grammar and spelling with TeXtidote",
 			actions = {
 				{
