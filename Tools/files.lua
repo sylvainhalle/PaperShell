@@ -219,4 +219,4 @@ return {
 	command_exists = command_exists,
 	run = run
 }
--- :mode=lua:wrap=none:
+-- :folding=explicit:wrap=none:mode=lua:tabSize=2:indentSize=2:

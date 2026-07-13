@@ -65,6 +65,23 @@ local function should_export(path)
   return true
 end
 
+-- Plugin verbs
+local env = {
+  arg = arg,
+  offset = 1,
+  project_root = project_root,
+  settings = CONFIG,
+  pwd = pwd,
+  outdir = CONFIG.outdir,
+  mainfile = CONFIG.mainfile,
+  run = run,
+  open_browser = open_browser,
+  tui      = tui,
+  files    = files,
+  net      = net,
+  utils    = utils
+}
+
 --[[ }}} ]]
 
 --[[ ***** Miscellaneous utilities ***** {{{ ]]--
@@ -252,6 +269,31 @@ function domenu(items, top)
 	return s
 end
 
+local function invoke(plugin, call)
+	local ret = {}
+	local plg = plugin:new(env, ret)
+	local f = nil
+	if type(call) == "string" then
+   f = plg[call]
+  elseif type(call) == "function" then
+  	f = call
+  end
+  if type(f) ~= "function" then
+  	tui.stderrln("ERROR: plugin function not found: " .. entry.call)
+   	return nil
+  end
+  if type(plg.prerequisites) == "function" then
+   	plg:prerequisites()
+  end
+  if not ret.error then
+   	f(plg)
+  end
+  if type(plg.postrequisites) == "function" then
+  	plg:postrequisites()
+  end
+	return ret
+end
+
 function tui_topmenu(plugins)
 	local ordered_items = {}
 	local ordered_plugins = {}
@@ -291,7 +333,8 @@ function tui_menu(plugin, crumbs, m)
 		local choice = domenu(ordered_items)
 		if choice > 0 then
 			if ordered_items[choice].call then
-				return plugin.plugin[ordered_items[choice].call]
+				local ret = {}
+				return plugin.plugin.plugin[ordered_items[choice].call]
 			end
 			if ordered_items[choice].actions then
 				local v = tui_menu(plugin, crumbs .. tui.color.foreground.bright.red .. " > " .. tui.color.reset .. ordered_items[choice].name, ordered_items[choice].actions)
@@ -335,27 +378,25 @@ end
 
 local function verb_matches(verbs, word)
   if type(verbs) == "string" then
-    return verbs == word
+  	if verbs == word then
+  		return word
+  	else
+  		return nil
+  	end
   end
   for _, v in ipairs(verbs or {}) do
-    if v == word then return true end
+    if utils.starts_with(word, v) then
+    	return v
+    end
   end
-  return false
+  return nil
 end
 
 local function dispatch_plugin_rec(plugin, entry, arg_index, env)
 	-- Leaf: call the designated function
 	if entry.call then
-    	local f = plugin.plugin[entry.call]
-    	if type(f) ~= "function" then
-    		tui.stderrln("ERROR: plugin function not found: " .. entry.call)
-    		return nil
-    	end
-    	local ret = {}
-    	f(env, ret)
-    	return ret
-    end
-
+		return invoke(plugin.plugin.plugin, entry.call)
+	end
     -- Internal node: consume next command word
 	if entry.actions then
     	local word = arg[arg_index]
@@ -363,15 +404,20 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
     		if entry.actions then
 	    		local f = tui_menu(plugin, "", entry.actions)
 	    		if f ~= nil then
-	    			local ret = {}
-	    			f(env, ret)
-	    			return ret
+	    			return invoke(plugin.plugin.plugin, f)
 	    		end
 	    	end
 	    else
 	    	for _, child in ipairs(entry.actions) do
-	    	   	if verb_matches(child.verb, word) then
-	    	   		return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
+	    		local match = verb_matches(child.verb, word)
+	    	   	if match then
+	    	   		local arg_suffix = string.sub(word, #match + 1, #word)
+	    	   		if #arg_suffix > 0 then
+	    	   			arg[arg_index] = arg_suffix
+	    	   			return dispatch_plugin_rec(plugin, child, arg_index, env)
+	    	   		else
+	    	   			return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
+	    	   		end
 	    	   	end
 	    	end
 	    end
@@ -380,21 +426,27 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
 	    return RET_ARGS
    	end
    	
-
     tui.stderrln("ERROR: malformed plugin menu entry")
     return nil
 end
 
 local function dispatch_plugin(action, env)
-  for _, plugin in pairs(PLUGINS) do
-    for _, entry in ipairs(plugin.manifest.menu or {}) do
-      if verb_matches(entry.verb, action) then
-        return dispatch_plugin_rec(plugin, entry, env.offset + 2, env)
-      end
+	for _, plugin in pairs(PLUGINS) do
+    	for _, entry in ipairs(plugin.manifest.menu or {}) do
+    		--utils.print_table(plugin.manifest.menu)
+    		local match = verb_matches(entry.verb, action)
+    		if match then
+    			local arg_suffix = string.sub(action, #match + 1, #action)
+    			if #arg_suffix > 0 then
+	    			arg[env.offset + 1] = arg_suffix
+	    			return dispatch_plugin_rec(plugin, entry, env.offset + 1, env)
+	    		else
+	    			return dispatch_plugin_rec(plugin, entry, env.offset + 2, env)
+	    		end
+	    	end
+	    end
     end
-  end
-
-  return nil
+    return nil
 end
 
 tui.stdoutln("PaperShell theme manager v" .. VERSION_STRING)
@@ -424,6 +476,7 @@ end
 
 -- Find a project root
 local project_root = find_root_rec(lfs.currentdir())
+env.project_root = project_root
 if not project_root then
   tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
   os.exit(RET_NO_ROOT)
@@ -444,23 +497,6 @@ if CONFIG.version > VERSION_STRING then
   tui.stdoutln("WARNING: the current installed version of PaperShell is older than the one")
   tui.stdoutln("         used to instantiate this project. You may consider updating it.")
 end
-
--- Plugin verbs
-local env = {
-  arg = arg,
-  offset = offset,
-  project_root = project_root,
-  settings = CONFIG,
-  pwd = pwd,
-  outdir = CONFIG.outdir,
-  mainfile = CONFIG.mainfile,
-  run = run,
-  open_browser = open_browser,
-  tui      = tui,
-  files    = files,
-  net      = net,
-  utils    = utils
-}
 
 -- Other arguments
 local action = nil
@@ -533,6 +569,13 @@ if ret ~= nil then
     end
     os.exit(RET_OK)
   end
+  if ret.error then
+  	local msg = ret.error.message or {}
+    for _,l in ipairs(msg) do
+      tui.stderrln(l)
+    end
+  	os.exit(ret.error.code)
+  end
   os.exit(ret.code or RET_OK)
 end
 
@@ -541,4 +584,4 @@ os.exit(RET_MISSING_ACTION)
 
 --[[ }}} ]]
 
--- :folding=explicit:wrap=none:mode=lua:
+-- :folding=explicit:wrap=none:mode=lua:tabSize=2:indentSize=2:

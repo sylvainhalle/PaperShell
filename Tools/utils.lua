@@ -20,7 +20,7 @@
 -- Source - https://stackoverflow.com/a/7615129
 -- Posted by user973713, modified by community. See post 'Timeline' for change history
 -- Retrieved 2026-07-08, License - CC BY-SA 4.0
-function str_split(inputstr, sep)
+local function str_split(inputstr, sep)
   if sep == nil then
     sep = "%s"
   end
@@ -31,11 +31,21 @@ function str_split(inputstr, sep)
   return t
 end
 
+--[[ Checks if a string is a prefix of another string.
+     @param string The string
+     @param prefix The prefix to look for
+--]]
+local function starts_with(string, prefix)
+	if #prefix > #string then
+		return false
+	end
+	return string.sub(string, 1, #prefix) == prefix
+end
+
 -- Source - https://stackoverflow.com/a/641993
 -- Posted by Doub, modified by community. See post 'Timeline' for change history
 -- Retrieved 2026-07-10, License - CC BY-SA 3.0
-
-function shallow_copy(t)
+local function shallow_copy(t)
   local t2 = {}
   for k,v in pairs(t) do
     t2[k] = v
@@ -43,6 +53,11 @@ function shallow_copy(t)
   return t2
 end
 
+--[[ Creates a deep (i.e. recursive) copy of an object.
+     @param obj Any
+     @param copies? The object to copy into
+     @return The copy of the object
+--]]
 local function deep_copy(obj, copies)
   if type(obj) ~= "table" then
     return obj
@@ -63,7 +78,12 @@ local function deep_copy(obj, copies)
   return setmetatable(copy, getmetatable(obj))
 end
 
-function explode(div,str) -- credit: http://richard.warburton.it
+--[[ Splits a string into an array of strings, breaking at each occurrence
+     of a specified character.
+     @param div The dividing character
+     @param str The string to split
+--]]
+local function explode(div,str) -- credit: http://richard.warburton.it
   if (div=='') then return false end
   local pos,arr = 0,{}
   -- for each divider found
@@ -75,6 +95,10 @@ function explode(div,str) -- credit: http://richard.warburton.it
   return arr
 end
 
+--[[ Trims a string of its leading and trailing spaces.
+     @param s The string to trim
+     @return The trimmed string
+--]]
 function str_trim(s)
 	s = s:gsub("^%s+", "")
 	s = s:gsub("%s+$", "")
@@ -99,7 +123,7 @@ end
 
 --[[ Determines if an element is in a table
   ]]
-function in_list(e, table)
+local function in_list(e, table)
   local b = e:match("([^/]*)$") or e
   for _, x in ipairs(table) do
     if b == x then return true end
@@ -109,18 +133,24 @@ end
 
 --[[ Determines if an element is in a table
   ]]
-function in_table(e, table)
+local function in_table(e, table)
   for _, x in ipairs(table) do
     if e == x then return true end
   end
   return false
 end
 
----Recursively print the table, if not table value is just printed.
+---Recursively prints a table, if not table value is just printed.
 ---@param t any
 ---@param level? number
-local function print_table(t, level)
+local function print_table(t, level, seen)
     level = level or 0
+    seen = seen or {}
+    if seen[t] then
+    	io.write(string.rep("  ", level), "<cycle>")
+    	return
+    end
+    seen[t] = true
     if type(t) == "table" then
         -- do not print new line on the level 0
         if level ~= 0 then
@@ -131,7 +161,7 @@ local function print_table(t, level)
 
         for key, value in pairs(t) do
             io.write(string.rep("  ", level) .. string.format("[%s] = ", key))
-            print_table(value, level)
+            print_table(value, level, seen)
             io.write(",\n")
         end
 
@@ -147,6 +177,7 @@ local function print_table(t, level)
 end
 
 return {
+	starts_with  = starts_with,
 	str_split    = str_split,
 	split        = split,
 	str_trim     = str_trim,
@@ -158,4 +189,4 @@ return {
 	deep_copy    = deep_copy
 }
 
--- :folding=explicit:wrap=none:mode=lua:
+-- :folding=explicit:wrap=none:mode=lua:tabSize=2:indentSize=2:

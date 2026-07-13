@@ -75,6 +75,13 @@ return {
 					help = {"bb uncited", "Finds uncited entries"},
 					tooltip = "Find uncited entries",
 					call = "find_uncited"
+				},
+				{
+					verb = {"f", "diff"},
+					name = "Diff",
+					help = {"bb diff", "Shows the difference between two files"},
+					tooltip = "Show the difference between two files",
+					call = "diff_bibs"
 				}
 			}
 		}

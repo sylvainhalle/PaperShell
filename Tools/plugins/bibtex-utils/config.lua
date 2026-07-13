@@ -19,3 +19,4 @@ return {
 		}
 	}
 }
+-- :folding=explicit:wrap=none:mode=lua:tabSize=2:indentSize=2:

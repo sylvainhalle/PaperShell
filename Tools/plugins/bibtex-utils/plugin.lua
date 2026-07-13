@@ -20,166 +20,122 @@ local bibtex = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/lua-bibtex-pars
 local config = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/config.lua")
 
 -- Return codes
-local RET_NO_BIB         = 6
+local RET_OK						 = 0
+local RET_NO_BIB				 = 6
 local RET_BIB_DUPLICATES = 10
 local RET_BIB_INCOMPLETE = 11
 
-local function prerequisites(env, ret)
-	local path = env.pwd.."/Source/"..env.settings.mainbib
-	if not env.file_exists(path) then
-		ret.error = {
+local BibtexPlugin = {}
+BibtexPlugin.__index = BibtexPlugin
+
+function BibtexPlugin:new(env, ret)
+	local obj = {
+		_env		= assert(env, "plugin environment is required"),
+		_ret		= ret or {},
+		_config = config
+	}
+	return setmetatable(obj, BibtexPlugin)
+end
+
+function BibtexPlugin:prerequisites()
+	local path = self:get_bib_path()
+	if not self._env.files.file_exists(path) then
+		self._ret.error = {
 			message = {"BibTeX file does not exist"},
-			code    = RET_NO_BIB
+			code		= RET_NO_BIB
 		}
 	end
 end
 
-
-local function in_array(array, elem)
-	for _,v in pairs(array) do
-		if v == elem then
-			return true
+function BibtexPlugin:get_field_case_insensitive(fields_dict, wanted)
+	local lower_wanted = string.lower(wanted)
+	for k, v in pairs(fields_dict) do
+		if string.lower(k) == lower_wanted then
+			return v and v.value or nil
 		end
 	end
-	return false
+	return nil
 end
 
-local function get_field_case_insensitive(fields_dict, wanted)
-  local lower_wanted = string.lower(wanted)
-  for k, v in pairs(fields_dict) do
-    if string.lower(k) == lower_wanted then
-      return v and v.value or nil
-    end
-  end
-  return nil
-end
-
-local function set_entry_field(library, entry_key, field_key, field_value)
-  local entry = library.entry_dict[entry_key]
-  if not entry then return end
-  for _, f in ipairs(entry.fields) do
-    if f.name == field_key then
-      f.value = field_value
-      break
-    end
-  end
-end
-
-local function readfile(path)
-  local f = io.open(path, "r")
-  if not f then return nil end
-  local c = f:read("*a")
-  f:close()
-  return c
-end
-
-local function writefile(path, text)
-  local f = io.open(path, "w")
-  f:write(text)
-  f:close()
-end
-
-local function run(cmd)
-  local p = io.popen(cmd)
-  local out = p:read("*a")
-  p:close()
-  return out
+function BibtexPlugin:set_entry_field(library, entry_key, field_key, field_value)
+	local entry = library.entry_dict[entry_key]
+	if not entry then return end
+	for _, f in ipairs(entry.fields) do
+		if f.name == field_key then
+			f.value = field_value
+			break
+		end
+	end
 end
 
 -- ========= robust get_field =========
-local function get_field(entry, wanted_name)
-  if type(entry) ~= "table" then return nil end
-  if not wanted_name or wanted_name == "" then return nil end
-  local wanted = wanted_name:lower()
+function BibtexPlugin:get_field(entry, wanted_name)
+	if type(entry) ~= "table" then return nil end
+	if not wanted_name or wanted_name == "" then return nil end
+	local wanted = wanted_name:lower()
 
-  -- 0) parfois à la racine
-  for k,v in pairs(entry) do
-    if type(k)=="string" and k:lower()==wanted and type(v)=="string" then
-      return unbrace(v)
-    end
-  end
+	-- 0) parfois à la racine
+	for k,v in pairs(entry) do
+		if type(k)=="string" and k:lower()==wanted and type(v)=="string" then
+			return self:unbrace(v)
+		end
+	end
 
-  local f = entry.fields
-  if type(f) ~= "table" then return nil end
+	local f = entry.fields
+	if type(f) ~= "table" then return nil end
 
-  -- 1) dictionnaire: clés -> valeurs
-  local is_list = (#f > 0 and type(f[1])=="table")
-  if not is_list then
-    for k,v in pairs(f) do
-      if type(k)=="string" and k:lower()==wanted and type(v)=="string" then
-        return unbrace(v)
-      end
-    end
-  end
+	-- 1) dictionnaire: clés -> valeurs
+	local is_list = (#f > 0 and type(f[1])=="table")
+	if not is_list then
+		for k,v in pairs(f) do
+			if type(k)=="string" and k:lower()==wanted and type(v)=="string" then
+				return self:unbrace(v)
+			end
+		end
+	end
 
-  -- 2) liste { {name=..., value=...}, ... }
-  if is_list then
-    for _,item in ipairs(f) do
-      local name = lower(item.name or item.key)
-      if name == wanted then
-        local v = item.value or item.val or item.text
-        if type(v)=="string" and v~="" then
-          return unbrace(v)
-        end
-      end
-    end
-  end
+	-- 2) liste { {name=..., value=...}, ... }
+	if is_list then
+		for _,item in ipairs(f) do
+			local name = self:lower(item.name or item.key)
+			if name == wanted then
+				local v = item.value or item.val or item.text
+				if type(v)=="string" and v~="" then
+					return self:unbrace(v)
+				end
+			end
+		end
+	end
 
-  return nil
+	return nil
 end
 
-local function unbrace(s)
-  if type(s) ~= "string" then return s end
-  s = s:gsub("^%s+", ""):gsub("%s+$", "")
-  if s and #s >= 2 then
-    local a,b = s:sub(1,1), s:sub(-1,-1)
-    if (a == "{" and b == "}") or (a == '"' and b == '"') then
-      return s:sub(2, -2)
-    end
-  end
-  return s
-end
-
-local function lower(s) 
-  return type(s)=="string" and s:lower() or s
-end
-
-local function set_field_value(library, entry_key, field_name, field_value)
-  local entry = library.entry_dict[entry_key]
-  if not entry then return end
-  for _, f in ipairs(entry.fields) do
-    if (f.name == field_name) then
-      f:set_value(field_value)
-      break
-    end
-  end
-end
-
-local function set_field_name(library, entry_key, current_field_name, new_vield_name)
-  local entry = library.entry_dict[entry_key]
-  if not entry then return end
-  for _, f in ipairs(entry.fields) do
-    if (f.name == current_field_name) then
-      f:set_name(new_vield_name)
-      entry.fields_dict[current_field_name] = nil
-      entry.fields_dict[new_vield_name] = f
-      break
-    end
-  end
-end
-
-local format = string.format
-local rep = string.rep
-local write = io.write
-
-function simplify_string(s)
-	s = lower(s)
-	s = string.gsub(s, "[.,;:?!]", "")
-	s = string.gsub(s, "%s+", " ")
+function BibtexPlugin:unbrace(s)
+	if type(s) ~= "string" then return s end
+	s = s:gsub("^%s+", ""):gsub("%s+$", "")
+	if s and #s >= 2 then
+		local a,b = s:sub(1,1), s:sub(-1,-1)
+		if (a == "{" and b == "}") or (a == '"' and b == '"') then
+			return s:sub(2, -2)
+		end
+	end
 	return s
 end
 
-local function find_duplicates(library)
+function BibtexPlugin:lower(s)
+	return type(s) == "string" and s:lower() or s
+end
+
+function BibtexPlugin:simplify_string(s)
+	if type(s) ~= "string" then return "" end
+	s = s:lower()
+	s = s:gsub("[.,;:?!]", "")
+	s = s:gsub("%s+", " ")
+	s = s:gsub("^%s+", ""):gsub("%s+$", "")
+	return s
+end
+
+function BibtexPlugin:find_duplicates(library)
 	local seen_keys = {}
 	local dup_keys = {}
 	local seen_titles = {}
@@ -187,16 +143,20 @@ local function find_duplicates(library)
 	for i = 1, #library.entries do
 		local e = library.entries[i]
 		local fields = e.fields_dict or {}
-		local t = simplify_string(get_field_case_insensitive(fields, "title"))
-		if in_array(seen_titles, t) then
-			if not in_array(dup_titles, t) then
-				table.insert(dup_titles, t)
+		local t = self:simplify_string(
+			self:get_field_case_insensitive(fields, "title")
+		)
+		if t ~= "" then
+			if self._env.utils.in_table(t, seen_titles) then
+				if not self._env.utils.in_table(t, dup_titles) then
+					table.insert(dup_titles, t)
+				end
+			else
+				table.insert(seen_titles, t)
 			end
-		else
-			table.insert(seen_titles, t)
 		end
-		if in_array(seen_keys, e.key) then
-			if not in_array(dup_keys, e.key) then
+		if self._env.utils.in_table(e.key, seen_keys) then
+			if not self._env.utils.in_table(e.key, dup_keys) then
 				table.insert(dup_keys, e.key)
 			end
 		else
@@ -206,17 +166,17 @@ local function find_duplicates(library)
 	return dup_keys, dup_titles
 end
 
-function find_incomplete(library)
+function BibtexPlugin:find_incomplete(library)
 	local incomplete = {}
 	for i = 1, #library.entries do
 		local e = library.entries[i]
 		local fields = e.fields_dict or {}
 		local mis = {
 			key = e.key,
-			author = not get_field_case_insensitive(fields, "author"),
-			title = not get_field_case_insensitive(fields, "title"),
-			year = not get_field_case_insensitive(fields, "year"),
-			pages = not get_field_case_insensitive(fields, "pages")
+			author = not self:get_field_case_insensitive(fields, "author"),
+			title = not self:get_field_case_insensitive(fields, "title"),
+			year = not self:get_field_case_insensitive(fields, "year"),
+			pages = not self:get_field_case_insensitive(fields, "pages")
 		}
 		table.insert(incomplete, mis)
 	end
@@ -224,17 +184,17 @@ function find_incomplete(library)
 end
 
 --[[ Formats the display of a BibTeX file.
-     @param library The Library object to format
+		 @param library The Library object to format
 --]]
-function pretty_print(env, library)
+function BibtexPlugin:pretty_print(library)
 	local out = ""
 	for i = 1, #library.entries do
 		local e = library.entries[i]
 		out = out .. "@" .. e.type .. "{" .. e.key .. ",\n"
 		for j = 1, #e.fields do
 			local item = e.fields[j]
-			out = out .. "  " .. padto(env, item.name, 16) .. " = {"
-			local lines = wrap(env, env.utils.str_trim(item.value), 58)
+			out = out .. "	" .. self:padto(item.name, 16) .. " = {"
+			local lines = self:wrap(self._env.utils.str_trim(item.value), 58)
 			for k,line in ipairs(lines) do
 				if k == 1 then
 					out = out .. line
@@ -261,12 +221,23 @@ function pretty_print(env, library)
 	return out
 end
 
-function padto(env, s, len)
-	return s .. string.rep(" ", len - #s)
+function BibtexPlugin:padto(s, len)
+	return s .. string.rep(" ", math.max(0, len - #s))
 end
 
-function wrap(env, s, len)
-	local words = env.utils.str_split(s, " ")
+--[[ Fetches all the keys present in a library.
+--]]
+function BibtexPlugin:get_keys(library)
+	local keys = {}
+	for i = 1, #library.entries do
+		local e = library.entries[i]
+		table.insert(keys, e.key)
+	end
+	return keys
+end
+
+function BibtexPlugin:wrap(s, len)
+	local words = self._env.utils.str_split(s, " ")
 	local lines = {}
 	local curline = ""
 	for _,w in ipairs(words) do
@@ -286,10 +257,10 @@ function wrap(env, s, len)
 end
 
 --[[ Displays the duplicate keys or titles found in the paper's
-     bib file.
+		 bib file.
 --]]
-local function print_duplicates(env, kdups, tdups)
-	local p = env.tui.Printer:new()
+function BibtexPlugin:print_duplicates(kdups, tdups)
+	local p = self._env.tui.Printer:new()
 	if #kdups == 0 and #tdups == 0 then
 		p:println("No duplicates found")
 		return p, RET_OK
@@ -301,8 +272,8 @@ local function print_duplicates(env, kdups, tdups)
 		end
 		p:outdent()
 	end
-	if #kdups > 0 then
-		p:print(#kdups .. " duplicate title(s) found:"):indent():println()
+	if #tdups > 0 then
+		p:print(#tdups .. " duplicate title(s) found:"):indent():println()
 		for _,v in ipairs(tdups) do
 			p:println(v)
 		end
@@ -311,8 +282,8 @@ local function print_duplicates(env, kdups, tdups)
 	return p, RET_BIB_DUPLICATES
 end
 
-local function print_missing_fields(env, inc)
-	local p = env.tui.Printer:new()
+function BibtexPlugin:print_missing_fields(inc)
+	local p = self._env.tui.Printer:new()
 	local keys = {"author", "title", "year", "pages"}
 	local missing = false
 	p:print("", 16)
@@ -325,7 +296,7 @@ local function print_missing_fields(env, inc)
 		for _,k in ipairs(keys) do
 			if e[k] then
 				missing = true
-				p:print(p:sbg().yellow()..p:sfg().white() .."X" .. p:srs(), #k + 1, " ", "center")
+				p:print(p:sbg().yellow()..p:sfg().white() .."X" .. p:srs(), #k + 1, " ")
 			else
 				p:print(" ", #k + 1)
 			end
@@ -338,41 +309,41 @@ local function print_missing_fields(env, inc)
 	return p, RET_OK
 end
 
-local function get_bib_path(env)
-	return env.pwd.."/Source/"..env.settings.mainbib
+function BibtexPlugin:get_bib_path()
+	return self._env.pwd.."/Source/"..self._env.settings.mainbib
 end
 
-local function show_duplicates(env, ret)
-	local lib = bibtex.parse(readfile(get_bib_path(env)))
-	local kdups, tdups = find_duplicates(lib)
-	local p, c = print_duplicates(env, kdups, tdups)
-	ret.success = {
+function BibtexPlugin:show_duplicates()
+	local lib = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
+	local kdups, tdups = self:find_duplicates(lib)
+	local p, c = self:print_duplicates(kdups, tdups)
+	self._ret.success = {
 		code = c,
 		message = p:lines()
 	}
 end
 
-local function show_missing_fields(env, ret)
-	local lib = bibtex.parse(readfile(get_bib_path(env)))
-	local incomplete = find_incomplete(lib)
-	local p, c = print_missing_fields(env, incomplete)
-	ret.success = {
+function BibtexPlugin:show_missing_fields()
+	local lib = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
+	local incomplete = self:find_incomplete(lib)
+	local p, c = self:print_missing_fields(incomplete)
+	self._ret.success = {
 		code = c,
 		message = p:lines()
 	}
 end
 
-local function clean_bib(env, ret)
-	local lib = bibtex.parse(readfile(get_bib_path(env)))
-	local cleaned = pretty_print(env, lib)
-	local lines = env.utils.explode("\n", cleaned)
-	ret.success = {
+function BibtexPlugin:clean_bib()
+	local lib = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
+	local cleaned = self:pretty_print(lib)
+	local lines = self._env.utils.explode("\n", cleaned)
+	self._ret.success = {
 		code = 0,
 		message = lines
 	}
 end
 
-local function shorten_from_table(env, reps, s)
+function BibtexPlugin:shorten_from_table(reps, s)
 	local out = s
 	for from, to in pairs(reps or {}) do
 		out = out:gsub(from, to)
@@ -380,13 +351,12 @@ local function shorten_from_table(env, reps, s)
 	return out
 end
 
-local function shorten_ee(env, s)
+function BibtexPlugin:shorten_ee(s)
 	return nil
-	--return s
 end
 
-local function shorten_booktitle(env, s)
-	local out = shorten_from_table(env, config.shorten.booktitle, s)
+function BibtexPlugin:shorten_booktitle(s)
+	local out = self:shorten_from_table(self._config.shorten.booktitle, s)
 	local x1, x2 = out:find("[^A-Z][A-Z]+%s+[12]%d%d%d[^%d]")
 	if x1 then
 		out = out:sub(x1 + 1, x2 - 1)
@@ -394,22 +364,21 @@ local function shorten_booktitle(env, s)
 	return out
 end
 
-local function shorten_journal(env, s)
-	return shorten_from_table(env, config.shorten.journal, s)
+function BibtexPlugin:shorten_journal(s)
+	return self:shorten_from_table(self._config.shorten.journal, s)
 end
 
-local function shorten_item(env, item)
-	local backup = env.utils.deep_copy(item)
-	local original_value = item.value
+function BibtexPlugin:shorten_item(item)
+	local backup = self._env.utils.deep_copy(item)
 	local new_value = item.value
 	if item.name == "journal" then
-		new_value = shorten_journal(env, item.value)
+		new_value = self:shorten_journal(item.value)
 	end
 	if item.name == "booktitle" then
-		new_value = shorten_booktitle(env, item.value)
+		new_value = self:shorten_booktitle(item.value)
 	end
 	if item.name == "ee" then
-		new_value = shorten_ee(env, item.value)
+		new_value = self:shorten_ee(item.value)
 	end
 	if item.value == new_value then
 		backup = nil
@@ -424,52 +393,52 @@ local function shorten_item(env, item)
 	return item, backup
 end
 
-local function shorten(env, ret)
-	local library = bibtex.parse(readfile(get_bib_path(env)))
+function BibtexPlugin:shorten()
+	local library = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
 	for i = 1, #library.entries do
 		local e = library.entries[i]
 		local toadd = {}
 		local todel = {}
 		for j = 1, #e.fields do
-		  local new_item, backup = shorten_item(env, e.fields[j])
+			local new_item, backup = self:shorten_item(e.fields[j])
 		
-		  if new_item then
+			if new_item then
 			e.fields[j] = new_item
-		  else
+			else
 			table.insert(todel, j)
-		  end
+			end
 		
-		  if backup then
+			if backup then
 			table.insert(toadd, {
-			  name  = backup.name,
-			  value = backup.value
+				name	= backup.name,
+				value = backup.value
 			})
-		  end
+			end
 		end
 		
 		table.sort(todel, function(a, b)
-		  return a > b
+			return a > b
 		end)
 		
 		for _, j in ipairs(todel) do
-		  table.remove(e.fields, j)
+			table.remove(e.fields, j)
 		end
 		for _, b in ipairs(toadd) do
-		  table.insert(e.fields, {
-			name  = b.name,
+			table.insert(e.fields, {
+			name	= b.name,
 			value = b.value,
 			_tokens = {
-			  {
+				{
 				value = b.value,
-				_raw  = b.value
-			  }
+				_raw	= b.value
+				}
 			}
-		  })
+			})
 		end
 	end
-	local cleaned = pretty_print(env, library)
-	local lines = env.utils.explode("\n", cleaned)
-	ret.success = {
+	local cleaned = self:pretty_print(library)
+	local lines = self._env.utils.explode("\n", cleaned)
+	self._ret.success = {
 		code = 0,
 		message = lines
 	}
@@ -477,8 +446,8 @@ end
 
 --[[ Performs a basic cleanup of a LaTeX source file.
 --]]
-local function coarse_clean(env, s)
-	local lines = env.utils.explode("\n", s)
+function BibtexPlugin:coarse_clean(s)
+	local lines = self._env.utils.explode("\n", s)
 	for i, line in ipairs(lines) do
 		lines[i] = line:gsub("^%%.*$", ""):gsub(" %.*$", "")
 	end
@@ -487,7 +456,7 @@ end
 
 --[[ Finds all entries that have a given key as a cross-reference.
 --]]
-function find_crossrefs(env, key, library)
+function BibtexPlugin:find_crossrefs(key, library)
 	local refs = {}
 	for i = 1, #library.entries do
 		local e = library.entries[i]
@@ -502,11 +471,11 @@ function find_crossrefs(env, key, library)
 end
 
 --[[ Finds all entries that are neither cited nor cross-referenced in the
-     main paper.
+		 main paper.
 --]]
-local function find_uncited(env, ret)
-	local library = bibtex.parse(readfile(get_bib_path(env)))
-	local paper = coarse_clean(env, readfile(env.project_root .. "/Source/" .. env.mainfile))
+function BibtexPlugin:find_uncited()
+	local library = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
+	local paper = self:coarse_clean(self._env.files.read_file(self._env.project_root .. "/Source/" .. self._env.mainfile))
 	local found = {}
 	for i = 1, #library.entries do
 		local e = library.entries[i]
@@ -516,10 +485,10 @@ local function find_uncited(env, ret)
 	end
 	local uncited = {}
 	for _, e in ipairs(found) do
-		local xr = find_crossrefs(env, e, library)
+		local xr = self:find_crossrefs(e, library)
 		local has_one = false
 		for _, r in ipairs(xr) do
-			if not env.utils.in_table(xr, found) then
+			if not self._env.utils.in_table(r, found) then
 				has_one = true
 				break
 			end
@@ -535,21 +504,72 @@ local function find_uncited(env, ret)
 		table.insert(uncited, 1, #uncited .. " entries are uncited")
 		message = uncited
 	end
-	ret.success = {
+	self._ret.success = {
 		code = 0,
 		message = message
 	}
 end
 
-local function postrequisites(env, ret)
+function BibtexPlugin:diff_bibs()
+	local library = bibtex.parse(self._env.files.read_file(self:get_bib_path()))
+	local other_arg = self._env.arg[#self._env.arg]
+	if not other_arg then
+		self._ret.error = {
+			code = 2,
+			message = {"A BibTeX file must be specified"}
+		}
+		return
+	end
+	local other_file = self._env.pwd .. "/" .. other_arg
+	if not self._env.files.file_exists(other_file) then
+		self._ret.error = {
+			code = 4,
+			message = {"File " .. other_file .. " not found"}
+		}
+		return
+	end
+	local other_library = bibtex.parse(self._env.files.read_file(other_file))
+	local in_local = self:get_keys(library)
+	local in_other = self:get_keys(other_library)
+	local missing_local = {}
+	local missing_other = {}
+	for _, k in ipairs(in_local) do
+		if not self._env.utils.in_table(k, in_other) then
+			table.insert(missing_other, k)
+		end
+	end
+	for _, k in ipairs(in_other) do
+		if not self._env.utils.in_table(k, in_local) then
+			table.insert(missing_local, k)
+		end
+	end
+	local p = self._env.tui.Printer:new()
+	p:print(p:sul() .. "Missing in local" .. p:srs(), 16):print(" "):println(p:sul() .. "Missing in other" .. p:srs(), 16)
+	for i = 1, math.max(#missing_local, #missing_other) do
+		if missing_local[i] then
+			p:print(missing_local[i], 16)
+		else
+			p:print("", 16)
+		end
+		p:print(" ")
+		if missing_other[i] then
+			p:print(missing_other[i], 16)
+		else
+			p:print("", 16)
+		end
+		p:println("")
+	end
+	self._ret.success = {
+		code = 0,
+		message = p:lines()
+	}
+end
+
+function BibtexPlugin:postrequisites()
 end
 
 return {
-  prerequisites       = prerequisites,
-  postrequisites      = postrequisites,
-  show_duplicates     = show_duplicates,
-  show_missing_fields = show_missing_fields,
-  clean_bib           = clean_bib,
-  shorten             = shorten,
-  find_uncited        = find_uncited
+	plugin = BibtexPlugin
 }
+
+-- :folding=explicit:wrap=none:mode=lua:tabSize=2:indentSize=2:
