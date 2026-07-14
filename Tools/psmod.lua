@@ -51,41 +51,6 @@ local CONFIG = {
 }
 local outdir     = "../Source"
 
-local function should_export(path)
-  local b = files.basename(path)
-  if b == "paper.pdf" then return false end
-  if b:match("~$") then return false end
-  if b:match("%.log$") then return false end
-  if b:match("%.out$") then return false end
-  if b:match("%.aux$") then return false end
-  if b:match("%.blg$") then return false end
-  if b:match("%.bbl$") then return false end
-  if b:match("%.idx$") then return false end
-  if b:match("%.fls$") then return false end
-  return true
-end
-
--- Plugin verbs
-local env = {
-  arg = arg,
-  offset = 1,
-  project_root = project_root,
-  settings = CONFIG,
-  pwd = pwd,
-  outdir = CONFIG.outdir,
-  mainfile = CONFIG.mainfile,
-  run = run,
-  open_browser = open_browser,
-  tui      = tui,
-  files    = files,
-  net      = net,
-  utils    = utils
-}
-
---[[ }}} ]]
-
---[[ ***** Miscellaneous utilities ***** {{{ ]]--
-
 --[[ Recursively finds the root folder of the project, starting from a given
      folder.
      @param dir The current folder
@@ -100,6 +65,40 @@ local function find_root_rec(dir)
   end
   return find_root_rec(files.up(dir))
 end
+
+-- Plugin verbs
+local env = {
+  arg = arg,
+  offset = 1,
+  settings = CONFIG,
+  pwd = pwd,
+  outdir = CONFIG.outdir,
+  mainfile = CONFIG.mainfile,
+  run = run,
+  open_browser = open_browser,
+  tui      = tui,
+  files    = files,
+  net      = net,
+  utils    = utils
+}
+
+-- Find a project root
+local project_root = find_root_rec(lfs.currentdir())
+env.project_root = project_root
+if not project_root then
+  tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
+  os.exit(RET_NO_ROOT)
+end
+
+-- Extract a few settings
+local override = dofile(project_root .. "/.papershell")
+for k,v in pairs(override) do
+  CONFIG[k] = v
+end
+
+--[[ }}} ]]
+
+--[[ ***** Miscellaneous utilities ***** {{{ ]]--
 
 --[[ Opens a website in the default web browser.
      @param url: The URL of the website to be opened.
@@ -129,77 +128,20 @@ for v in lfs.dir(root) do
 		local man = dofile(root .. v .. "/manifest.lua") or {}
 		if man.id and files.file_exists(root .. v .. "/plugin.lua") then
 			local plg = dofile(root .. v .. "/plugin.lua")
+			local plgi = plg.plugin:new(env, {})
+			--utils.print_table(plgi)
 			PLUGINS[man.id] = {
 				manifest = man,
-				plugin   = plg
+				plugin   = plg.plugin:new(env, {})
 			}
 		end
 	end
 end
-
+--utils.print_table(PLUGINS)
 
 -- }}} ]]
 
-local function collect_files(root, rel, files)
-  rel = rel or ""
-  files = files or {}
 
-  local dir = rel == "" and root or files.join(root, rel)
-
-  for entry in lfs.dir(dir) do
-    if entry ~= "." and entry ~= ".." then
-      local relpath = rel == "" and entry or files.join(rel, entry)
-      local fullpath = files.join(root, relpath)
-      local attr = lfs.attributes(fullpath)
-
-      if attr and attr.mode == "directory" then
-        collect_files(root, relpath, files)
-      elseif attr and attr.mode == "file" and should_export(relpath) then
-        table.insert(files, relpath)
-      end
-    end
-  end
-  return files
-end
-
-local function create_export_folder(export_dir)
-  export_dir = export_dir or "Export"
-
-  -- Remove previous export directory
-  os.execute(string.format('rm -rf "%s"', export_dir))
-
-  assert(lfs.mkdir(export_dir))
-
-  local files = collect_files(".")
-
-  for _, relpath in ipairs(files) do
-    files.copy_file(relpath, export_dir .. "/" .. relpath)
-  end
-
-  tui.stdoutln(string.format("Exported %d file(s) to %s", #files, export_dir))
-end
-
-local function export_project(export_dir)
-  local archive = "paper.zip"
-  tui.stdoutln("Exporting submission sources")
-  create_export_folder(export_dir)
-  if files.command_exists("zip") then
-    tui.stdoutln("Creating " .. archive)
-    run("zip -q -9 -r paper.zip .")
-    tui.stdoutln("Archive written to " .. archive)
-  elseif file.command_exists("7z") then
-    tui.stdoutln("Creating " .. archive)
-    run('7z a -mx9 -tzip paper.zip .')
-    tui.stdoutln("Archive written to " .. archive)
-  else
-    tui.stdoutln()
-    tui.stdoutln("No ZIP utility was found.")
-    tui.stdoutln("Submission sources have been exported to:")
-    tui.stdoutln("  " .. export_dir)
-    tui.stdoutln()
-    tui.stdoutln("Please create the archive manually.")
-  end
-end
 
 --[[ Downloads a theme as a ZIP, and files.unzips it in the appropriate folders
      @param url The URL to download from
@@ -270,28 +212,37 @@ function domenu(items, top)
 end
 
 local function invoke(plugin, call)
-	local ret = {}
-	local plg = plugin:new(env, ret)
-	local f = nil
-	if type(call) == "string" then
-   f = plg[call]
+  local ret = {}
+  plugin._ret = ret
+
+  local f
+
+  if type(call) == "string" then
+    f = plugin[call]
   elseif type(call) == "function" then
-  	f = call
+    f = call
   end
+
   if type(f) ~= "function" then
-  	tui.stderrln("ERROR: plugin function not found: " .. entry.call)
-   	return nil
+    tui.stderrln(
+      "ERROR: plugin function not found: " .. tostring(call)
+    )
+    return nil
   end
-  if type(plg.prerequisites) == "function" then
-   	plg:prerequisites()
+
+  if type(plugin.prerequisites) == "function" then
+    plugin:prerequisites()
   end
+
   if not ret.error then
-   	f(plg)
+    f(plugin)
   end
-  if type(plg.postrequisites) == "function" then
-  	plg:postrequisites()
+
+  if type(plugin.postrequisites) == "function" then
+    plugin:postrequisites()
   end
-	return ret
+
+  return ret
 end
 
 function tui_topmenu(plugins)
@@ -311,7 +262,10 @@ function tui_topmenu(plugins)
 			return nil
 		end
 		if ordered_items[choice].call then
-			return ordered_items[choice].call
+			return {
+				plugin = ordered_plugins[choice].plugin,
+				call   = ordered_items[choice].call
+			}
 		end
 		if ordered_items[choice].actions then
 			local v = tui_menu(ordered_plugins[choice], "\u{f015} Home " .. tui.color.foreground.bright.red .. ">".. tui.color.reset .. " " .. ordered_items[choice].name, ordered_items[choice].actions)
@@ -333,8 +287,10 @@ function tui_menu(plugin, crumbs, m)
 		local choice = domenu(ordered_items)
 		if choice > 0 then
 			if ordered_items[choice].call then
-				local ret = {}
-				return plugin.plugin.plugin[ordered_items[choice].call]
+				return {
+						plugin = plugin.plugin,
+						call   = ordered_items[choice].call
+				}
 			end
 			if ordered_items[choice].actions then
 				local v = tui_menu(plugin, crumbs .. tui.color.foreground.bright.red .. " > " .. tui.color.reset .. ordered_items[choice].name, ordered_items[choice].actions)
@@ -352,9 +308,6 @@ function printusage(stream)
   stream:write("Usage: papershell [-h | verb [noun...]]\n\n")
   stream:write("Possible verbs:\n")
   stream:write("  init [folder]           Creates an empty project in folder\n")
-  stream:write("  export                  Exports sources to archive\n")
-  stream:write("  mk [-c]                 Runs latexmk on main document\n")
-  stream:write("                          (-c cleans the project)\n")
   stream:write("  th list                 Lists available themes\n")
   stream:write("  th install <theme>      Downloads and installs theme\n")
   stream:write("  th uninstall <theme>    Uninstalls theme\n")
@@ -392,10 +345,10 @@ local function verb_matches(verbs, word)
   return nil
 end
 
-local function dispatch_plugin_rec(plugin, entry, arg_index, env)
+local function dispatch_plugin_rec(plugin, entry, arg_index)
 	-- Leaf: call the designated function
 	if entry.call then
-		return invoke(plugin.plugin.plugin, entry.call)
+		return invoke(plugin.plugin, entry.call)
 	end
     -- Internal node: consume next command word
 	if entry.actions then
@@ -404,7 +357,7 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
     		if entry.actions then
 	    		local f = tui_menu(plugin, "", entry.actions)
 	    		if f ~= nil then
-	    			return invoke(plugin.plugin.plugin, f)
+	    			return invoke(plugin.plugin, f)
 	    		end
 	    	end
 	    else
@@ -414,9 +367,9 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
 	    	   		local arg_suffix = string.sub(word, #match + 1, #word)
 	    	   		if #arg_suffix > 0 then
 	    	   			arg[arg_index] = arg_suffix
-	    	   			return dispatch_plugin_rec(plugin, child, arg_index, env)
+	    	   			return dispatch_plugin_rec(plugin, child, arg_index)
 	    	   		else
-	    	   			return dispatch_plugin_rec(plugin, child, arg_index + 1, env)
+	    	   			return dispatch_plugin_rec(plugin, child, arg_index + 1)
 	    	   		end
 	    	   	end
 	    	end
@@ -430,18 +383,24 @@ local function dispatch_plugin_rec(plugin, entry, arg_index, env)
     return nil
 end
 
-local function dispatch_plugin(action, env)
+local function dispatch_plugin(action)
 	for _, plugin in pairs(PLUGINS) do
     	for _, entry in ipairs(plugin.manifest.menu or {}) do
-    		--utils.print_table(plugin.manifest.menu)
     		local match = verb_matches(entry.verb, action)
     		if match then
     			local arg_suffix = string.sub(action, #match + 1, #action)
     			if #arg_suffix > 0 then
 	    			arg[env.offset + 1] = arg_suffix
-	    			return dispatch_plugin_rec(plugin, entry, env.offset + 1, env)
+	    			return dispatch_plugin_rec(plugin, entry, env.offset + 1)
 	    		else
-	    			return dispatch_plugin_rec(plugin, entry, env.offset + 2, env)
+	    			if arg[env.offset + 2] then
+	    				return dispatch_plugin_rec(plugin, entry, env.offset + 2)
+	    			elseif entry.actions then
+	    				local f = tui_menu(plugin, "", entry.actions)
+	    				if f ~= nil then
+	    					return invoke(f.plugin, f.call)
+	    				end
+	    			end
 	    		end
 	    	end
 	    end
@@ -449,7 +408,7 @@ local function dispatch_plugin(action, env)
     return nil
 end
 
-tui.stdoutln("PaperShell theme manager v" .. VERSION_STRING)
+tui.stdoutln(tui.color.reset .. "PaperShell theme manager v" .. VERSION_STRING)
 tui.stdoutln("(C) 2015-2026 Sylvain Hallé")
 tui.stdoutln()
 
@@ -474,20 +433,6 @@ if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
   os.exit(RET_OK)
 end
 
--- Find a project root
-local project_root = find_root_rec(lfs.currentdir())
-env.project_root = project_root
-if not project_root then
-  tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
-  os.exit(RET_NO_ROOT)
-end
-
--- Extract a few settings
-local override = dofile(project_root .. "/.papershell")
-for k,v in pairs(override) do
-  CONFIG[k] = v
-end
-
 -- Check version
 if CONFIG.version < VERSION_STRING then
   tui.stdoutln("WARNING: the project was instantiated with an earlier version of")
@@ -503,27 +448,12 @@ local action = nil
 local ret = nil
 if not arg[offset + 1] then
 	-- Interactive mode
-	action = tui_topmenu(PLUGINS)
-	if action then
-		ret = {}
-		action(env, ret)
-	end
+	local selection = tui_topmenu(PLUGINS)
+	if selection then
+  	ret = invoke(selection.plugin, selection.call)
+  end
 else
 	action = arg[offset + 1]
-	
-	-- Core verbs first
-	if action == "mk" then
-	  if arg[offset + 2] == "-c" then
-		os.exit(os.execute(string.format("cd %s && latexmk -c", project_root)))
-	  else
-		os.exit(os.execute(string.format("cd %s && latexmk", project_root)))
-	  end
-	end
-	
-	if action == "export" then
-	  export_project(project_root .. "/" .. (arg[offset + 2] or "Export"))
-	  os.exit(RET_OK)
-	end
 	
 	-- Theme verbs remain hard-coded for now
 	if action == "th" or action == "theme" then
