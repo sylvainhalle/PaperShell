@@ -197,11 +197,12 @@ local function command_exists(cmd)
   return (os.execute("which " .. cmd) == 0)
 end
 
+-- https://stackoverflow.com/a/14031974
 local function run(cmd)
   local f = assert(io.popen(cmd))
-  local s = assert(f:read('*a'))
-  f:close()
-  return s
+  local s = assert(f:read('a'))
+  local rc = {f:close()}
+  return s, rc[3] -- 3 being the return code
 end
 
 return {

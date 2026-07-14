@@ -36,28 +36,41 @@ function MkPlugin:new(env, ret)
 end
 
 function MkPlugin:compile()
-	print(string.format("cd %s/Source && latexmk", self._env.project_root))
-	local c = os.execute(string.format("cd %s/Source && latexmk", self._env.project_root))
+	local s, c = self._env.files.run(string.format("cd %s/Source && latexmk", self._env.project_root))
+	if self._config.raw then
+		out = self._env.utils.explode("\n", s)
+	else
+		out = self:filter_lines(s)
+	end
   if c == RET_OK then
   	self._ret.success = {
-  		code = c
+  		code    = c,
+  		message = out
   	}
   else
   	self._ret.error = {
-  		code = c
+  		code    = c,
+  		message = out
   	}
   end
 end
 
 function MkPlugin:clean()
-	local c = os.execute(string.format("cd %s/Source && latexmk -c", self._env.project_root))
+	local s, c = self._env.files.run(string.format("cd %s/Source && latexmk -c", self._env.project_root))
+	if self._config.raw then
+		out = self._env.utils.explode("\n", s)
+	else
+		out = self:filter_lines(s)
+	end
   if c == RET_OK then
   	self._ret.success = {
-  		code = c
+  		code = c,
+  		message = out
   	}
   else
   	self._ret.error = {
-  		code = c
+  		code = c,
+  		message = out
   	}
   end
 end
