@@ -145,7 +145,7 @@ local function ansi_substring(str, length)
     		end
     	end
     	if visible_len >= length then
-    		--break
+    		return out
     	end
     end
     return out
@@ -220,7 +220,7 @@ function Printer:outdent()
 end
 
 function Printer:println(s, ln, pd, a)
-	self:print(s, a)
+	self:print(s, ln, pd, a)
 	table.insert(self._lines, self._curline)
 	self._curline = nil
 	return self

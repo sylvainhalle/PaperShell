@@ -28,11 +28,25 @@ return {
 					call = "compile"
 				},
 				{
+					verb = {"f", "force"},
+					name = "Force compile",
+					help = {"mk compile", "Forces a recompilation of the paper"},
+					tooltip = "Force a recompilation of the paper",
+					call = "force"
+				},
+				{
 					verb = {"l", "clean"},
 					name = "Clean",
 					help = {"mk clean", "Cleans the project"},
 					tooltip = "Clean the project",
 					call = "clean"
+				},
+				{
+					verb = {"g", "log"},
+					name = "Log",
+					help = {"mk log", "Shows the compilation log"},
+					tooltip = "Show the compilation log",
+					call = "log"
 				}
 			}
 		}

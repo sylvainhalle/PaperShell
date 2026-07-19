@@ -35,12 +35,56 @@ function MkPlugin:new(env, ret)
 	return setmetatable(obj, MkPlugin)
 end
 
-function MkPlugin:compile()
-	local s, c = self._env.files.run(string.format("cd %s/Source && latexmk", self._env.project_root))
+local function rule_matches(rule, line)
+	if rule.matches then
+		return rule.matches(line)
+	end
+	return line:match(rule.start_pattern) ~= nil
+end
+
+local function rule_ends(rule, line)
+	if rule.ends then
+		return rule.ends(line)
+	end
+	return not rule.end_pattern
+			or line:match(rule.end_pattern) ~= nil
+end
+
+function MkPlugin:filter_lines(s)
+	local rules = self._config.filters
+	table.sort(rules, function(a, b)
+		return (a.priority or 0) > (b.priority or 0)
+	end)
+	local lines = self._env.utils.explode("\n", s)
+	local active = nil
+	for _, line in ipairs(lines) do
+		if active then
+			local n = #active.entries
+			active.entries[n] = active.entries[n] .. "\n" .. line --" " .. line:gsub("%s+", " ")
+			if rule_ends(active, line) then
+				active = nil
+			end
+		else
+			for _, rule in ipairs(rules) do
+				if rule.priority >= 0 and rule_matches(rule, line) then
+					table.insert(rule.entries, line)
+					if not rule_ends(rule, line) then
+						active = rule
+					end
+					break
+				end
+			end
+		end
+	end
+	return rules
+end
+
+function MkPlugin:runmk(options)
+	local s, c = self._env.files.run(string.format("cd %s/Source && latexmk %s 2> /dev/null", self._env.project_root, options or ""))
 	if self._config.raw then
 		out = self._env.utils.explode("\n", s)
 	else
-		out = self:filter_lines(s)
+		return self:log(true)
 	end
   if c == RET_OK then
   	self._ret.success = {
@@ -55,24 +99,80 @@ function MkPlugin:compile()
   end
 end
 
+function MkPlugin:compile()
+	return self:runmk()
+end
+
 function MkPlugin:clean()
-	local s, c = self._env.files.run(string.format("cd %s/Source && latexmk -c", self._env.project_root))
-	if self._config.raw then
-		out = self._env.utils.explode("\n", s)
+	return self:runmk("-C")
+end
+
+function MkPlugin:force()
+	return self:runmk("-g")
+end
+
+function MkPlugin:print_entry(re, e, p)
+	if re.capture_pattern then
+		local name, m = e:gsub(re.capture_pattern.message.pattern, re.capture_pattern.message.name)
+		if m == 0 then
+			return
+		else
+			p:print(p:sfg().yellow() .. "* " .. p:srs())
+			local text = e:gsub(re.capture_pattern.message.pattern, re.capture_pattern.message.text):gsub("%s+", " ")
+			p:print(name .. ": ", re.capture_pattern.pad)
+			p:print(text)
+		end
+		if re.capture_pattern.line then
+			p:println(" " .. e:gsub(re.capture_pattern.line, "L%1"))
+		else
+			p:println("")
+		end
 	else
-		out = self:filter_lines(s)
+		p:println(e)
 	end
-  if c == RET_OK then
-  	self._ret.success = {
-  		code = c,
-  		message = out
-  	}
-  else
-  	self._ret.error = {
-  		code = c,
-  		message = out
-  	}
-  end
+end
+
+function MkPlugin:log(inside)
+	local filename = self._env.pwd .. "/Source/" .. "paper.log"
+	if not self._env.files.file_exists(filename) then
+		if inside then
+			self._ret.success = {
+				code = 0,
+				message = ""
+			}
+			return
+		else
+			self._ret.error = {
+				code = 1,
+				message = {"File "..filename.." not found"}
+			}
+			return
+		end
+	end
+	local content = self._env.files.read_file(filename)
+	local report = self:filter_lines(content)
+	local p = self._env.tui.Printer:new()
+	p:ul():println("Summary" .. p:srs()):indent()
+	for _, re in pairs(report) do
+		if #re.entries > 0 then
+			p:print(p:sfg().yellow() .. "* " .. p:srs() .. re.title, 24):println(": "..#re.entries)
+		end
+	end
+	p:outdent():println()
+	for _, re in pairs(report) do
+		if #re.entries > 0 then
+			p:ul():println(re.title .. p:srs()):indent()
+			local shown = {}
+			for _, e in ipairs(re.entries) do
+				self:print_entry(re, e, p)
+			end
+		end
+		p:outdent():println()
+	end
+	self._ret.success = {
+		code = 0,
+		message = p:lines()
+	}
 end
 
 function MkPlugin:prerequisites()
