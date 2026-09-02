@@ -418,7 +418,7 @@ end
 
 -- Help
 if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
-  printusage(io.tui.stdout)
+  printusage(io.stdout)
   os.exit(RET_OK)
 end
 
