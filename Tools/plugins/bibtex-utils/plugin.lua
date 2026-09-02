@@ -16,8 +16,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ]]
 
-local bibtex = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/lua-bibtex-parser.lua")
-local config = dofile(os.getenv("PWD") .. "/plugins/bibtex-utils/config.lua")
+local pwd    = debug.getinfo(1,'S').source:match("@(.*)/[^/]*$")
+local bibtex = dofile(pwd .. "/lua-bibtex-parser.lua")
+local config = dofile(pwd .. "/config.lua")
 
 -- Return codes
 local RET_OK						 = 0

@@ -18,6 +18,9 @@
 
 -- Dynamic settings
 local pwd = os.getenv("PAPERSHELL_HOME") or ".."
+local info = debug.getinfo(1,'S');
+
+package.path = package.path .. ";" .. pwd .. "/Tools/?.lua"
 
 -- Dependencies
 local http   = require "socket.http"
@@ -81,20 +84,6 @@ local env = {
   net      = net,
   utils    = utils
 }
-
--- Find a project root
-local project_root = find_root_rec(lfs.currentdir())
-env.project_root = project_root
-if not project_root then
-  tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
-  os.exit(RET_NO_ROOT)
-end
-
--- Extract a few settings
-local override = dofile(project_root .. "/.papershell")
-for k,v in pairs(override) do
-  CONFIG[k] = v
-end
 
 --[[ }}} ]]
 
@@ -431,6 +420,20 @@ end
 if (arg[offset + 1] == "-h" or arg[offset + 1] == "--help") then
   printusage(io.tui.stdout)
   os.exit(RET_OK)
+end
+
+-- Find a project root
+local project_root = find_root_rec(lfs.currentdir())
+env.project_root = project_root
+if not project_root and arg[env.offset] ~= "init" then
+  tui.stderrln("ERROR: not a PaperShell project (or any parent up to mount point /)")
+  os.exit(RET_NO_ROOT)
+end
+
+-- Extract a few settings
+local override = dofile(project_root .. "/.papershell")
+for k,v in pairs(override) do
+  CONFIG[k] = v
 end
 
 -- Check version

@@ -20,6 +20,8 @@
      @author Sylvain Hallé
   ]]
 
+local pwd = os.getenv("PAPERSHELL_HOME") or ".."
+
 -- Dependencies
 local lfs    = require "lfs"
 local zip    = require "zip"
@@ -134,7 +136,7 @@ function copy_folder(source, destination, ignore)
   if not sourceExists then
     return false, "Source directory does not exist."
   end
-  if (utils.inlist(source, toignore)) then
+  if (utils.in_list(source, toignore)) then
     return true
   end
   

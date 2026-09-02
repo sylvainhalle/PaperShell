@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+
 # ------------------------------------------------------------
 # Simple installation script for PaperShell 3
 # ------------------------------------------------------------
@@ -12,6 +12,7 @@ PS_LOCAL_SHARE="${HOME}/.local/share"
 PS_LOCAL_MAN="${PS_LOCAL_SHARE}/man"
 PS_INSTALL_DIR="${PS_LOCAL_SHARE}/papershell"
 PS_WRAPPER="${PS_LOCAL_BIN}/papershell"
+PAPERSHELL_HOME="$(realpath $(pwd)/../)"
 
 # Prints a message
 say() {
@@ -95,8 +96,8 @@ say "Creating wrapper: $PS_WRAPPER"
 cat > "$PS_WRAPPER" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-export PAPERSHELL_HOME="$(realpath $(pwd)/../)
-exec texlua "$PAPERSHELL_HOME/Tools/psmod.lua" "$@"
+export PAPERSHELL_HOME="$(realpath $(pwd)/../)"
+exec texlua "\$PAPERSHELL_HOME/Tools/psmod.lua" "$@"
 EOF
 chmod u+x "$PS_WRAPPER"
 

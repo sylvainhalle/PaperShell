@@ -17,8 +17,9 @@
 ]]
 
 -- Dependencies
+local pwd    = debug.getinfo(1,'S').source:match("@(.*)/[^/]*$")
 local lfs    = require "lfs"
-local config = dofile(os.getenv("PWD") .. "/plugins/export/config.lua")
+local config = dofile(pwd .. "/config.lua")
 
 -- Return codes
 local RET_OK						 = 0
