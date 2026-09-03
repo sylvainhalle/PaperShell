@@ -3,7 +3,7 @@
 %% https://github.com/sylvainhalle/PaperShell
 %% DO NOT EDIT!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[conference]{IEEEtran}
+\documentclass[conference]{sty/ieeetran/IEEEtran}
 
 % Usual packages
 \usepackage[utf8]{inputenc}            % UTF-8 input encoding
@@ -82,4 +82,4 @@ end %>
 \makeatletter
 \let\l@ENGLISH\l@english
 \makeatother
-% :mode=text:
+% :mode=latex:

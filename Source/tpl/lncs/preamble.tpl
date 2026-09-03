@@ -3,11 +3,16 @@
 %% https://github.com/sylvainhalle/PaperShell
 %% DO NOT EDIT!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass{llncs}
+\documentclass{sty/lncs/llncs}
 
 % Usual packages
 \usepackage[utf8]{inputenc}            % UTF-8 input encoding
-\usepackage[T1]{fontenc}               % Type1 fonts
+\RequirePackage{iftex}
+\ifLuaTeX
+\usepackage{fontspec}
+\else
+\usepackage[T1]{fontenc}
+\fi
 \usepackage[english]{babel}            % Hyphenation
 \usepackage{graphicx}                  % Import graphics
 \usepackage{cite}                      % Better handling of citations

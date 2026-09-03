@@ -3,11 +3,10 @@
 %% https://github.com/sylvainhalle/PaperShell
 %% DO NOT EDIT!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[a4paper,fleqn]{cas-sc}
+\documentclass[a4paper,fleqn]{sty/cas/cas-sc}
 
 % Usual packages
 \usepackage[utf8]{inputenc}            % UTF-8 input encoding
-\usepackage[T1]{fontenc}               % Type1 fonts
 \usepackage[english]{babel}            % Hyphenation
 \usepackage{graphicx}                  % Import graphics
 \usepackage{cite}                      % Better handling of citations

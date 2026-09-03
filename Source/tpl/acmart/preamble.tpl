@@ -3,11 +3,10 @@
 %% https://github.com/sylvainhalle/PaperShell
 %% DO NOT EDIT!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[sigconf]{acmart}
+\documentclass[acmsmall]{sty/acmart/acmart}
 
 % Usual packages
 \usepackage[utf8]{inputenc}  % UTF-8 input encoding
-\usepackage[T1]{fontenc}     % Type1 fonts
 \usepackage[english]{babel}  % Hyphenation
 \usepackage{graphicx}        % Import graphics
 \usepackage{comment}         % To comment out blocks of text
@@ -20,7 +19,7 @@
 
 
 \title{%
-{{ title or "" }}%
+<< title or "" >>%
 }
 
 % Default path for graphicspath
@@ -32,6 +31,7 @@
 
 %\input{acm-ccs.tex}
 \keywords{%
-{{ keywords or "" }}%
+<< keywords or "" >>%
 }
 \maketitle
+%:mode=latex:
